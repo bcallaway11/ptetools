@@ -1,5 +1,5 @@
-Package: pte
-Title: Panel Treatment Effects
+Package: ptetools
+Title: Panel Treatment Effects Tools
 Version: 0.0.0.9000
 Authors@R:
     person(given = "Brantly",
