@@ -18,7 +18,7 @@ test_that("tests for inference", {
     sp <- did::reset.sim()
     data <- did::build_sim_dataset(sp)
 
-    res <- pte(
+    res <- pte2(
       yname = "Y",
       gname = "G",
       tname = "period",

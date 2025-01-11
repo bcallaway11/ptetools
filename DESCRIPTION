@@ -16,7 +16,6 @@ RoxygenNote: 7.3.2
 Imports:
     BMisc (>= 1.4.7),
     Matrix,
-    did (>= 2.0.0),
     ggplot2,
     DRDID,
     tidyr,
