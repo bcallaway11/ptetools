@@ -508,9 +508,18 @@ pte <- function(yname,
 #'  package will use the empirical bootstrap no matter what the value of this
 #'  parameter.
 #'
-#' @param process_dtt_gt An optional function to customize results when
+#' @param process_dtt_gt_fun An optional function to customize results when
 #'  the gt-specific function returns the distribution of treated and untreated
-#'  potential outcomes.
+#'  potential outcomes.  The default is `process_dtt_gt`, which is a function
+#'  provided by the package.  See that function for an example of what this function
+#'  should return.  This is unused is unused except in cases where
+#'  the results involve distributions.
+#'
+#' @param process_dose An optional function to customize results when the gt-specific
+#'  function returns treatment effects that depend on dose (i.e., amount of the
+#'  treatment).  The default is `process_dose_gt`, which is a function provided
+#'  by the package.  See that function for an example of what this function should
+#'  return.  This is unused except in cases where the results involve doses.
 #'
 #' @param ... extra arguments that can be passed to create the correct subsets
 #'  of the data (depending on \code{subset_fun}), to estimate group time
@@ -535,10 +544,11 @@ pte2 <- function(yname,
                  weightsname = NULL,
                  gt_type = "att",
                  ret_quantile = NULL,
-                 process_dtt_gt = NULL,
                  global_fun = FALSE,
                  time_period_fun = FALSE,
                  group_fun = FALSE,
+                 process_dtt_gt_fun = process_dtt_gt,
+                 process_dose_gt_fun = process_dose_gt
                  biters = 100,
                  cl = 1,
                  ...) {
@@ -580,6 +590,7 @@ pte2 <- function(yname,
     return(process_dose_gt(res, ptep))
   }
 
+  # otherwise, we are in the main case where the target is an ATT
 
   # check if no influence function provided,
   # if yes, go to alternate code for empirical
