@@ -219,12 +219,6 @@ compute.pte2 <- function(ptep,
       attgt <- attgt_fun(gt_data = gt_data, ...)
 
       #-----------------------------------------------------------------------------
-      # If this is too generic...
-      # an alternative idea is to just delete the call to attgt_fun above
-      # and just write your own code in this spot
-      #-----------------------------------------------------------------------------
-
-      #-----------------------------------------------------------------------------
       # process attgt results
       #   - branch based on whether or not attgt_fun returned an influence
       #     function
@@ -575,14 +569,22 @@ pte2 <- function(yname,
     ...
   )
 
+  # handle distributional results
+  if (gt_type == "dtt") {
+    stop("not supported yet...")
+    return(process_dtt_gt(res, ptep))
+  }
+
+  # handle aggregations into dose
+  if (gt_type == "dose") {
+    return(process_dose_gt(res, ptep))
+  }
+
+
   # check if no influence function provided,
   # if yes, go to alternate code for empirical
   # bootstrap
   if (all(is.na(res$inffunc)) | ptep$boot_type == "empirical") {
-    if (gt_type == "dtt") {
-      res <- process_dtt_gt(res, ptep)
-    }
-
     return(panel_empirical_bootstrap(res$attgt.list,
       ptep,
       setup_pte_fun,
