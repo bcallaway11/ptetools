@@ -572,8 +572,6 @@ pte2 <- function(yname,
     ...
   )
 
-  browser()
-
   res <- compute.pte2(
     ptep = ptep,
     subset_fun = subset_fun,

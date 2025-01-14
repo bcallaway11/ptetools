@@ -401,6 +401,7 @@ overall_weights <- function(attgt,
                             min_e = -Inf,
                             max_e = Inf,
                             ...) {
+  browser()
   group <- attgt$group
   time.period <- attgt$t
   att <- attgt$att
@@ -443,8 +444,6 @@ overall_weights <- function(attgt,
 
   # length of this is equal to number of groups
   pgg <- pg
-
-  browser()
 
   # same but length is equal to the number of ATT(g,t)
   pg <- pg[match(group, glist)]
