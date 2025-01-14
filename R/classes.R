@@ -451,3 +451,32 @@ summary.pte_emp_boot <- function(object, ...) {
 
   out
 }
+
+
+#' @title pte_dose_results
+#'
+#' @description class for holding pte results
+#'
+#' @param att_gt attgt results
+#' @param dose vector of doses
+#' @param att_d ATT(d) for each value of `dose`
+#' @param acrt_d ACRT(d) for each value of `dose`
+#'
+#' @export
+pte_dose_results <- function(att_gt,
+                             dose,
+                             att_d = NULL,
+                             acrt_d = NULL,
+                             ptep) {
+  out <- list(
+    att_gt = att_gt,
+    dose = dose,
+    att_d = att_d,
+    acrt_d = acrt_d,
+    ptep = ptep
+  )
+
+  class(out) <- "pte_dose_results"
+
+  out
+}

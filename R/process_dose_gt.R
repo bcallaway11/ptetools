@@ -1,9 +1,9 @@
 process_dose_gt <- function(gt_results, ptep, ...) {
     browser()
 
-    o_weights <- overall_weights(gt_results, ...)
+    # make the call to att, to get same format of results
+    att_gt <- process_att_gt(gt_results, ptep)
+    o_weights <- overall_weights(att_gt, ...)
 
-    # extract ATT(g,t) and influence functions
-    attgt.list <- gt_results$attgt.list
-    inffunc <- gt_results$inffunc
+    1 + 1
 }

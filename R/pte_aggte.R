@@ -447,4 +447,26 @@ overall_weights <- function(attgt,
 
   # same but length is equal to the number of ATT(g,t)
   pg <- pg[match(group, glist)]
+
+  # which g-t's should get positive weight, mainly post-treatment ones
+  keeper <- group <= time.period & time.period <= (group + max_e)
+
+  g_weight <- sapply(glist, function(g) {
+    # look at post-treatment periods for group g
+    # added last condition to allow for limit on longest period included in att
+    is_this_g <- (group == g) & (g <= time.period) & (time.period <= (group + max_e))
+
+    # probability for this group (there is only one, so just take the first one)
+    this_pg <- pg[is_this_g][1]
+
+    # scale probability by number of post-treatment periods for this group
+    this_pg / sum(is_this_g)
+  })
+
+  out_weight <- g_weight[match(group, glist)] * keeper
+
+  # quick sanity check
+  if (sum(out_weight) != 1) stop("something's going wrong calculating overall weights")
+
+  data.frame(group = group, time.period = time.period, overall_weight = out_weight)
 }
