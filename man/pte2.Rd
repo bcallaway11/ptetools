@@ -19,10 +19,11 @@ pte2(
   weightsname = NULL,
   gt_type = "att",
   ret_quantile = NULL,
-  process_dtt_gt = NULL,
   global_fun = FALSE,
   time_period_fun = FALSE,
   group_fun = FALSE,
+  process_dtt_gt_fun = process_dtt_gt,
+  process_dose_gt_fun = process_dose_gt,
   biters = 100,
   cl = 1,
   ...
@@ -124,10 +125,6 @@ their own choices for \code{gt_type}}
 this is a specific quantile at which to report results, e.g.,
 \code{ret_quantile = 0.5} will return that the qte at the median.}
 
-\item{process_dtt_gt}{An optional function to customize results when
-the gt-specific function returns the distribution of treated and untreated
-potential outcomes.}
-
 \item{global_fun}{Logical indicating whether or not untreated potential
 outcomes can be estimated in one shot, i.e., for all groups and time periods.
 Main use case would be for one-shot imputation estimators.  Not supported yet.}
@@ -139,6 +136,13 @@ outcomes can be estimated for all groups in the same time period.  Not supported
 can be estimated for all time periods for a single group.  Not supported yet.
 These functions aim at reducing or eliminating running the same code multiple times.}
 
+\item{process_dtt_gt_fun}{An optional function to customize results when
+the gt-specific function returns the distribution of treated and untreated
+potential outcomes.  The default is \code{process_dtt_gt}, which is a function
+provided by the package.  See that function for an example of what this function
+should return.  This is unused is unused except in cases where
+the results involve distributions.}
+
 \item{biters}{number of bootstrap iterations; default is 100}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
@@ -148,6 +152,12 @@ of the data (depending on \code{subset_fun}), to estimate group time
 average treatment effects (depending on \code{attgt_fun}), or to
 aggregating treatment effects (particularly useful are \code{min_e},
 \code{max_e}, and \code{balance_e} arguments to event study aggregations)}
+
+\item{process_dose}{An optional function to customize results when the gt-specific
+function returns treatment effects that depend on dose (i.e., amount of the
+treatment).  The default is \code{process_dose_gt}, which is a function provided
+by the package.  See that function for an example of what this function should
+return.  This is unused except in cases where the results involve doses.}
 }
 \value{
 \code{pte_results} object

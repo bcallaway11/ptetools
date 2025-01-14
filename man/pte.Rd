@@ -2,7 +2,8 @@
 % Please edit documentation in R/imports.R, R/pte.R
 \docType{package}
 \name{pte}
-\alias{pte-package}
+\alias{ptetools}
+\alias{ptetools-package}
 \alias{pte}
 \title{Panel Treatment Effects}
 \usage{

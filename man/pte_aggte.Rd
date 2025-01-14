@@ -4,7 +4,14 @@
 \alias{pte_aggte}
 \title{pte_aggte}
 \usage{
-pte_aggte(attgt, type = "overall")
+pte_aggte(
+  attgt,
+  type = "overall",
+  balance_e = NULL,
+  min_e = -Inf,
+  max_e = Inf,
+  ...
+)
 }
 \arguments{
 \item{attgt}{A group_time_att object to be aggregated}

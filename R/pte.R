@@ -548,7 +548,7 @@ pte2 <- function(yname,
                  time_period_fun = FALSE,
                  group_fun = FALSE,
                  process_dtt_gt_fun = process_dtt_gt,
-                 process_dose_gt_fun = process_dose_gt
+                 process_dose_gt_fun = process_dose_gt,
                  biters = 100,
                  cl = 1,
                  ...) {
@@ -572,6 +572,8 @@ pte2 <- function(yname,
     ...
   )
 
+  browser()
+
   res <- compute.pte2(
     ptep = ptep,
     subset_fun = subset_fun,
@@ -582,12 +584,12 @@ pte2 <- function(yname,
   # handle distributional results
   if (gt_type == "dtt") {
     stop("not supported yet...")
-    return(process_dtt_gt(res, ptep))
+    return(process_dtt_gt_fun(res, ptep))
   }
 
   # handle aggregations into dose
   if (gt_type == "dose") {
-    return(process_dose_gt(res, ptep))
+    return(process_dose_gt_fun(res, ptep))
   }
 
   # otherwise, we are in the main case where the target is an ATT

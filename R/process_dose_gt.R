@@ -1,6 +1,9 @@
-process_dose_gt <- function(att_gt_results, ptep) {
+process_dose_gt <- function(gt_results, ptep, ...) {
     browser()
+
+    o_weights <- overall_weights(gt_results, ...)
+
     # extract ATT(g,t) and influence functions
-    attgt.list <- att_gt_results$attgt.list
-    inffunc <- att_gt_results$inffunc
+    attgt.list <- gt_results$attgt.list
+    inffunc <- gt_results$inffunc
 }

@@ -371,7 +371,7 @@ get_agg_inf_func <- function(att, inffunc1, whichones, weights.agg, wif = NULL) 
 #'  a standard error
 #'
 #' @param thisinffunc An influence function
-#' @inheritParams compute.aggte
+#' @inheritParams pte_aggte
 #'
 #' @return scalar standard error
 #'
@@ -384,4 +384,68 @@ getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
   } else {
     return(sqrt(mean((thisinffunc)^2) / n))
   }
+}
+
+
+#' @title overall_weights
+#'
+#' @description A function that returns weights on gt's to deliver overall
+#'  (averaged across groups and time periods) treatment effect parameters
+#' @inheritParams pte_aggte
+#' @return a data.frame with columns containing the group, the time period
+#'  and the amount of weight that it should get for an overall treatment
+#'  effect parameter
+#' @export
+overall_weights <- function(attgt,
+                            balance_e = NULL,
+                            min_e = -Inf,
+                            max_e = Inf,
+                            ...) {
+  group <- attgt$group
+  time.period <- attgt$t
+  att <- attgt$att
+  inf_func <- attgt$inf_func
+  ptep <- attgt$ptep
+  bstrap <- ptep$bstrap
+  if (is.null(bstrap)) bstrap <- TRUE # default to bootstrap
+  cband <- ptep$cband
+  alp <- ptep$alp
+  biters <- ptep$biters
+  data <- ptep$data
+  tname <- ptep$tname
+  gname <- ptep$gname
+  glist <- sort(unique(group))
+  tlist <- sort(unique(time.period))
+
+  first_period_data <- data[data[, tname] == tlist[1], ]
+
+  originalt <- time.period
+  originalgroup <- group
+  originalglist <- glist
+  originaltlist <- tlist
+
+  # In case g's are not part of tlist
+  # originalgtlist <- sort(unique(c(originaltlist, originalglist)))
+  # uniquet <- seq(1, length(unique(originalgtlist)))
+
+  time.period <- sapply(originalt, orig2t, originaltlist)
+  group <- sapply(originalgroup, orig2t, originaltlist)
+  glist <- sapply(originalglist, orig2t, originaltlist)
+  tlist <- unique(time.period)
+  maxT <- max(time.period)
+
+  weights.ind <- first_period_data$.w
+
+  # relative group sizes for all ever-treated groups
+  pg <- sapply(originalglist, function(g) mean(weights.ind * (first_period_data[, gname] == g)))
+  # normalized so that probabilities sum to 1
+  pg <- pg / sum(pg)
+
+  # length of this is equal to number of groups
+  pgg <- pg
+
+  browser()
+
+  # same but length is equal to the number of ATT(g,t)
+  pg <- pg[match(group, glist)]
 }
