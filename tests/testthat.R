@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(pte)
+library(ptetools)
 
-test_check("pte")
+test_check("ptetool")

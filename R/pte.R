@@ -421,7 +421,15 @@ pte <- function(yname,
   max_e <- ifelse(is.null(dots$max_e), Inf, dots$max_e)
   balance_e <- dots$balance_e
 
-  event_study <- pte_aggte(att_gt, type = "dynamic", bstrap = TRUE, cband = cband, alp = ptep$alp, min_e = min_e, max_e = max_e, balance_e = balance_e)
+  event_study <- pte_aggte(att_gt,
+    type = "dynamic",
+    bstrap = TRUE,
+    cband = cband,
+    alp = ptep$alp,
+    min_e = min_e,
+    max_e = max_e,
+    balance_e = balance_e
+  )
 
   # output
   out <- pte_results(

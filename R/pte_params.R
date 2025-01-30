@@ -92,7 +92,7 @@ setup_pte_basic <- function(yname,
 #' and \code{attgt_fun} in the next steps.
 #'
 #' @inheritParams pte_params
-#' @param required_pre_periods The number of required pre-treatment periods to implement 
+#' @param required_pre_periods The number of required pre-treatment periods to implement
 #'  the estimation strategy.  Default is 1.
 #' @param ... additional arguments
 #'
