@@ -116,13 +116,13 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 #' @param dose vector containing the values of the dose used in estimation
 #' @param att.d estimates of ATT(d) for each value of `dose`
 #' @param att.d_se standard error of ATT(d) for each value of `dose`
-#' @param att.d_crt.val critical value to produce pointwise or uniform confidence
+#' @param att.d_crit.val critical value to produce pointwise or uniform confidence
 #'  interval for ATT(d)
 #' @param att.d_inffunc matrix containing the influence function from estimating
 #'  ATT(d)
 #' @param acrt.d estimates of ACRT(d) for each value of `dose`
 #' @param acrt.d_se standard error of ACRT(d) for each value of `dose`
-#' @param acrt.d_crt.val critical value to produce pointwise or uniform confidence
+#' @param acrt.d_crit.val critical value to produce pointwise or uniform confidence
 #'  interval for ACRT(d)
 #' @param acrt.d_inffunc matrix containing the influence function from estimating
 #'  ACRT(d)
@@ -171,6 +171,7 @@ dose_obj <- function(
 #' @param object an `dose_obj` object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 summary.dose_obj <- function(object, ...) {
     dose_obj <- object
@@ -201,6 +202,7 @@ summary.dose_obj <- function(object, ...) {
 #' @param x a list containing the summary of a `dose_obj` object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 print.summary.dose_obj <- function(x, ...) {
     # browser()

@@ -12,3 +12,58 @@ navbar:
     github:
       icon: fa-github
       href: https://github.com/bcallaway11/ptetools
+
+reference:
+  - title: Generic functions for panel data causal inference
+    contents:
+      - aggte_obj
+      - attgt_if
+      - attgt_noif
+      - attgt_pte_aggregations
+      - compute.pte
+      - compute.pte2
+      - dose_obj
+      - group_time_att
+      - gt_data_frame
+      - overall_weights
+      - panel_empirical_bootstrap
+      - process_att_gt
+      - pte
+      - pte2
+      - pte_aggte
+      - pte_attgt
+      - pte_emp_boot
+      - pte_params
+      - pte_results
+      - setup_pte
+      - setup_pte_basic
+
+  - title: Group-time average treatment effects with a binary treatment
+    contents:
+      - did_attgt
+      - pte_default
+
+  - title: Functions for dealing with a continuous treatment
+    contents:
+      - pte_dose_results
+
+  - title: Functions for dealing with distributional treatment effects
+    contents:
+      - qott_pte_aggregations
+      - qtt_pte_aggregations
+
+  - title: Functions for group-time specific subsets of data
+    contents:
+      - keep_all_pretreatment_subset
+      - keep_all_untreated_subset
+      - two_by_two_subset
+
+  - title: Plotting functions
+    contents:
+      - ggpte
+      - ggpte_cont
+
+  - title: Helper functions
+    contents:
+      - crit_val_checks
+      - mboot2

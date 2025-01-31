@@ -25,12 +25,18 @@ dose_obj(
 
 \item{att.d_se}{standard error of ATT(d) for each value of \code{dose}}
 
+\item{att.d_crit.val}{critical value to produce pointwise or uniform confidence
+interval for ATT(d)}
+
 \item{att.d_inffunc}{matrix containing the influence function from estimating
 ATT(d)}
 
 \item{acrt.d}{estimates of ACRT(d) for each value of \code{dose}}
 
 \item{acrt.d_se}{standard error of ACRT(d) for each value of \code{dose}}
+
+\item{acrt.d_crit.val}{critical value to produce pointwise or uniform confidence
+interval for ACRT(d)}
 
 \item{acrt.d_inffunc}{matrix containing the influence function from estimating
 ACRT(d)}
@@ -39,12 +45,6 @@ ACRT(d)}
 
 \item{call}{the original call to the function for computing causal effect parameters
 with a continuous treatment}
-
-\item{att.d_crt.val}{critical value to produce pointwise or uniform confidence
-interval for ATT(d)}
-
-\item{acrt.d_crt.val}{critical value to produce pointwise or uniform confidence
-interval for ACRT(d)}
 }
 \value{
 dose_obj

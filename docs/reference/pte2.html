@@ -210,6 +210,14 @@ should return.  This is unused is unused except in cases where
 the results involve distributions.</p></dd>
 
 
+<dt id="arg-process-dose-gt-fun">process_dose_gt_fun<a class="anchor" aria-label="anchor" href="#arg-process-dose-gt-fun"></a></dt>
+<dd><p>An optional function to customize results when the gt-specific
+function returns treatment effects that depend on dose (i.e., amount of the
+treatment).  The default is <code>process_dose_gt</code>, which is a function provided
+by the package.  See that function for an example of what this function should
+return.  This is unused except in cases where the results involve doses.</p></dd>
+
+
 <dt id="arg-biters">biters<a class="anchor" aria-label="anchor" href="#arg-biters"></a></dt>
 <dd><p>number of bootstrap iterations; default is 100</p></dd>
 
@@ -224,14 +232,6 @@ of the data (depending on <code>subset_fun</code>), to estimate group time
 average treatment effects (depending on <code>attgt_fun</code>), or to
 aggregating treatment effects (particularly useful are <code>min_e</code>,
 <code>max_e</code>, and <code>balance_e</code> arguments to event study aggregations)</p></dd>
-
-
-<dt id="arg-process-dose">process_dose<a class="anchor" aria-label="anchor" href="#arg-process-dose"></a></dt>
-<dd><p>An optional function to customize results when the gt-specific
-function returns treatment effects that depend on dose (i.e., amount of the
-treatment).  The default is <code>process_dose_gt</code>, which is a function provided
-by the package.  See that function for an example of what this function should
-return.  This is unused except in cases where the results involve doses.</p></dd>
 
 </dl></div>
     <div class="section level2">

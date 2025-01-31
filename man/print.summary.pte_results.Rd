@@ -14,3 +14,4 @@
 \description{
 prints value of a \code{summary.pte_results} object
 }
+\keyword{internal}

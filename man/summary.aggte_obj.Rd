@@ -14,3 +14,4 @@
 \description{
 A function to summarize aggregated treatment effect parameters.
 }
+\keyword{internal}

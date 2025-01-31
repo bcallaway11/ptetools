@@ -11,7 +11,7 @@
 #'  (equal to "pre" for pre-treatment periods and equal to "post" for post
 #'  treatment periods), \code{Y} (outcome).
 #'
-#'  In our case, we call \code{pte::two_by_two_subset} which sets up the
+#'  In our case, we call \code{two_by_two_subset} which sets up the
 #'  data to have this format before the call to \code{did_attgt}.
 #'
 #' @param gt_data data that is "local" to a particular group-time average
@@ -78,7 +78,7 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
 #'  (equal to "pre" for pre-treatment periods and equal to "post" for post
 #'  treatment periods), \code{Y} (outcome).
 #'
-#'  In our case, we call \code{pte::two_by_two_subset} which sets up the
+#'  In our case, we call \code{two_by_two_subset} which sets up the
 #'  data to have this format before the call to `pte_attgt`
 #'
 #' @param gt_data data that is "local" to a particular group-time average
@@ -218,5 +218,5 @@ pte_attgt <- function(
     stop(paste0("est_method: ", est_method, " is not supported"))
   }
   # return attgt
-  pte::attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)
+  attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)
 }

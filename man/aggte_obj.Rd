@@ -25,6 +25,8 @@ aggte_obj(
 
 \item{overall.se}{Standard error for overall ATT}
 
+\item{type}{The type of aggregation to be done.  Default is "overall"}
+
 \item{egt}{Holds the length of exposure (for dynamic effects), the
 group (for selective treatment timing), or the time period (for calendar
 time effects)}

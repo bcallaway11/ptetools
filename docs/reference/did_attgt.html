@@ -8,7 +8,7 @@ In particular, there should be an id column (individual identifier),
 D (treated group identifier), period (time period), name
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), Y (outcome).
-In our case, we call pte::two_by_two_subset which sets up the
+In our case, we call two_by_two_subset which sets up the
 data to have this format before the call to did_attgt.'><meta property="og:description" content='Takes a "local" data.frame and computes
 an estimate of a group time average treatment effect
 and a corresponding influence function using a difference in differences
@@ -18,7 +18,7 @@ In particular, there should be an id column (individual identifier),
 D (treated group identifier), period (time period), name
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), Y (outcome).
-In our case, we call pte::two_by_two_subset which sets up the
+In our case, we call two_by_two_subset which sets up the
 data to have this format before the call to did_attgt.'><meta property="og:image" content="https://github.com/bcallaway11/ptetools/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -59,13 +59,13 @@ In particular, there should be an <code>id</code> column (individual identifier)
 <code>D</code> (treated group identifier), <code>period</code> (time period), <code>name</code>
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), <code>Y</code> (outcome).</p>
-<p>In our case, we call <code><a href="https://rdrr.io/pkg/pte/man/two_by_two_subset.html" class="external-link">pte::two_by_two_subset</a></code> which sets up the
+<p>In our case, we call <code>two_by_two_subset</code> which sets up the
 data to have this format before the call to <code>did_attgt</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">did_attgt</span><span class="op">(</span><span class="va">gt_data</span>, <span class="va">xformla</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">did_attgt</span><span class="op">(</span><span class="va">gt_data</span>, xformula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,7 +77,7 @@ data to have this format before the call to <code>did_attgt</code>.</p>
 treatment effect</p></dd>
 
 
-<dt id="arg-xformla">xformla<a class="anchor" aria-label="anchor" href="#arg-xformla"></a></dt>
+<dt id="arg-xformula">xformula<a class="anchor" aria-label="anchor" href="#arg-xformula"></a></dt>
 <dd><p>one-sided formula for covariates used in the propensity score
 and outcome regression models</p></dd>
 

@@ -14,3 +14,4 @@
 \description{
 A function to summarize \code{pte} results.
 }
+\keyword{internal}

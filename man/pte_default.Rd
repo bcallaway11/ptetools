@@ -37,6 +37,9 @@ pte_default(
 
 \item{data}{balanced panel data}
 
+\item{xformula}{one-sided formula for covariates used in the propensity score
+and outcome regression models}
+
 \item{d_outcome}{Whether or not to take the first difference of the outcome.
 The default is FALSE.  To use difference-in-differences, set this to be TRUE.}
 

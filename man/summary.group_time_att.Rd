@@ -14,3 +14,4 @@
 \description{
 prints a summary of a \code{group_time_att} object
 }
+\keyword{internal}

@@ -6,7 +6,7 @@
 \usage{
 pte_attgt(
   gt_data,
-  xformla,
+  xformula,
   d_outcome = FALSE,
   d_covs_formula = ~-1,
   lagged_outcome_cov = FALSE,
@@ -18,7 +18,7 @@ pte_attgt(
 \item{gt_data}{data that is "local" to a particular group-time average
 treatment effect}
 
-\item{xformla}{one-sided formula for covariates used in the propensity score
+\item{xformula}{one-sided formula for covariates used in the propensity score
 and outcome regression models}
 
 \item{d_outcome}{Whether or not to take the first difference of the outcome.
@@ -51,6 +51,6 @@ In particular, there should be an \code{id} column (individual identifier),
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), \code{Y} (outcome).
 
-In our case, we call \code{pte::two_by_two_subset} which sets up the
+In our case, we call \code{two_by_two_subset} which sets up the
 data to have this format before the call to \code{pte_attgt}
 }

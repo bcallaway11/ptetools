@@ -14,3 +14,4 @@
 \description{
 prints a summary of a \code{dose_obj} object
 }
+\keyword{internal}

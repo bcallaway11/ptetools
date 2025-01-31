@@ -523,7 +523,7 @@ pte <- function(yname,
 #'  should return.  This is unused is unused except in cases where
 #'  the results involve distributions.
 #'
-#' @param process_dose An optional function to customize results when the gt-specific
+#' @param process_dose_gt_fun An optional function to customize results when the gt-specific
 #'  function returns treatment effects that depend on dose (i.e., amount of the
 #'  treatment).  The default is `process_dose_gt`, which is a function provided
 #'  by the package.  See that function for an example of what this function should

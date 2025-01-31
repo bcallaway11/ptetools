@@ -76,6 +76,7 @@ group_time_att <- function(group,
 #' @param object an \code{group_time_att} object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 summary.group_time_att <- function(object, ...) {
   group_time_att_obj <- object
@@ -123,6 +124,7 @@ summary.group_time_att <- function(object, ...) {
 #' @param x a \code{group_time_att} object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 print.group_time_att <- function(x, ...) {
   summary.group_time_att(x, ...)
@@ -163,6 +165,7 @@ pte_results <- function(att_gt,
 #' @param object an \code{pte_results} object
 #' @param ... other arguments
 #'
+#' @keywords internal
 #' @export
 summary.pte_results <- function(object, ...) {
   overall_att <- object$overall_att$overall.att
@@ -233,6 +236,7 @@ summary.pte_results <- function(object, ...) {
 #' @param x a \code{pte_results} object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 print.pte_results <- function(x, ...) {
   # summary.pte_results(x,...)
@@ -249,6 +253,7 @@ print.pte_results <- function(x, ...) {
 #' @param x a \code{summary.pte_results} object
 #' @param ... extra arguments
 #'
+#' @keywords internal
 #' @export
 print.summary.pte_results <- function(x, ...) {
   object <- x
@@ -403,6 +408,7 @@ pte_emp_boot <- function(attgt_results,
 #'
 #' @return \code{summary.pte_results} object
 #'
+#' @keywords internal
 #' @export
 summary.pte_emp_boot <- function(object, ...) {
   overall_att <- object$overall_results$att

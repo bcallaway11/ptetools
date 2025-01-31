@@ -490,8 +490,7 @@ crit_val_checks <- function(crit_val, alp = 0.05) {
 #'
 #' @description An object for holding aggregated treatment effect parameters.
 #'
-#' @inheritParams aggte
-#' @inheritParams compute.aggte
+#' @inheritParams pte_aggte
 #' @param overall.att The estimated overall ATT
 #' @param overall.se Standard error for overall ATT
 #' @param egt Holds the length of exposure (for dynamic effects), the
@@ -547,6 +546,7 @@ aggte_obj <- function(overall.att = NULL,
 #' @param object an \code{aggte_obj} object
 #' @param ... other arguments
 #'
+#' @keywords internal
 #' @export
 summary.aggte_obj <- function(object, ...) {
   # call

@@ -143,6 +143,12 @@ provided by the package.  See that function for an example of what this function
 should return.  This is unused is unused except in cases where
 the results involve distributions.}
 
+\item{process_dose_gt_fun}{An optional function to customize results when the gt-specific
+function returns treatment effects that depend on dose (i.e., amount of the
+treatment).  The default is \code{process_dose_gt}, which is a function provided
+by the package.  See that function for an example of what this function should
+return.  This is unused except in cases where the results involve doses.}
+
 \item{biters}{number of bootstrap iterations; default is 100}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
@@ -152,12 +158,6 @@ of the data (depending on \code{subset_fun}), to estimate group time
 average treatment effects (depending on \code{attgt_fun}), or to
 aggregating treatment effects (particularly useful are \code{min_e},
 \code{max_e}, and \code{balance_e} arguments to event study aggregations)}
-
-\item{process_dose}{An optional function to customize results when the gt-specific
-function returns treatment effects that depend on dose (i.e., amount of the
-treatment).  The default is \code{process_dose_gt}, which is a function provided
-by the package.  See that function for an example of what this function should
-return.  This is unused except in cases where the results involve doses.}
 }
 \value{
 \code{pte_results} object
