@@ -210,12 +210,15 @@ summary.pte_results <- function(object, ...) {
   c1name <- "Event Time"
   colnames(out2) <- c(c1name, "Estimate", "Std. Error", cband_text1, "Conf. Band]", "")
 
+  target_parameter <- object$ptep$target_parameter
+
   out <- list(
     overall_att = out1,
     event_study = out2,
     alp = alp,
     bstrap = bstrap,
-    cband = cband
+    cband = cband,
+    target_parameter = target_parameter
   )
 
   class(out) <- "summary.pte_results"
@@ -252,10 +255,19 @@ print.summary.pte_results <- function(x, ...) {
   out1 <- object$overall_att
   out2 <- object$event_study
   alp <- object$alp
+  target_parameter <- object$target_parameter
+
+  # in a handful of cases, the overall parameter is not an ATT
+  # (e.g., it could be an ACRT with a continuous treatment),
+  # allow for possibility of difference here:
+  att_text <- "Overall ATT" # default
+  if (isTRUE(target_parameter == "slope")) {
+    att_text <- "Overall ACRT"
+  }
 
   # overall att
   cat("\n")
-  cat("Overall ATT:  \n")
+  cat(paste0(att_text, ":  \n"))
   colnames(out1) <- c("ATT", "   Std. Error", paste0("    [ ", 100 * (1 - alp), "% "), "Conf. Int.]", "")
   print(out1, row.names = FALSE)
   cat("\n\n")

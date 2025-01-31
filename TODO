@@ -1,7 +1,7 @@
 TODO:
 
-* make sure that the knots are the same across g and t
-* (I think) in the function overall_weights, work with original groups and time periods instead of the adjusted ones, but just follow what `process_att_gt` does.
 * I am just going to ignore the untreated group for conducting inference
   * it is difficult to operationalize in code
   * It doesn't matter for ACRT(d) at all; for ATT(d), it doesn't matter if we interpret estimates as being nonparametric.
+* Report ACRT^o and ATT^o in the summary
+* change text for summary of ACRT event study

@@ -163,3 +163,102 @@ dose_obj <- function(
 
     out
 }
+
+#' @title summary.dose_obj
+#'
+#' @description summarizes a `dose_obj` object
+#'
+#' @param object an `dose_obj` object
+#' @param ... extra arguments
+#'
+#' @export
+summary.dose_obj <- function(object, ...) {
+    dose_obj <- object
+    out <- list(
+        overall_att = dose_obj$overall_att,
+        overall_att_se = dose_obj$overall_att_se,
+        overall_acrt = dose_obj$overall_acrt,
+        overall_acrt_se = dose_obj$overall_acrt_se,
+        dose = dose_obj$dose,
+        att.d = dose_obj$att.d,
+        att.d_se = dose_obj$att.d_se,
+        att.d_crit.val = dose_obj$att.d_crit.val,
+        acrt.d = dose_obj$acrt.d,
+        acrt.d_se = dose_obj$acrt.d_se,
+        acrt.d_crit.val = dose_obj$acrt.d_crit.val,
+        alp = dose_obj$pte_params$alp,
+        cband = dose_obj$pte_params$cband,
+        bstrap = dose_obj$pte_params$bstrap
+    )
+    class(out) <- "summary.dose_obj"
+    out
+}
+
+#' @title print.summary.dose_obj
+#'
+#' @description prints a summary of a `dose_obj` object
+#'
+#' @param x a list containing the summary of a `dose_obj` object
+#' @param ... extra arguments
+#'
+#' @export
+print.summary.dose_obj <- function(x, ...) {
+    # browser()
+    alp <- x$alp
+    cband <- x$cband
+    bstrap <- TRUE # TODO: hardcoded because this only option
+
+    # ATT(d)
+    cat("ATT(d):\n")
+
+    cband_text1a <- paste0(100 * (1 - alp), "% ")
+    cband_text1b <- ifelse(bstrap,
+        ifelse(cband, "Simult. ", "Pointwise "),
+        "Pointwise "
+    )
+    cband_text1 <- paste0("[", cband_text1a, cband_text1b)
+
+    cband_lower <- x$att.d - x$att.d_crit.val * x$att.d_se
+    cband_upper <- x$att.d + x$att.d_crit.val * x$att.d_se
+
+    sig <- (cband_upper < 0) | (cband_lower > 0)
+    sig[is.na(sig)] <- FALSE
+    sig_text <- ifelse(sig, "*", "")
+
+    out <- cbind.data.frame(x$dose, x$att.d, x$att.d_se, cband_lower, cband_upper)
+    out <- round(out, 4)
+    out <- cbind.data.frame(out, sig_text)
+
+
+    colnames(out) <- c("dose", "ATT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
+    print(out, row.names = FALSE, justify = "centre")
+    cat("\n\n")
+
+    # ATT(d)
+    cat("ACRT(d):\n")
+
+    cband_text1a <- paste0(100 * (1 - alp), "% ")
+    cband_text1b <- ifelse(bstrap,
+        ifelse(cband, "Simult. ", "Pointwise "),
+        "Pointwise "
+    )
+    cband_text1 <- paste0("[", cband_text1a, cband_text1b)
+
+    cband_lower <- x$acrt.d - x$acrt.d_crit.val * x$acrt.d_se
+    cband_upper <- x$acrt.d + x$acrt.d_crit.val * x$acrt.d_se
+
+    sig <- (cband_upper < 0) | (cband_lower > 0)
+    sig[is.na(sig)] <- FALSE
+    sig_text <- ifelse(sig, "*", "")
+
+    out <- cbind.data.frame(x$dose, x$acrt.d, x$acrt.d_se, cband_lower, cband_upper)
+    out <- round(out, 4)
+    out <- cbind.data.frame(out, sig_text)
+
+
+    colnames(out) <- c("dose", "ACRT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
+    print(out, row.names = FALSE, justify = "centre")
+    cat("---\n")
+    cat("Signif. codes: `*' confidence band does not cover 0")
+    cat("\n\n")
+}

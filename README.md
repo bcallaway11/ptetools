@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Panel Treatment Effects (pte) Package <img src="man/figures/logo.png" align="right" alt="pte" width="155" />
+# Panel Treatment Effects Tools (ptetools) Package <img src="man/figures/logo.png" align="right" alt="ptetools" width="155" />
 
-The `pte` package compartmentalizes the steps needed to implement
+The `ptetools` package compartmentalizes the steps needed to implement
 estimators of group-time average treatment effects (and their
 aggregations) in order to make it easier to apply the same sorts of
 arguments outside of their “birthplace” in the literature on
@@ -24,7 +24,7 @@ relevant subset of the data, an outcome, and whether or not a unit
 should be considered to be in the treated or comparison group for that
 group/time. There is one example of a relevant subset function provided
 in the package: [the `two_by_two_subset`
-function](https://github.com/bcallaway11/pte/blob/master/R/subset_functions.R).
+function](https://github.com/bcallaway11/ptetools/blob/master/R/subset_functions.R).
 This function takes an original dataset, subsets it into pre- and
 post-treatment periods and denotes treated and untreated units. This
 particular subset is perhaps the most common/important one for thinking
@@ -36,13 +36,13 @@ to the function, and report an *ATT* for that subset. With minor
 modification, this function should be availble for most any sort of
 treatment effects application — for example, if you can solve the
 baseline 2x2 case in difference in differences, you should use that
-function here, and the `pte` package will take care of dealing with the
-variation in treatment timing.
+function here, and the `ptetools` package will take care of dealing with
+the variation in treatment timing.
 
-If `attgt_fun` returns an influence function, then the `pte` package
-will also conduct inference using the multiplier bootstrap (which is
-fast) and produce uniform confidence bands (which adjust for multiple
-testing).
+If `attgt_fun` returns an influence function, then the `ptetools`
+package will also conduct inference using the multiplier bootstrap
+(which is fast) and produce uniform confidence bands (which adjust for
+multiple testing).
 
 The default output of `pte` is an overall treatment effect on the
 treated (i.e., across all groups that participate in the treatment in
@@ -62,7 +62,7 @@ on [Callaway and Sant’Anna
 estimates of group-time average treatment effects, *ATT(g,t)*, based on
 a difference in differences identification strategy. The following
 example demonstrates that it is easy to compute group-time average
-treatment effects using difference in differences using the `pte`
+treatment effects using difference in differences using the `ptetools`
 package. \[*Note:* This is definitely not the recommended way of doing
 this as there is very little error handling, etc. here, but it is rather
 a proof of concept. You should use the `did` package for this case.\]
@@ -73,35 +73,61 @@ on employment using data from the `did` package.
 ``` r
 library(did)
 data(mpdta)
-did_res <- pte(yname="lemp",
-               gname="first.treat",
-               tname="year",
-               idname="countyreal",
-               data=mpdta,
-               setup_pte_fun=setup_pte,
-               subset_fun=two_by_two_subset,
-               attgt_fun=did_attgt,
-               xformla=~lpop) 
+did_res <- pte(
+  yname = "lemp",
+  gname = "first.treat",
+  tname = "year",
+  idname = "countyreal",
+  data = mpdta,
+  setup_pte_fun = setup_pte,
+  subset_fun = two_by_two_subset,
+  attgt_fun = did_attgt,
+  xformla = ~lpop
+)
 #> Warning in pte(yname = "lemp", gname = "first.treat", tname = "year", idname = "countyreal", : 'pte' is deprecated.
 #> Use 'pte2' instead.
 #> See help("Deprecated")
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
 
 summary(did_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0323        0.0126     -0.057     -0.0075 *
+#>  -0.0323        0.0135    -0.0587     -0.0058 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error   [95%  Conf. Band]  
-#>          -3   0.0269     0.0154 -0.0131      0.0670  
-#>          -2  -0.0050     0.0129 -0.0385      0.0286  
-#>          -1  -0.0229     0.0144 -0.0603      0.0145  
-#>           0  -0.0201     0.0117 -0.0506      0.0103  
-#>           1  -0.0547     0.0165 -0.0976     -0.0118 *
-#>           2  -0.1382     0.0396 -0.2410     -0.0354 *
-#>           3  -0.1069     0.0341 -0.1954     -0.0184 *
+#>          -3   0.0269     0.0112 -0.0053      0.0591  
+#>          -2  -0.0050     0.0126 -0.0413      0.0313  
+#>          -1  -0.0229     0.0124 -0.0584      0.0127  
+#>           0  -0.0201     0.0139 -0.0602      0.0199  
+#>           1  -0.0547     0.0173 -0.1046     -0.0049 *
+#>           2  -0.1382     0.0337 -0.2350     -0.0414 *
+#>           3  -0.1069     0.0340 -0.2046     -0.0092 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggpte(did_res)
@@ -111,7 +137,7 @@ ggpte(did_res)
 
 What’s most interesting here, is that the only “new” code that needs to
 be writte is in [the `did_attgt`
-function](https://github.com/bcallaway11/pte/blob/master/R/attgt_functions.R).
+function](https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R).
 You will see that this is a very small amount of code.
 
 ## Example 2: Policy Evaluation during a Pandemic
@@ -129,7 +155,7 @@ variation in treatment timing. Therefore, it is still useful to think
 about group-time average treatment effects, but the DID strategy should
 be replaced with their particular unconfoundedness type assumption.
 
-The `pte` package is particularly useful here.
+The `ptetools` package is particularly useful here.
 
 ``` r
 # formula for covariates
@@ -137,69 +163,151 @@ xformla <- ~ current + I(current^2) + region + totalTestResults
 ```
 
 ``` r
-covid_res <- pte(yname="positive",
-                 gname="group",
-                 tname="time.period",
-                 idname="state_id",
-                 data=covid_data2,
-                 setup_pte_fun=setup_pte_basic,
-                 subset_fun=two_by_two_subset,
-                 attgt_fun=covid_attgt,
-                 xformla=xformla,
-                 max_e=21,
-                 min_e=-10) 
+covid_res <- pte(
+  yname = "positive",
+  gname = "group",
+  tname = "time.period",
+  idname = "state_id",
+  data = covid_data2,
+  setup_pte_fun = setup_pte_basic,
+  subset_fun = two_by_two_subset,
+  attgt_fun = covid_attgt,
+  xformla = xformla,
+  max_e = 21,
+  min_e = -10
+)
 #> Warning in pte(yname = "positive", gname = "group", tname = "time.period", : 'pte' is deprecated.
 #> Use 'pte2' instead.
 #> See help("Deprecated")
-#> Warning in compute.aggte(MP = MP, type = type, balance_e = balance_e, min_e =
-#> min_e, : Simultaneous conf. band is somehow smaller than pointwise one using
-#> normal approximation. Since this is unusual, we are reporting pointwise
-#> confidence intervals
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
+#> Warning in mboot2(thisinffunc, biters = biters, alp = alp): critical value for uniform confidence band is somehow smaller than
+#>             critical value for pointwise confidence interval...using pointwise
+#>             confidence interal
 
 summary(covid_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  14.8882       65.6876  -113.8573    143.6336 
+#>  14.8882       89.2491  -160.0369    189.8132 
 #> 
 #> 
 #> Dynamic Effects:
-#>  Event Time Estimate Std. Error     [95%  Conf. Band] 
-#>         -10  -3.7266     3.2311  -12.3090      4.8557 
-#>          -9   2.6607     1.5006   -1.3252      6.6465 
-#>          -8   0.8290     2.2907   -5.2556      6.9136 
-#>          -7   5.2843     2.2970   -0.8168     11.3855 
-#>          -6   2.8555     1.6468   -1.5186      7.2296 
-#>          -5   1.3589     4.6708  -11.0476     13.7654 
-#>          -4   0.3294     3.4672   -8.8801      9.5388 
-#>          -3  -4.2227     4.1922  -15.3579      6.9125 
-#>          -2  -3.8447     2.9210  -11.6033      3.9138 
-#>          -1  -0.2234     3.4245   -9.3195      8.8727 
-#>           0 -10.8156     9.3885  -35.7531     14.1218 
-#>           1 -13.7998    15.7824  -55.7205     28.1209 
-#>           2  -7.8432    11.4501  -38.2566     22.5703 
-#>           3  -4.5541    12.2315  -37.0430     27.9347 
-#>           4  -3.5368    12.3862  -36.4367     29.3631 
-#>           5   8.5221    11.9115  -23.1167     40.1609 
-#>           6   1.1140    16.5244  -42.7776     45.0056 
-#>           7   6.6384    19.8568  -46.1044     59.3813 
-#>           8   7.1288    28.8276  -69.4422     83.6998 
-#>           9  10.8758    25.2019  -56.0647     77.8163 
-#>          10  17.5057    32.3052  -68.3023    103.3137 
-#>          11  40.8318    41.9009  -70.4639    152.1275 
-#>          12  48.6134    41.2350  -60.9137    158.1404 
-#>          13  52.4228    57.2359  -99.6052    204.4508 
-#>          14  50.2000    71.5414 -139.8257    240.2257 
-#>          15  68.2960    58.4186  -86.8735    223.4655 
-#>          16  44.7305    77.2877 -160.5585    250.0195 
-#>          17  61.4670    97.5688 -197.6919    320.6258 
-#>          18  50.4635    96.0637 -204.6976    305.6246 
-#>          19  47.3392   117.3176 -264.2759    358.9542 
-#>          20  28.6326   159.2878 -394.4622    451.7275 
-#>          21   4.3445   120.6413 -316.0987    324.7878 
+#>  Event Time Estimate Std. Error     [95%  Conf. Band]  
+#>         -10  -3.7266     4.0893  -13.5376      6.0843  
+#>          -9   2.6607     1.4131   -0.7295      6.0508  
+#>          -8   0.8290     2.1182   -4.2528      5.9107  
+#>          -7   5.2843     2.0558    0.3523     10.2164 *
+#>          -6   2.8555     2.3030   -2.6698      8.3808  
+#>          -5   1.3589     4.0842   -8.4397     11.1575  
+#>          -4   0.3294     3.4489   -7.9451      8.6039  
+#>          -3  -4.2227     4.6681  -15.4221      6.9768  
+#>          -2  -3.8447     2.9548  -10.9336      3.2441  
+#>          -1  -0.2234     3.4588   -8.5214      8.0747  
+#>           0 -10.8156     8.4755  -31.1497      9.5184  
+#>           1 -13.7998    12.9474  -44.8626     17.2630  
+#>           2  -7.8432     9.9894  -31.8092     16.1228  
+#>           3  -4.5541     8.6319  -25.2634     16.1552  
+#>           4  -3.5368    11.3025  -30.6532     23.5795  
+#>           5   8.5221    12.1537  -20.6363     37.6805  
+#>           6   1.1140    17.0145  -39.7064     41.9343  
+#>           7   6.6384    15.9018  -31.5122     44.7891  
+#>           8   7.1288    25.9489  -55.1264     69.3840  
+#>           9  10.8758    33.4554  -69.3886     91.1403  
+#>          10  17.5057    30.2446  -55.0556     90.0670  
+#>          11  40.8318    35.3309  -43.9323    125.5959  
+#>          12  48.6134    45.3943  -60.2943    157.5210  
+#>          13  52.4228    59.6057  -90.5799    195.4255  
+#>          14  50.2000    55.9394  -84.0068    184.4068  
+#>          15  68.2960    67.1875  -92.8965    229.4885  
+#>          16  44.7305    67.4749 -117.1516    206.6126  
+#>          17  61.4670    82.0294 -135.3336    258.2675  
+#>          18  50.4635   104.0203 -199.0964    300.0234  
+#>          19  47.3392   129.1065 -262.4062    357.0845  
+#>          20  28.6326   109.0253 -232.9351    290.2003  
+#>          21   4.3445   129.9741 -307.4822    316.1713  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
-ggpte(covid_res) + ylim(c(-1000,1000))
+ggpte(covid_res) + ylim(c(-1000, 1000))
 ```
 
 ![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
@@ -219,11 +327,11 @@ Although I pretty much always end up doing this, it can be tedious, and
 it can be nice to get a working version of the code for a project going
 before working out the details on the influence function.
 
-The `pte` package can be used with the empirical bootstrap. There are a
-few limitations. First, it’s going to be substantially slower. Second,
-this code just reports pointwise confidence intervals. However, this
-basically is set up to fit into my typical workflow, and I see this as a
-way to get preliminary results.
+The `ptetools` package can be used with the empirical bootstrap. There
+are a few limitations. First, it’s going to be substantially slower.
+Second, this code just reports pointwise confidence intervals. However,
+this basically is set up to fit into my typical workflow, and I see this
+as a way to get preliminary results.
 
 Let’s demonstrate it. To do this, consider the same setup as in Example
 1, but where no influence function is returned. Let’s write the code for
@@ -232,7 +340,6 @@ this:
 ``` r
 # did with no influence function
 did_attgt_noif <- function(gt_data, xformla, ...) {
-
   # call original function
   did_gt <- did_attgt(gt_data, xformla, ...)
 
@@ -246,15 +353,17 @@ did_attgt_noif <- function(gt_data, xformla, ...) {
 Now, we can show the same sorts of results as above
 
 ``` r
-did_res_noif <- pte(yname="lemp",
-                    gname="first.treat",
-                    tname="year",
-                    idname="countyreal",
-                    data=mpdta,
-                    setup_pte_fun=setup_pte,
-                    subset_fun=two_by_two_subset,
-                    attgt_fun=did_attgt_noif, #this is only diff.
-                    xformla=~lpop) 
+did_res_noif <- pte(
+  yname = "lemp",
+  gname = "first.treat",
+  tname = "year",
+  idname = "countyreal",
+  data = mpdta,
+  setup_pte_fun = setup_pte,
+  subset_fun = two_by_two_subset,
+  attgt_fun = did_attgt_noif, # this is only diff.
+  xformla = ~lpop
+)
 #> Warning in pte(yname = "lemp", gname = "first.treat", tname = "year", idname = "countyreal", : 'pte' is deprecated.
 #> Use 'pte2' instead.
 #> See help("Deprecated")
@@ -263,18 +372,18 @@ summary(did_res_noif)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0323         0.012    -0.0558     -0.0087 *
+#>  -0.0323        0.0125    -0.0568     -0.0077 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  
 #>          -3   0.0269     0.0140         -0.0005      0.0544  
-#>          -2  -0.0050     0.0134         -0.0312      0.0213  
-#>          -1  -0.0229     0.0125         -0.0473      0.0016  
-#>           0  -0.0201     0.0121         -0.0439      0.0036  
-#>           1  -0.0547     0.0170         -0.0881     -0.0213 *
-#>           2  -0.1382     0.0332         -0.2032     -0.0732 *
-#>           3  -0.1069     0.0324         -0.1704     -0.0434 *
+#>          -2  -0.0050     0.0131         -0.0307      0.0208  
+#>          -1  -0.0229     0.0155         -0.0531      0.0074  
+#>           0  -0.0201     0.0123         -0.0442      0.0039  
+#>           1  -0.0547     0.0170         -0.0881     -0.0214 *
+#>           2  -0.1382     0.0335         -0.2039     -0.0725 *
+#>           3  -0.1069     0.0344         -0.1744     -0.0394 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggpte(did_res_noif)
