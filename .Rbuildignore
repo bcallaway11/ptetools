@@ -5,3 +5,5 @@
 ^\.Rproj\.user$
 ^docs$
 ^R/imputation_functions.R$
+^_pkgdown\.yml$
+^pkgdown$
