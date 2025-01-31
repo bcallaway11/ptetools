@@ -2,7 +2,8 @@
 % Please edit documentation in R/classes.R
 \name{pte_results}
 \alias{pte_results}
-\title{pte_results}
+\title{Class for holding overall results with a staggered treatment,
+including an overall ATT and an event study}
 \usage{
 pte_results(att_gt, overall_att, event_study, ptep)
 }

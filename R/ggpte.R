@@ -1,6 +1,9 @@
-#' @title ggpte
+#' @title The main plotting function in the `ptetools` package.  It plots
+#'  event studies.
 #'
-#' @description Simple event study plots for panel treatment effects
+#' @description Simple event study plots for panel treatment effects.  This
+#'  function is generic enough that most packages that otherwise use
+#'  the `ptetools` package can call it directly to plot an event study.
 #'
 #' @param pte_results A \code{pte_results} object
 #'
@@ -19,7 +22,7 @@ ggpte <- function(pte_results) {
 }
 
 
-#' @title ggpte_cont
+#' @title Plots dose-specific results in applications with a continuous treatment
 #'
 #' @description a function for plotting results in applications with a continuous treatment
 #'

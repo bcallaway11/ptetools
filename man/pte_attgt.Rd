@@ -2,7 +2,8 @@
 % Please edit documentation in R/attgt_functions.R
 \name{pte_attgt}
 \alias{pte_attgt}
-\title{pte_attgt}
+\title{A flexible way to estimate ATT(g,t) using difference-in-differences or
+lagged outcome unconfoundedness, for a particular group and time period}
 \usage{
 pte_attgt(
   gt_data,

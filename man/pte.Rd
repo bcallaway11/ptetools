@@ -20,10 +20,16 @@ pte(
   alp = 0.05,
   boot_type = "multiplier",
   weightsname = NULL,
-  biters = 100,
-  cl = 1,
   gt_type = "att",
   ret_quantile = NULL,
+  global_fun = FALSE,
+  time_period_fun = FALSE,
+  group_fun = FALSE,
+  process_dtt_gt_fun = process_dtt_gt,
+  process_dose_gt_fun = process_dose_gt,
+  biters = 100,
+  cl = 1,
+  call = NULL,
   ...
 )
 }
@@ -115,21 +121,43 @@ parameter.}
 \item{weightsname}{The name of the column that contains sampling weights.
 The defaul is NULL, in which case no sampling weights are used.}
 
-\item{biters}{number of bootstrap iterations; default is 100}
-
-\item{cl}{number of clusters to be used when bootstrapping; default is 1}
-
-\item{gt_type}{is the type of result that is computed for each group and
-time period.  The default choice is "att" is this is (by far) the most
-common choice.  The other option is "dtt", which stands for distribution
-treatment effect on the treated.  In this case, the attgt_fun should
-return a vector of counterfactual outcomes for each unit in the data, from
-which a counterfactual distribution can be computed.  Additional arguments
-will often need to be provided in this case.}
+\item{gt_type}{which type of group-time effects are computed.
+The default is "att".  Different estimation strategies can implement
+their own choices for \code{gt_type}}
 
 \item{ret_quantile}{For functions that compute quantile treatment effects,
 this is a specific quantile at which to report results, e.g.,
 \code{ret_quantile = 0.5} will return that the qte at the median.}
+
+\item{global_fun}{Logical indicating whether or not untreated potential
+outcomes can be estimated in one shot, i.e., for all groups and time periods.
+Main use case would be for one-shot imputation estimators.  Not supported yet.}
+
+\item{time_period_fun}{Logical indicating whether or not untreated potential
+outcomes can be estimated for all groups in the same time period.  Not supported yet.}
+
+\item{group_fun}{Logical indicating whether or not untreated potential outcomes
+can be estimated for all time periods for a single group.  Not supported yet.
+These functions aim at reducing or eliminating running the same code multiple times.}
+
+\item{process_dtt_gt_fun}{An optional function to customize results when
+the gt-specific function returns the distribution of treated and untreated
+potential outcomes.  The default is \code{process_dtt_gt}, which is a function
+provided by the package.  See that function for an example of what this function
+should return.  This is unused is unused except in cases where
+the results involve distributions.}
+
+\item{process_dose_gt_fun}{An optional function to customize results when the gt-specific
+function returns treatment effects that depend on dose (i.e., amount of the
+treatment).  The default is \code{process_dose_gt}, which is a function provided
+by the package.  See that function for an example of what this function should
+return.  This is unused except in cases where the results involve doses.}
+
+\item{biters}{number of bootstrap iterations; default is 100}
+
+\item{cl}{number of clusters to be used when bootstrapping; default is 1}
+
+\item{call}{keeps track of through the \code{call} from external functions/packages}
 
 \item{...}{extra arguments that can be passed to create the correct subsets
 of the data (depending on \code{subset_fun}), to estimate group time

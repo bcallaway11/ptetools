@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{pte_dose_results}
 \alias{pte_dose_results}
-\title{pte_dose_results}
+\title{Class for holding results with a continuous treatment}
 \usage{
 pte_dose_results(att_gt, dose, att_d = NULL, acrt_d = NULL, ptep)
 }
@@ -14,6 +14,8 @@ pte_dose_results(att_gt, dose, att_d = NULL, acrt_d = NULL, ptep)
 \item{att_d}{ATT(d) for each value of \code{dose}}
 
 \item{acrt_d}{ACRT(d) for each value of \code{dose}}
+
+\item{ptep}{a \code{pte_params} object}
 }
 \description{
 class for holding pte results

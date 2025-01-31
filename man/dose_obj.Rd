@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_dose_gt.R
 \name{dose_obj}
 \alias{dose_obj}
-\title{dose_obj}
+\title{An object that holds results when there is a continuous treatment}
 \usage{
 dose_obj(
   dose,

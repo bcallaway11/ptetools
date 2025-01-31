@@ -1,3 +1,19 @@
+#' @title Processes results from each group and time period in settings
+#'  with a continuous treatment.
+#'
+#' @description After computing results for each group and time period,
+#'  `process_dose_gt` combines/averages them into overall effects and/or
+#'  dose specific effects.  This is generic code that can be used
+#'  from different ways of estimating causal effects across different
+#'  timing groups and periods in a previous step.
+#'
+#' @inheritParams process_att_gt
+#' @inheritParams pte_results
+#'
+#' @param gt_results list of group-time specific results
+#' @param ... extra arguments
+#'
+#' @export
 process_dose_gt <- function(gt_results, ptep, ...) {
     # make the call to att, to get same format of results
     att_gt <- process_att_gt(gt_results, ptep)
@@ -108,7 +124,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     )
 }
 
-#' @title dose_obj
+#' @title An object that holds results when there is a continuous treatment
 #'
 #' @description Holds results from computing dose-specific treatment effects
 #'  with a continuous treatment

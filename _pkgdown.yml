@@ -21,7 +21,6 @@ reference:
       - attgt_noif
       - attgt_pte_aggregations
       - compute.pte
-      - compute.pte2
       - dose_obj
       - group_time_att
       - gt_data_frame
@@ -29,7 +28,6 @@ reference:
       - panel_empirical_bootstrap
       - process_att_gt
       - pte
-      - pte2
       - pte_aggte
       - pte_attgt
       - pte_emp_boot
@@ -46,6 +44,7 @@ reference:
   - title: Functions for dealing with a continuous treatment
     contents:
       - pte_dose_results
+      - process_dose_gt
 
   - title: Functions for dealing with distributional treatment effects
     contents:

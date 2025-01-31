@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{aggte_obj}
 \alias{aggte_obj}
-\title{aggte_obj}
+\title{Object to hold aggregated treatment effect results}
 \usage{
 aggte_obj(
   overall.att = NULL,
@@ -16,7 +16,6 @@ aggte_obj(
   min_e = NULL,
   max_e = NULL,
   balance_e = NULL,
-  call = NULL,
   DIDparams = NULL
 )
 }
@@ -25,7 +24,7 @@ aggte_obj(
 
 \item{overall.se}{Standard error for overall ATT}
 
-\item{type}{The type of aggregation to be done.  Default is "overall"}
+\item{type}{The type of aggregation to be done.  Default is "overall".}
 
 \item{egt}{Holds the length of exposure (for dynamic effects), the
 group (for selective treatment timing), or the time period (for calendar
@@ -40,6 +39,17 @@ bands for dynamic effects, selective treatment timing, or time period
 effects.}
 
 \item{inf.function}{The influence function of the chosen aggregated parameters}
+
+\item{min_e}{The minimum event time computed in the event study results.
+This is useful when there are a huge number of pre-treatment periods.}
+
+\item{max_e}{The maximum event time computed in the event study results.
+This is useful when there are a huge number of post-treatment periods.}
+
+\item{balance_e}{Drops groups that do not have at least \code{balance_e} periods
+of post-treatment data.  This keeps the composition of groups constant
+across different event times in an event study.
+Default is NULL, in which case this is ignored.}
 
 \item{DIDparams}{A DIDparams object}
 }

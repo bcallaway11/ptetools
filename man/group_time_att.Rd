@@ -2,7 +2,8 @@
 % Please edit documentation in R/classes.R
 \name{group_time_att}
 \alias{group_time_att}
-\title{group_time_att}
+\title{Class that holds causal effect parameter estimates across
+timing groups and time periods}
 \usage{
 group_time_att(
   group,

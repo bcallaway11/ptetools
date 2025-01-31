@@ -2,7 +2,8 @@
 % Please edit documentation in R/pte_aggte.R
 \name{pte_aggte}
 \alias{pte_aggte}
-\title{pte_aggte}
+\title{Aggregates group-time specific effects into either an overall estimate
+or an event study}
 \usage{
 pte_aggte(
   attgt,
@@ -16,7 +17,23 @@ pte_aggte(
 \arguments{
 \item{attgt}{A group_time_att object to be aggregated}
 
-\item{type}{The type of aggregation to be done.  Default is "overall"}
+\item{type}{The type of aggregation to be done.  Default is "overall".}
+
+\item{balance_e}{Drops groups that do not have at least \code{balance_e} periods
+of post-treatment data.  This keeps the composition of groups constant
+across different event times in an event study.
+Default is NULL, in which case this is ignored.}
+
+\item{min_e}{The minimum event time computed in the event study results.
+This is useful when there are a huge number of pre-treatment periods.}
+
+\item{max_e}{The maximum event time computed in the event study results.
+This is useful when there are a huge number of post-treatment periods.}
+
+\item{...}{extra arguments}
+}
+\value{
+an \code{aggte_obj}
 }
 \description{
 This is a slight edit of the aggte function from the \code{did} package.

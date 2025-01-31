@@ -52,8 +52,11 @@ aggregating treatment effects (particularly useful are \code{min_e},
 \code{max_e}, and \code{balance_e} arguments to event study aggregations)}
 }
 \value{
-list of attgt results and, sometimes, and influence function
+list of attgt results and, sometimes, an influence function
 }
 \description{
-Function that actually computes panel treatment effects
+Function that actually computes panel treatment effects.
+The difference relative to \code{compute.pte} is that this function
+loops over time periods first (instead of groups) and tries to
+estimate model for untreated potential outcomes jointly for all groups.
 }

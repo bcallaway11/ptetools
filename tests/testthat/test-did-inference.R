@@ -19,7 +19,7 @@ test_that("tests for inference", {
     data <- did::build_sim_dataset(sp)
 
     res <- suppressWarnings(
-      pte2(
+      pte(
         yname = "Y",
         gname = "G",
         tname = "period",
@@ -39,5 +39,5 @@ test_that("tests for inference", {
 
   rej_frac <- mean(unlist(rejs))
 
-  expect_equal(rej_frac, 0.06, tolerance = 0.05) # make test fail if reject 0
+  expect_true(abs(rej_frac - 0.06) <= 0.05) # make test fail if reject 0 times
 })

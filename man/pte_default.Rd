@@ -2,7 +2,8 @@
 % Please edit documentation in R/pte.R
 \name{pte_default}
 \alias{pte_default}
-\title{pte_default}
+\title{Default, highly generic function for computing causal effects with
+staggered treatment adoption}
 \usage{
 pte_default(
   yname,

@@ -3,7 +3,7 @@
 #' @description Computes empirical bootstrap pointwise standard errors
 #'
 #' @inheritParams compute.pte
-#' @inheritParams pte2
+#' @inheritParams pte
 #' @inheritParams attgt_if
 #' @param attgt.list list of attgt results from \code{compute.pte}
 #'

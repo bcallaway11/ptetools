@@ -2,7 +2,8 @@
 % Please edit documentation in R/classes.R
 \name{gt_data_frame}
 \alias{gt_data_frame}
-\title{gt_data_frame}
+\title{Checks if data satisfies criteria to be used in internal
+\code{ptetools} functions}
 \usage{
 gt_data_frame(data)
 }

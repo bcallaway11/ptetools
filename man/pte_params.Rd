@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_params.R
 \name{pte_params}
 \alias{pte_params}
-\title{pte_params}
+\title{An object to carry around parameters in the \code{ptetools} package}
 \usage{
 pte_params(
   yname,
@@ -25,7 +25,8 @@ pte_params(
   time_period_fun = FALSE,
   group_fun = FALSE,
   biters,
-  cl
+  cl,
+  call = NULL
 )
 }
 \arguments{
@@ -95,7 +96,9 @@ These functions aim at reducing or eliminating running the same code multiple ti
 \item{biters}{number of bootstrap iterations; default is 100}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
+
+\item{call}{keeps track of through the \code{call} from external functions/packages}
 }
 \description{
-Objects that contain pte parameters
+Object that contain pte parameters
 }

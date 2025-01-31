@@ -2,7 +2,8 @@
 % Please edit documentation in R/ggpte.R
 \name{ggpte}
 \alias{ggpte}
-\title{ggpte}
+\title{The main plotting function in the \code{ptetools} package.  It plots
+event studies.}
 \usage{
 ggpte(pte_results)
 }
@@ -10,5 +11,7 @@ ggpte(pte_results)
 \item{pte_results}{A \code{pte_results} object}
 }
 \description{
-Simple event study plots for panel treatment effects
+Simple event study plots for panel treatment effects.  This
+function is generic enough that most packages that otherwise use
+the \code{ptetools} package can call it directly to plot an event study.
 }

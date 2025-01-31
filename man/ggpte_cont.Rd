@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggpte.R
 \name{ggpte_cont}
 \alias{ggpte_cont}
-\title{ggpte_cont}
+\title{Plots dose-specific results in applications with a continuous treatment}
 \usage{
 ggpte_cont(dose_obj, type = "att")
 }

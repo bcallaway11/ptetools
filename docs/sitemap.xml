@@ -7,7 +7,6 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/attgt_noif.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/attgt_pte_aggregations.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/compute.pte.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/reference/compute.pte2.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/crit_val_checks.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/did_attgt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/dose_obj.html</loc></url>
@@ -21,7 +20,6 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/keep_all_pretreatment_subset.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/keep_all_untreated_subset.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/mboot2.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/reference/orig2t.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/overall_weights.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/panel_empirical_bootstrap.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.group_time_att.html</loc></url>
@@ -29,8 +27,8 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.summary.dose_obj.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.summary.pte_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/process_att_gt.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/process_dose_gt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/reference/pte2.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_aggte.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_attgt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_default.html</loc></url>
@@ -47,7 +45,6 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/summary.group_time_att.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/summary.pte_emp_boot.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/summary.pte_results.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/reference/t2orig.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/two_by_two_subset.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/wif.html</loc></url>
 </urlset>

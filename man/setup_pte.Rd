@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_params.R
 \name{setup_pte}
 \alias{setup_pte}
-\title{Setup panel treatment effects parameters}
+\title{A function for setting up data, etc. to use the \code{ptetools} package}
 \usage{
 setup_pte(
   yname,
@@ -21,6 +21,7 @@ setup_pte(
   ret_quantile = 0.5,
   biters = 100,
   cl = 1,
+  call = NULL,
   ...
 )
 }
@@ -73,6 +74,8 @@ this is a specific quantile at which to report results, e.g.,
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
 
+\item{call}{keeps track of through the \code{call} from external functions/packages}
+
 \item{...}{additional arguments}
 }
 \value{
@@ -80,7 +83,7 @@ this is a specific quantile at which to report results, e.g.,
 }
 \description{
 This is a function for how to setup
-the data to be used in the \code{pte} package.
+the data to be used in the \code{ptetools} package.
 
 The \code{setup_pte} function builds on \code{setup_pte_basic} and
 attempts to provide a general purpose function (with error handling)

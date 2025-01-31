@@ -2,7 +2,8 @@
 % Please edit documentation in R/attgt_functions.R
 \name{did_attgt}
 \alias{did_attgt}
-\title{did_attgt}
+\title{Difference-in-differences estimates of ATT(g,t), given a group g and
+time period t.}
 \usage{
 did_attgt(gt_data, xformula = ~1, ...)
 }

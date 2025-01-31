@@ -1,7 +1,8 @@
-#' @title Example setup panel treatment effects parameters
+#' @title Example function to setup data for using subsequent functions in
+#'  the `ptetools` package
 #'
 #' @description This is a lightweight (example) function for how to setup
-#' the data to be used in the \code{pte} package.
+#' the data to be used in the \code{ptetools} package.
 #'
 #' \code{setup_pte_basic} takes in information about the structure of \code{data}
 #' and returns a \code{pte_params} object.  The key piece of information
@@ -37,6 +38,7 @@ setup_pte_basic <- function(yname,
                             ret_quantile = 0.5,
                             biters = 100,
                             cl = 1,
+                            call = NULL,
                             ...) {
   data <- as.data.frame(data)
 
@@ -74,17 +76,18 @@ setup_pte_basic <- function(yname,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     biters = biters,
-    cl = cl
+    cl = cl,
+    call = call
   )
 
   params
 }
 
 
-#' @title Setup panel treatment effects parameters
+#' @title A function for setting up data, etc. to use the `ptetools` package
 #'
 #' @description This is a function for how to setup
-#' the data to be used in the \code{pte} package.
+#' the data to be used in the \code{ptetools} package.
 #'
 #' The \code{setup_pte} function builds on \code{setup_pte_basic} and
 #' attempts to provide a general purpose function (with error handling)
@@ -115,6 +118,7 @@ setup_pte <- function(yname,
                       ret_quantile = 0.5,
                       biters = 100,
                       cl = 1,
+                      call = NULL,
                       ...) {
   data <- as.data.frame(data)
 
@@ -207,16 +211,17 @@ setup_pte <- function(yname,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     biters = biters,
-    cl = cl
+    cl = cl,
+    call = call
   )
 
   params
 }
 
 
-#' @title pte_params
+#' @title An object to carry around parameters in the `ptetools` package
 #'
-#' @description Objects that contain pte parameters
+#' @description Object that contain pte parameters
 #'
 #' @param yname Name of outcome in \code{data}
 #' @param gname Name of group in \code{data}
@@ -264,6 +269,7 @@ setup_pte <- function(yname,
 #'  These functions aim at reducing or eliminating running the same code multiple times.
 #' @param biters number of bootstrap iterations; default is 100
 #' @param cl number of clusters to be used when bootstrapping; default is 1
+#' @param call keeps track of through the `call` from external functions/packages
 #'
 #' @export
 pte_params <- function(yname,
@@ -286,7 +292,8 @@ pte_params <- function(yname,
                        time_period_fun = FALSE,
                        group_fun = FALSE,
                        biters,
-                       cl) {
+                       cl,
+                       call = NULL) {
   obj <- list(
     yname = yname,
     gname = gname,
@@ -305,7 +312,8 @@ pte_params <- function(yname,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     biters = biters,
-    cl = cl
+    cl = cl,
+    call = call
   )
 
   class(obj) <- "pte_params"

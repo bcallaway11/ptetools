@@ -1,4 +1,5 @@
-#' @title pte_aggte
+#' @title Aggregates group-time specific effects into either an overall estimate
+#'  or an event study
 #'
 #' @description This is a slight edit of the aggte function from the `did` package.
 #' Currently, it only provides aggregations for "overall" treatment effects
@@ -9,7 +10,19 @@
 #' assignment nor from the covariates).
 #'
 #' @param attgt A group_time_att object to be aggregated
-#' @param type The type of aggregation to be done.  Default is "overall"
+#' @param type The type of aggregation to be done.  Default is "overall".
+#' @param balance_e Drops groups that do not have at least `balance_e` periods
+#'  of post-treatment data.  This keeps the composition of groups constant
+#'  across different event times in an event study.
+#'  Default is NULL, in which case this is ignored.
+#' @param min_e The minimum event time computed in the event study results.
+#'  This is useful when there are a huge number of pre-treatment periods.
+#' @param max_e The maximum event time computed in the event study results.
+#'  This is useful when there are a huge number of post-treatment periods.
+#' @param ... extra arguments
+#'
+#' @return an `aggte_obj`
+#' @export
 pte_aggte <- function(attgt,
                       type = "overall",
                       balance_e = NULL,
@@ -155,7 +168,6 @@ pte_aggte <- function(attgt,
         selective.inf.func.g = selective.inf.func.g,
         selective.inf.func = selective.inf.func
       ),
-      call = call,
       DIDparams = attgt
     ))
   } else if (type == "dynamic") {
@@ -255,7 +267,6 @@ pte_aggte <- function(attgt,
         dynamic.inf.func.e = dynamic.inf.func.e,
         dynamic.inf.func = dynamic.inf.func
       ),
-      call = call,
       min_e = min_e,
       max_e = max_e,
       balance_e = balance_e,
@@ -359,7 +370,8 @@ getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
 }
 
 
-#' @title overall_weights
+#' @title Computes weights across post-treatment groups and time periods to
+#'  deliver overall treatment effect parameters
 #'
 #' @description A function that returns weights on gt's to deliver overall
 #'  (averaged across groups and time periods) treatment effect parameters
@@ -447,7 +459,8 @@ overall_weights <- function(attgt,
   )
 }
 
-#' @title crit_val_checks
+#' @title Performs sanity checks on critical values for forming uniform
+#'  confidence bands
 #'
 #' @description A function to perform sanity checks and possibly adjust a
 #'  a critical value to form a uniform confidence band
@@ -480,7 +493,7 @@ crit_val_checks <- function(crit_val, alp = 0.05) {
 
 
 
-#' @title aggte_obj
+#' @title Object to hold aggregated treatment effect results
 #'
 #' @description Objects of this class hold results on aggregated
 #'  group-time average treatment effects.  This is derived from the AGGTEobj
@@ -517,7 +530,6 @@ aggte_obj <- function(overall.att = NULL,
                       min_e = NULL,
                       max_e = NULL,
                       balance_e = NULL,
-                      call = NULL,
                       DIDparams = NULL) {
   out <- list(
     overall.att = overall.att,
@@ -531,7 +543,6 @@ aggte_obj <- function(overall.att = NULL,
     min_e = min_e,
     max_e = max_e,
     balance_e = balance_e,
-    call = call,
     DIDparams = DIDparams
   )
 
@@ -644,7 +655,7 @@ summary.aggte_obj <- function(object, ...) {
 
   # estimation method text
   est_method <- object$DIDparams$est_method
-  if (is(est_method, "character")) {
+  if (inherits(est_method, "character")) {
     est_method_text <- est_method
     if (est_method == "dr") {
       est_method_text <- "Doubly Robust"

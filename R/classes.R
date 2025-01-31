@@ -1,4 +1,5 @@
-#' @title group_time_att
+#' @title Class that holds causal effect parameter estimates across
+#'  timing groups and time periods
 #'
 #' @description group_time_att class
 #'
@@ -131,7 +132,8 @@ print.group_time_att <- function(x, ...) {
 }
 
 
-#' @title pte_results
+#' @title Class for holding overall results with a staggered treatment,
+#'  including an overall ATT and an event study
 #'
 #' @description class for holding pte results
 #'
@@ -160,7 +162,7 @@ pte_results <- function(att_gt,
 
 #' @title summary.pte_results
 #'
-#' @description A function to summarize \code{pte} results.
+#' @description A function to summarize `ptetools` results.
 #'
 #' @param object an \code{pte_results} object
 #' @param ... other arguments
@@ -289,7 +291,8 @@ print.summary.pte_results <- function(x, ...) {
   cat("\n\n")
 }
 
-#' @title attgt_if
+#' @title Class for holding returns from group-time specific estimates
+#'  in settings when an influence function is returned
 #'
 #' @description Class for holding group-time average treatment effects
 #'  along with their influence function
@@ -312,7 +315,8 @@ attgt_if <- function(attgt, inf_func, extra_gt_returns = NULL) {
   out
 }
 
-#' @title attgt_noif
+#' @title Class for holding returns from group-time specific estimates
+#'  in settings when an influence function is not returned
 #'
 #' @description Class for holding group-time average treatment effects
 #'  which don't include influence functions
@@ -329,7 +333,8 @@ attgt_noif <- function(attgt, extra_gt_returns = NULL) {
 }
 
 
-#' @title gt_data_frame
+#' @title Checks if data satisfies criteria to be used in internal
+#'  `ptetools` functions
 #'
 #' @description function to take in a data.frame, check if it has the right
 #'  columns to be used to calculate a group-time average treatment effect,
@@ -354,9 +359,9 @@ gt_data_frame <- function(data) {
   data
 }
 
-#' @title pte_emp_boot
+#' @title Class to hold empirical bootstrap results
 #'
-#' @title Class for holding \code{pte} empirical bootstrap results
+#' @description Class for holding `ptetools` empirical bootstrap results
 #'
 #' @param attgt_results \code{data.frame} holding attgt results
 #' @param overall_results \code{data.frame} holding overall results
@@ -471,7 +476,7 @@ summary.pte_emp_boot <- function(object, ...) {
 }
 
 
-#' @title pte_dose_results
+#' @title Class for holding results with a continuous treatment
 #'
 #' @description class for holding pte results
 #'
@@ -479,6 +484,7 @@ summary.pte_emp_boot <- function(object, ...) {
 #' @param dose vector of doses
 #' @param att_d ATT(d) for each value of `dose`
 #' @param acrt_d ACRT(d) for each value of `dose`
+#' @param ptep a `pte_params` object
 #'
 #' @export
 pte_dose_results <- function(att_gt,

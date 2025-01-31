@@ -12,6 +12,6 @@
 \item{...}{other arguments}
 }
 \description{
-A function to summarize \code{pte} results.
+A function to summarize \code{ptetools} results.
 }
 \keyword{internal}

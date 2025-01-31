@@ -1,4 +1,5 @@
-#' @title did_attgt
+#' @title Difference-in-differences estimates of ATT(g,t), given a group g and
+#'  time period t.
 #'
 #' @description Takes a "local" data.frame and computes
 #'  an estimate of a group time average treatment effect
@@ -65,7 +66,8 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
 }
 
 
-#' @title pte_attgt
+#' @title A flexible way to estimate ATT(g,t) using difference-in-differences or
+#'  lagged outcome unconfoundedness, for a particular group and time period
 #'
 #' @description `pte_attgt` takes a "local" data.frame and computes
 #'  an estimate of a group time average treatment effect

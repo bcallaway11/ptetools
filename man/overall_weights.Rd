@@ -2,12 +2,26 @@
 % Please edit documentation in R/pte_aggte.R
 \name{overall_weights}
 \alias{overall_weights}
-\title{overall_weights}
+\title{Computes weights across post-treatment groups and time periods to
+deliver overall treatment effect parameters}
 \usage{
 overall_weights(attgt, balance_e = NULL, min_e = -Inf, max_e = Inf, ...)
 }
 \arguments{
 \item{attgt}{A group_time_att object to be aggregated}
+
+\item{balance_e}{Drops groups that do not have at least \code{balance_e} periods
+of post-treatment data.  This keeps the composition of groups constant
+across different event times in an event study.
+Default is NULL, in which case this is ignored.}
+
+\item{min_e}{The minimum event time computed in the event study results.
+This is useful when there are a huge number of pre-treatment periods.}
+
+\item{max_e}{The maximum event time computed in the event study results.
+This is useful when there are a huge number of post-treatment periods.}
+
+\item{...}{extra arguments}
 }
 \value{
 a data.frame with columns containing the group, the time period
