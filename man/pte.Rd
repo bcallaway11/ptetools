@@ -148,7 +148,8 @@ Main function for computing panel treatment effects
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/bcallaway11/pte}
+  \item \url{https://github.com/bcallaway11/ptetools}
+  \item Report bugs at \url{https://github.com/bcallaway11/ptetools/issues}
 }
 
 }

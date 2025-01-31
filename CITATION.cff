@@ -4,11 +4,11 @@
 # --------------------------------------------
  
 cff-version: 1.2.0
-message: 'To cite package "pte" in publications use:'
+message: 'To cite package "ptetools" in publications use:'
 type: software
 license: GPL-3.0-only
-title: 'pte: Panel Treatment Effects'
-version: 0.0.0.9000
+title: 'ptetools: Panel Treatment Effects Tools'
+version: 1.0.0
 abstract: This is fairly generic code for estimating treatment effects with panel
   data. This is useful code in my own work and will perhaps be useful to others. It
   builds heavily on the \codedid package. In particular, it breaks into separate steps
@@ -21,8 +21,18 @@ authors:
 - family-names: Callaway
   given-names: Brantly
   email: brantly.callaway@uga.edu
-repository-code: https://github.com/bcallaway11/pte
-url: https://github.com/bcallaway11/pte
+preferred-citation:
+  type: manual
+  title: Panel Treatment Effects Tools
+  authors:
+  - family-names: Callaway
+    given-names: Brantly
+    email: brantly.callaway@uga.edu
+  year: '2025'
+  notes: R package version 1.0.0
+  url: https://github.com/bcallaway11/ptetools
+repository-code: https://github.com/bcallaway11/ptetools
+url: https://github.com/bcallaway11/ptetools
 contact:
 - family-names: Callaway
   given-names: Brantly
@@ -41,12 +51,12 @@ references:
     email: brantly.callaway@uga.edu
   year: '2025'
   doi: 10.32614/CRAN.package.BMisc
-  version: '>= 1.4.1'
+  version: '>= 1.4.7'
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
   notes: Imports
-  url: https://R-forge.R-project.org/tracker/?atid=294&group_id=61
+  url: https://Matrix.R-forge.R-project.org
   repository: https://CRAN.R-project.org/package=Matrix
   authors:
   - family-names: Bates
@@ -61,22 +71,6 @@ references:
     orcid: https://orcid.org/0000-0002-3542-2938
   year: '2025'
   doi: 10.32614/CRAN.package.Matrix
-- type: software
-  title: did
-  abstract: 'did: Treatment Effects with Multiple Periods and Groups'
-  notes: Imports
-  url: https://bcallaway11.github.io/did/
-  repository: https://CRAN.R-project.org/package=did
-  authors:
-  - family-names: Callaway
-    given-names: Brantly
-    email: brantly.callaway@uga.edu
-  - family-names: Sant'Anna
-    given-names: Pedro H. C.
-    email: pedro.h.santanna@vanderbilt.edu
-  year: '2025'
-  doi: 10.32614/CRAN.package.did
-  version: '>= 2.0.0'
 - type: software
   title: ggplot2
   abstract: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
