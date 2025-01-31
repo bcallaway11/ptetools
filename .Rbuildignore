@@ -7,3 +7,4 @@
 ^R/imputation_functions.R$
 ^_pkgdown\.yml$
 ^pkgdown$
+^cran-comments\.md$
