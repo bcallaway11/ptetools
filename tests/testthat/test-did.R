@@ -3,22 +3,23 @@
 #------------------------------------------------------------------------
 
 library(did)
-devtools::load_all("~/Dropbox/ptetools")
 
 test_that("did basics", {
   sp <- did::reset.sim()
   data <- did::build_sim_dataset(sp)
 
-  res <- pte2(
-    yname = "Y",
-    gname = "G",
-    tname = "period",
-    idname = "id",
-    data = data,
-    setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = did_attgt,
-    xformla = ~X
+  res <- suppressWarnings(
+    pte2(
+      yname = "Y",
+      gname = "G",
+      tname = "period",
+      idname = "id",
+      data = data,
+      setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset,
+      attgt_fun = did_attgt,
+      xformula = ~X
+    )
   )
 
   expect_equal(res$overall_att$overall.att, 1, tolerance = .5)
@@ -32,7 +33,7 @@ test_that("did basics", {
     tname = "period",
     idname = "id",
     data = data,
-    xformla = ~X,
+    xformula = ~X,
     control_group = "notyettreated"
   )
 
@@ -43,22 +44,25 @@ test_that("did basics", {
 })
 
 test_that("empirical bootstrap", {
+  skip_on_cran()
   sp <- did::reset.sim()
   data <- did::build_sim_dataset(sp)
 
-  res <- pte2(
-    yname = "Y",
-    gname = "G",
-    tname = "period",
-    idname = "id",
-    data = data,
-    setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = did_attgt,
-    xformla = ~X,
-    boot_type = "empirical",
-    biters = 10
-  ) # just checking that this runs
+  res <- suppressWarnings(
+    pte2(
+      yname = "Y",
+      gname = "G",
+      tname = "period",
+      idname = "id",
+      data = data,
+      setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset,
+      attgt_fun = did_attgt,
+      xformula = ~X,
+      boot_type = "empirical",
+      biters = 10
+    ) # just checking that this runs
+  )
 
   expect_equal(res$overall_att$overall.att, 1)
   message("this is failing because the names are not correct on the returns
@@ -66,18 +70,22 @@ test_that("empirical bootstrap", {
 })
 
 test_that("periods that look like years works ok and unbalanced groups", {
+  skip_on_cran()
   data(mpdta)
-  res <- pte2(
-    yname = "lemp",
-    gname = "first.treat",
-    tname = "year",
-    idname = "countyreal",
-    data = mpdta,
-    setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = did_attgt,
-    xformla = ~lpop
+  res <- suppressWarnings(
+    pte2(
+      yname = "lemp",
+      gname = "first.treat",
+      tname = "year",
+      idname = "countyreal",
+      data = mpdta,
+      setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset,
+      attgt_fun = did_attgt,
+      xformula = ~lpop
+    )
   )
+
   # this is to test if summary is working // had issues with ife version of this
   expect_equal(summary(res)$overall_att$overall_att, -0.0323)
   dyn_idx <- summary(res)$event_study[, "Event Time"] == 0
@@ -88,16 +96,18 @@ test_that("periods that look like years works ok and unbalanced groups", {
   #------------------------------------------------------------------------
   data(mpdta)
   mpdta$G <- mpdta$first.treat
-  res <- pte2(
-    yname = "lemp",
-    gname = "G",
-    tname = "year",
-    idname = "countyreal",
-    data = mpdta,
-    setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = did_attgt,
-    xformla = ~lpop
+  res <- suppressWarnings(
+    pte2(
+      yname = "lemp",
+      gname = "G",
+      tname = "year",
+      idname = "countyreal",
+      data = mpdta,
+      setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset,
+      attgt_fun = did_attgt,
+      xformula = ~lpop
+    )
   )
   # this is to test if summary is working // had issues with ife version of this
   expect_equal(summary(res)$overall_att$overall_att, -0.0323)
@@ -109,15 +119,17 @@ test_that("no formula for covariates is ok", {
   sp <- did::reset.sim()
   data <- did::build_sim_dataset(sp)
 
-  res <- pte2(
-    yname = "Y",
-    gname = "G",
-    tname = "period",
-    idname = "id",
-    data = data,
-    setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = did_attgt
+  res <- suppressWarnings(
+    pte2(
+      yname = "Y",
+      gname = "G",
+      tname = "period",
+      idname = "id",
+      data = data,
+      setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset,
+      attgt_fun = did_attgt
+    )
   )
 
   expect_equal(res$overall_att$overall.att, 1, tolerance = .5)

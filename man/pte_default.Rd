@@ -10,7 +10,7 @@ pte_default(
   tname,
   idname,
   data,
-  xformla = ~1,
+  xformula = ~1,
   d_outcome = FALSE,
   d_covs_formula = ~-1,
   lagged_outcome_cov = FALSE,
@@ -36,9 +36,6 @@ pte_default(
 \item{idname}{Name of id in \code{data}}
 
 \item{data}{balanced panel data}
-
-\item{xformla}{one-sided formula for covariates used in the propensity score
-and outcome regression models}
 
 \item{d_outcome}{Whether or not to take the first difference of the outcome.
 The default is FALSE.  To use difference-in-differences, set this to be TRUE.}

@@ -18,16 +18,18 @@ test_that("tests for inference", {
     sp <- did::reset.sim()
     data <- did::build_sim_dataset(sp)
 
-    res <- pte2(
-      yname = "Y",
-      gname = "G",
-      tname = "period",
-      idname = "id",
-      data = data,
-      setup_pte_fun = setup_pte,
-      subset_fun = two_by_two_subset,
-      attgt_fun = did_attgt,
-      xformla = ~X
+    res <- suppressWarnings(
+      pte2(
+        yname = "Y",
+        gname = "G",
+        tname = "period",
+        idname = "id",
+        data = data,
+        setup_pte_fun = setup_pte,
+        subset_fun = two_by_two_subset,
+        attgt_fun = did_attgt,
+        xformula = ~X
+      )
     )
     # truth is that att = 1
     tstat <- (res$overall_att$overall.att - 1) / res$overall_att$overall.se
@@ -37,5 +39,5 @@ test_that("tests for inference", {
 
   rej_frac <- mean(unlist(rejs))
 
-  expect_equal(rej_frac, 0.06, tolerance = .05) # make test fail if reject 0
+  expect_equal(rej_frac, 0.06, tolerance = 0.05) # make test fail if reject 0
 })

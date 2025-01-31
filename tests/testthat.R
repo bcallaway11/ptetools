@@ -9,4 +9,4 @@
 library(testthat)
 library(ptetools)
 
-test_check("ptetool")
+test_check("ptetools")

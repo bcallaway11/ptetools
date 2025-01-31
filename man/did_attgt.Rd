@@ -4,7 +4,7 @@
 \alias{did_attgt}
 \title{did_attgt}
 \usage{
-did_attgt(gt_data, xformla, ...)
+did_attgt(gt_data, xformla = ~1, ...)
 }
 \arguments{
 \item{gt_data}{data that is "local" to a particular group-time average

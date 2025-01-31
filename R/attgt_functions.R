@@ -16,19 +16,19 @@
 #'
 #' @param gt_data data that is "local" to a particular group-time average
 #'  treatment effect
-#' @param xformla one-sided formula for covariates used in the propensity score
+#' @param xformula one-sided formula for covariates used in the propensity score
 #'  and outcome regression models
 #' @param ... extra function arguments; not used here
 #'
 #' @return attgt_if
 #'
 #' @export
-did_attgt <- function(gt_data, xformla, ...) {
+did_attgt <- function(gt_data, xformula = ~1, ...) {
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
   # for outcome regression, get pre-treatment values
-  Xpre <- model.frame(xformla, data = subset(gt_data, name == "pre"))
+  Xpre <- model.frame(xformula, data = subset(gt_data, name == "pre"))
 
   # convert two period panel into one period
   gt_data_outcomes <- tidyr::pivot_wider(gt_data[, c("D", "id", "period", "name", "Y")],
@@ -54,7 +54,7 @@ did_attgt <- function(gt_data, xformla, ...) {
     y1 = Y_post,
     y0 = Y_pre,
     D = D,
-    covariates = model.matrix(xformla,
+    covariates = model.matrix(xformula,
       data = gt_dataX
     ),
     inffunc = TRUE
@@ -83,7 +83,7 @@ did_attgt <- function(gt_data, xformla, ...) {
 #'
 #' @param gt_data data that is "local" to a particular group-time average
 #'  treatment effect
-#' @param xformla one-sided formula for covariates used in the propensity score
+#' @param xformula one-sided formula for covariates used in the propensity score
 #'  and outcome regression models
 #' @param d_outcome Whether or not to take the first difference of the outcome.
 #'  The default is FALSE.  To use difference-in-differences, set this to be TRUE.
@@ -101,7 +101,7 @@ did_attgt <- function(gt_data, xformla, ...) {
 #' @export
 pte_attgt <- function(
     gt_data,
-    xformla,
+    xformula,
     d_outcome = FALSE,
     d_covs_formula = ~ -1, lagged_outcome_cov = FALSE,
     est_method = "dr",
@@ -114,7 +114,7 @@ pte_attgt <- function(
   #-----------------------------------------------------------------------------
 
   # pre-treatment covariates
-  Xpre <- model.frame(xformla, data = subset(gt_data, name == "pre"))
+  Xpre <- model.frame(xformula, data = subset(gt_data, name == "pre"))
   .w <- subset(gt_data, name == "pre")$.w
 
   # change in covariates
@@ -144,7 +144,7 @@ pte_attgt <- function(
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
-  use_formula <- BMisc::toformula("", c(BMisc::rhs.vars(xformla), colnames(dX)))
+  use_formula <- BMisc::toformula("", c(BMisc::rhs.vars(xformula), colnames(dX)))
   if (lagged_outcome_cov) use_formula <- BMisc::addCovToFormla("pre", use_formula)
   covmat <- model.matrix(use_formula, data = gt_dataX)
   covmat2 <- covmat[D == 0, ]
