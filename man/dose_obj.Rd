@@ -26,13 +26,13 @@ dose_obj(
 \arguments{
 \item{dose}{vector containing the values of the dose used in estimation}
 
-\item{overall_att}{estimate of the overall ATT, E\link{ATT(D)|D>0}}
+\item{overall_att}{estimate of the overall ATT, the mean of ATT(D) given D > 0}
 
 \item{overall_att_se}{the standard error of the estimate of overall_att}
 
 \item{overall_att_inffunc}{the influence funciton for estimating overall_att}
 
-\item{overall_acrt}{estimate of the overall ACRT, E\link{ACRT(D|D)|D>0}}
+\item{overall_acrt}{estimate of the overall ACRT, the mean of ACRT(D|D) given D > 0}
 
 \item{overall_acrt_se}{the standard error fo the estimate of overall_acrt}
 

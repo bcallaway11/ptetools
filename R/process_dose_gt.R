@@ -167,10 +167,10 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 #'  with a continuous treatment
 #'
 #' @param dose vector containing the values of the dose used in estimation
-#' @param overall_att estimate of the overall ATT, E[ATT(D)|D>0]
+#' @param overall_att estimate of the overall ATT, the mean of ATT(D) given D > 0
 #' @param overall_att_se the standard error of the estimate of overall_att
 #' @param overall_att_inffunc the influence funciton for estimating overall_att
-#' @param overall_acrt estimate of the overall ACRT, E[ACRT(D|D)|D>0]
+#' @param overall_acrt estimate of the overall ACRT, the mean of ACRT(D|D) given D > 0
 #' @param overall_acrt_se the standard error fo the estimate of overall_acrt
 #' @param overall_acrt_inffunc the influence function for estimating overall_acrt
 #' @param att.d estimates of ATT(d) for each value of `dose`
