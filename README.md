@@ -3,18 +3,48 @@
 
 # Panel Treatment Effects Tools (ptetools) Package <img src="man/figures/logo.png" align="right" alt="ptetools" width="155" />
 
+## Structure of panel data causal inference problems
+
 The `ptetools` package compartmentalizes the steps needed to implement
 estimators of group-time average treatment effects (and their
 aggregations) in order to make it easier to apply the same sorts of
 arguments outside of their “birthplace” in the literature on
 difference-in-differences.
 
-This code is lightweight, only works for balanced panels, and has
-minimal error checking. That said, it should be useful projects that
-build on top of group-time average treatment effects in order to deliver
-estimates of causal effects in panel data settings.
+Essentially, the idea is that many panel data causal inference problems
+involve steps such as:
 
-The main function is called `pte`. The most important paramters that it
+1.  Defining an identification strategy (e.g.,
+    difference-in-differences)
+
+2.  Defining a notion of a group (e.g., based on treatment timing)
+
+3.  Looping over groups and time periods
+
+4.  Organizing the data so that the correct data show up for each group
+    and time period
+
+5.  Computing group-time average treatment effects (or other parameters
+    that are local to a group and a time period)
+
+6.  Aggregating group-time average treatment effect parameters (e.g.,
+    into an event study or an overall average treatment effect
+    parameter)
+
+Many of these steps are common across different panel data causal
+inference settings. For example, you could implement a
+difference-in-differences identification strategy or a change-in-changes
+identification strategy with all of the same steps as above except for
+replacing step 1.
+
+The idea of the `ptetools` package is to re-use as much
+code/infrastructure as possible when developing new approaches to panel
+data causal inference. For example, `ptetools` sits as the “backend” for
+several other packages including: `ife`, `contdid`, and parts of `qte`.
+
+## How ptetools works
+
+The main function is called `pte`. The most important parameters that it
 takes in are `subset_fun` and `attgt_fun`. These are functions that the
 user should pass to `pte`.
 
@@ -28,7 +58,8 @@ function](https://github.com/bcallaway11/ptetools/blob/master/R/subset_functions
 This function takes an original dataset, subsets it into pre- and
 post-treatment periods and denotes treated and untreated units. This
 particular subset is perhaps the most common/important one for thinking
-about treatment effects with panel data.
+about treatment effects with panel data, and this function can be reused
+across applications.
 
 The other main function is `attgt_fun`. This function should be able to
 take in the correct subset of data, possibly along with other arguments
@@ -46,13 +77,14 @@ multiple testing).
 
 The default output of `pte` is an overall treatment effect on the
 treated (i.e., across all groups that participate in the treatment in
-any time period) and dynamic effects (i.e., event studies). More
-aggregations are possible, but these seem to be the leading cases;
-aggregations of group-time average treatment effects are discussed at
-length in [Callaway and Sant’Anna
-(2021)](https://doi.org/10.1016/j.jeconom.2020.12.001).
+any time period) and and event study. More aggregations are possible,
+but these seem to be the leading cases; aggregations of group-time
+average treatment effects are discussed at length in [Callaway and
+Sant’Anna (2021)](https://doi.org/10.1016/j.jeconom.2020.12.001).
 
-Here are a few examples:
+Below are several examples of how the `ptetools` package can be used to
+implement an identification strategy with a very small amount of new
+code.
 
 ## Example 1: Difference in differences
 
@@ -89,18 +121,18 @@ summary(did_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0305        0.0123    -0.0546     -0.0063 *
+#>  -0.0305        0.0139    -0.0577     -0.0033 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error   [95%  Conf. Band]  
-#>          -3   0.0298     0.0158 -0.0111      0.0706  
-#>          -2  -0.0024     0.0127 -0.0351      0.0302  
-#>          -1  -0.0243     0.0147 -0.0621      0.0136  
-#>           0  -0.0189     0.0124 -0.0508      0.0130  
-#>           1  -0.0536     0.0181 -0.1001     -0.0070 *
-#>           2  -0.1363     0.0424 -0.2456     -0.0269 *
-#>           3  -0.1008     0.0351 -0.1914     -0.0103 *
+#>          -3   0.0298     0.0128 -0.0016      0.0612  
+#>          -2  -0.0024     0.0124 -0.0330      0.0281  
+#>          -1  -0.0243     0.0156 -0.0625      0.0140  
+#>           0  -0.0189     0.0121 -0.0486      0.0108  
+#>           1  -0.0536     0.0209 -0.1049     -0.0022 *
+#>           2  -0.1363     0.0421 -0.2394     -0.0332 *
+#>           3  -0.1008     0.0290 -0.1719     -0.0297 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggpte(did_res)
@@ -119,6 +151,15 @@ As a next example, consider trying to estimate effects of Covid-19
 related policies during a pandemic. The estimates below are for the
 effects of state-leve shelter-in-place orders during the early part of
 the pandemic.
+
+The data for this example comes from the `ppe` package which can be
+loaded by running
+
+``` r
+devtools::install_github("bcallaway11/ppe")
+library(ppe)
+data(covid_data)
+```
 
 [Callaway and Li (2021)](https://arxiv.org/abs/2105.06927) argue that a
 particular unconfoundedness-type strategy is more appropriate in this
@@ -154,49 +195,49 @@ summary(covid_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  14.8882       70.9966  -124.2626    154.0389 
+#>  14.8882       81.3975   -144.648    174.4243 
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error     [95%  Conf. Band] 
-#>         -10  -3.7266     3.1136  -12.1092      4.6560 
-#>          -9   2.6607     1.7120   -1.9485      7.2699 
-#>          -8   0.8290     2.4142   -5.6706      7.3286 
-#>          -7   5.2843     2.4728   -1.3732     11.9419 
-#>          -6   2.8555     1.6468   -1.5782      7.2892 
-#>          -5   1.3589     3.7156   -8.6445     11.3623 
-#>          -4   0.3294     4.4875  -11.7521     12.4109 
-#>          -3  -4.2227     3.5722  -13.8400      5.3947 
-#>          -2  -3.8447     3.0971  -12.1830      4.4935 
-#>          -1  -0.2234     3.5584   -9.8037      9.3569 
-#>           0 -10.8156     8.7835  -34.4632     12.8320 
-#>           1 -13.7998    11.9623  -46.0057     18.4061 
-#>           2  -7.8432    10.5984  -36.3770     20.6907 
-#>           3  -4.5541    10.1508  -31.8830     22.7747 
-#>           4  -3.5368    10.8100  -32.6404     25.5668 
-#>           5   8.5221    11.9253  -23.5841     40.6283 
-#>           6   1.1140    16.3982  -43.0345     45.2625 
-#>           7   6.6384    19.3860  -45.5542     58.8311 
-#>           8   7.1288    25.5462  -61.6487     75.9063 
-#>           9  10.8758    28.1514  -64.9156     86.6673 
-#>          10  17.5057    32.5023  -69.9996    105.0110 
-#>          11  40.8318    43.1400  -75.3131    156.9767 
-#>          12  48.6134    41.9574  -64.3475    161.5743 
-#>          13  52.4228    50.3243  -83.0642    187.9098 
-#>          14  50.2000    53.9236  -94.9772    195.3773 
-#>          15  68.2960    72.5556 -127.0440    263.6360 
-#>          16  44.7305    62.2640 -122.9016    212.3626 
-#>          17  61.4670    90.7224 -182.7830    305.7169 
-#>          18  50.4635   102.9626 -226.7404    327.6674 
-#>          19  47.3392   103.1212 -230.2918    324.9701 
-#>          20  28.6326   127.6975 -315.1646    372.4298 
-#>          21   4.3445   138.8343 -369.4360    378.1250 
+#>         -10  -3.7266     4.0770  -14.5913      7.1380 
+#>          -9   2.6607     1.3233   -0.8659      6.1872 
+#>          -8   0.8290     2.0592   -4.6584      6.3164 
+#>          -7   5.2843     2.3890   -1.0820     11.6507 
+#>          -6   2.8555     1.9429   -2.3220      8.0330 
+#>          -5   1.3589     3.8561   -8.9169     11.6348 
+#>          -4   0.3294     4.1641  -10.7672     11.4260 
+#>          -3  -4.2227     4.5687  -16.3976      7.9523 
+#>          -2  -3.8447     2.5874  -10.7397      3.0502 
+#>          -1  -0.2234     3.5748   -9.7498      9.3030 
+#>           0 -10.8156     8.4284  -33.2760     11.6448 
+#>           1 -13.7998    12.7000  -47.6435     20.0439 
+#>           2  -7.8432    10.3881  -35.5260     19.8397 
+#>           3  -4.5541    11.5720  -35.3918     26.2835 
+#>           4  -3.5368    12.8737  -37.8435     30.7698 
+#>           5   8.5221    12.5426  -24.9021     41.9463 
+#>           6   1.1140    19.6653  -51.2911     53.5191 
+#>           7   6.6384    22.1615  -52.4189     65.6958 
+#>           8   7.1288    24.7498  -58.8259     73.0835 
+#>           9  10.8758    30.0144  -69.1082     90.8598 
+#>          10  17.5057    38.3232  -84.6201    119.6315 
+#>          11  40.8318    35.9062  -54.8530    136.5165 
+#>          12  48.6134    49.4014  -83.0342    180.2609 
+#>          13  52.4228    52.3941  -87.1999    192.0455 
+#>          14  50.2000    65.3084 -123.8374    224.2375 
+#>          15  68.2960    56.4158  -82.0440    218.6360 
+#>          16  44.7305    64.0967 -126.0780    215.5390 
+#>          17  61.4670    89.4620 -176.9366    299.8705 
+#>          18  50.4635    86.2362 -179.3437    280.2707 
+#>          19  47.3392   123.0495 -280.5702    375.2485 
+#>          20  28.6326   120.9462 -293.6718    350.9370 
+#>          21   4.3445   145.9722 -384.6504    393.3395 
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggpte(covid_res) + ylim(c(-1000, 1000))
 ```
 
-![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
 
 What’s most interesting is just how little code needs to be written
 here. The only new code required is the `ppe::covid_attgt` function
@@ -255,24 +296,24 @@ summary(did_res_noif)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0323        0.0124    -0.0566      -0.008 *
+#>  -0.0323        0.0128    -0.0574     -0.0072 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  
-#>          -3   0.0269     0.0157         -0.0039      0.0577  
-#>          -2  -0.0050     0.0137         -0.0319      0.0220  
-#>          -1  -0.0229     0.0136         -0.0495      0.0038  
-#>           0  -0.0201     0.0118         -0.0433      0.0030  
-#>           1  -0.0547     0.0167         -0.0875     -0.0220 *
-#>           2  -0.1382     0.0367         -0.2102     -0.0662 *
-#>           3  -0.1069     0.0315         -0.1686     -0.0452 *
+#>          -3   0.0269     0.0137          0.0000      0.0539 *
+#>          -2  -0.0050     0.0130         -0.0304      0.0204  
+#>          -1  -0.0229     0.0133         -0.0490      0.0032  
+#>           0  -0.0201     0.0123         -0.0442      0.0039  
+#>           1  -0.0547     0.0188         -0.0915     -0.0179 *
+#>           2  -0.1382     0.0356         -0.2080     -0.0684 *
+#>           3  -0.1069     0.0336         -0.1727     -0.0411 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggpte(did_res_noif)
 ```
 
-![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-9-1.png)<!-- -->
 
 What’s exciting about this is just how little new code needs to be
 written.

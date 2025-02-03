@@ -6,6 +6,12 @@
 \usage{
 dose_obj(
   dose,
+  overall_att = NULL,
+  overall_att_se = NULL,
+  overall_att_inffunc = NULL,
+  overall_acrt = NULL,
+  overall_acrt_se = NULL,
+  overall_acrt_inffunc = NULL,
   att.d = NULL,
   att.d_se = NULL,
   att.d_crit.val = NULL,
@@ -14,8 +20,7 @@ dose_obj(
   acrt.d_se = NULL,
   acrt.d_crit.val = NULL,
   acrt.d_inffunc = NULL,
-  pte_params = NULL,
-  call = NULL
+  pte_params = NULL
 )
 }
 \arguments{
@@ -42,9 +47,6 @@ interval for ACRT(d)}
 ACRT(d)}
 
 \item{pte_params}{a pte_params object containing other parameters passed to the function}
-
-\item{call}{the original call to the function for computing causal effect parameters
-with a continuous treatment}
 }
 \value{
 dose_obj

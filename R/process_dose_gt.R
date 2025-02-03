@@ -16,7 +16,7 @@
 #' @export
 process_dose_gt <- function(gt_results, ptep, ...) {
     # make the call to att, to get same format of results
-    att_gt <- process_att_gt(gt_results, ptep)
+    att_gt <- suppressWarnings(process_att_gt(gt_results, ptep)) # try to drop this as it does some extraneous things that we don't end up using
     o_weights <- overall_weights(att_gt, ...)
 
     # main dose-specific results are in extra_gt_returns
@@ -38,9 +38,45 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     bread_gt <- BMisc::getListElement(inner_extra_gt_returns, "bread")
     Xe_gt <- BMisc::getListElement(inner_extra_gt_returns, "Xe")
 
+    acrt_gt_inffunc_mat <- gt_results$inffunc
+    biters <- ptep$biters
+    bstrap <- ptep$bstrap
+    alp <- ptep$alp
+
+    # overall att results
+    overall_att_res <- suppressWarnings(
+        ptetools::pte_default(
+            yname = ptep$yname,
+            gname = ptep$gname,
+            tname = ptep$tname,
+            idname = ptep$idname,
+            data = ptep$data,
+            d_outcome = TRUE,
+            anticipation = ptep$anticipation,
+            base_period = ptep$base_period,
+            control_group = ptep$control_group,
+            weightsname = ptep$weightsname,
+            biters = ptep$biters,
+            alp = ptep$alp
+        )
+    )
+
+    overall_att <- overall_att_res$overall_att$overall.att
+    overall_att_se <- overall_att_res$overall_att$overall.se
+    overall_att_inffunc <- overall_att_res$overall_att$inf.function[[2]]
+    if (!all.equal(overall_att, weighted.mean(att.overall_gt, w = o_weights$overall_weight))) {
+        stop("failed sanity check: something off with calculating overall att")
+    }
+
+    # overall acrt results
+    overall_acrt <- weighted.mean(acrt.overall_gt, w = o_weights$overall_weight)
+    overall_acrt_inffunc <- as.matrix(rowSums(sweep(acrt_gt_inffunc_mat, 2, o_weights$overall_weight, "*")) / sum(o_weights$overall_weight))
+    overall_acrt_se <- getSE(overall_acrt_inffunc, biters = biters, alp = alp)
+
+
     # point estimates of ATT(d) and ACRT(d)
-    att.d <- weighted_combine_list(att.d_gt, o_weights$overall_weight)
-    acrt.d <- weighted_combine_list(acrt.d_gt, o_weights$overall_weight)
+    att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
+    acrt.d <- BMisc::weighted_combine_list(acrt.d_gt, o_weights$overall_weight)
 
     # values of the dose
     dvals <- ptep$dvals
@@ -54,7 +90,6 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     # since we are picking dvals over a grid, the only randomness comes from
     # estimating the \beta's
     n1_vec <- sapply(Xe_gt, nrow)
-    acrt_gt_inffunc_mat <- gt_results$inffunc
     n <- nrow(acrt_gt_inffunc_mat)
     keep_mat <- acrt_gt_inffunc_mat != 0
     if (!all(colSums(keep_mat) == n1_vec)) {
@@ -71,7 +106,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         }
     )
 
-    att.d_inffunc <- weighted_combine_list(att.d_gt_inffunc, o_weights$overall_weight)
+    att.d_inffunc <- BMisc::weighted_combine_list(att.d_gt_inffunc, o_weights$overall_weight)
     biters <- ptep$biters
     alp <- ptep$alp
     cband <- ptep$cband
@@ -96,7 +131,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
             out_inffunc
         }
     )
-    acrt.d_inffunc <- weighted_combine_list(acrt.d_gt_inffunc, o_weights$overall_weight)
+    acrt.d_inffunc <- BMisc::weighted_combine_list(acrt.d_gt_inffunc, o_weights$overall_weight)
     acrt_boot_res <- mboot2(acrt.d_inffunc, biters = biters, alp = alp)
     acrt.d_se <- acrt_boot_res$boot_se
     if (cband) {
@@ -106,11 +141,14 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         acrt.d_crit.val <- qnorm(1 - alp / 2)
     }
 
-    # placeholder for tracking `call`
-    call <- NULL
-
     dose_obj(
         dose = dvals,
+        overall_att = overall_att,
+        overall_att_se = overall_att_se,
+        overall_att_inffunc = overall_att_inffunc,
+        overall_acrt = overall_acrt,
+        overall_acrt_se = overall_acrt_se,
+        overall_acrt_inffunc = overall_acrt_inffunc,
         att.d = att.d,
         att.d_se = att.d_se,
         att.d_crit.val = att.d_crit.val,
@@ -119,8 +157,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         acrt.d_se = acrt.d_se,
         acrt.d_crit.val = acrt.d_crit.val,
         acrt.d_inffunc = acrt.d_inffunc,
-        pte_params = ptep,
-        call = call
+        pte_params = ptep
     )
 }
 
@@ -130,6 +167,12 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 #'  with a continuous treatment
 #'
 #' @param dose vector containing the values of the dose used in estimation
+#' @param overall_att estimate of the overall ATT, E[ATT(D)|D>0]
+#' @param overall_att_se the standard error of the estimate of overall_att
+#' @param overall_att_inffunc the influence funciton for estimating overall_att
+#' @param overall_acrt estimate of the overall ACRT, E[ACRT(D|D)|D>0]
+#' @param overall_acrt_se the standard error fo the estimate of overall_acrt
+#' @param overall_acrt_inffunc the influence function for estimating overall_acrt
 #' @param att.d estimates of ATT(d) for each value of `dose`
 #' @param att.d_se standard error of ATT(d) for each value of `dose`
 #' @param att.d_crit.val critical value to produce pointwise or uniform confidence
@@ -143,14 +186,17 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 #' @param acrt.d_inffunc matrix containing the influence function from estimating
 #'  ACRT(d)
 #' @param pte_params a pte_params object containing other parameters passed to the function
-#' @param call the original call to the function for computing causal effect parameters
-#'  with a continuous treatment
-#'
 #' @return dose_obj
 #'
 #' @export
 dose_obj <- function(
     dose,
+    overall_att = NULL,
+    overall_att_se = NULL,
+    overall_att_inffunc = NULL,
+    overall_acrt = NULL,
+    overall_acrt_se = NULL,
+    overall_acrt_inffunc = NULL,
     att.d = NULL,
     att.d_se = NULL,
     att.d_crit.val = NULL,
@@ -159,10 +205,15 @@ dose_obj <- function(
     acrt.d_se = NULL,
     acrt.d_crit.val = NULL,
     acrt.d_inffunc = NULL,
-    pte_params = NULL,
-    call = NULL) {
+    pte_params = NULL) {
     out <- list(
         dose = dose,
+        overall_att = overall_att,
+        overall_att_se = overall_att_se,
+        overall_att_inffunc = overall_att_inffunc,
+        overall_acrt = overall_acrt,
+        overall_acrt_se = overall_acrt_se,
+        overall_acrt_inffunc = overall_acrt_inffunc,
         att.d = att.d,
         att.d_se = att.d_se,
         att.d_crit.val = att.d_crit.val,
@@ -171,8 +222,7 @@ dose_obj <- function(
         acrt.d_se = acrt.d_se,
         acrt.d_crit.val = acrt.d_crit.val,
         acrt.d_inffunc = acrt.d_inffunc,
-        pte_params = pte_params,
-        call = call
+        pte_params = pte_params
     )
 
     class(out) <- "dose_obj"
@@ -192,11 +242,11 @@ dose_obj <- function(
 summary.dose_obj <- function(object, ...) {
     dose_obj <- object
     out <- list(
+        dose = dose_obj$dose,
         overall_att = dose_obj$overall_att,
         overall_att_se = dose_obj$overall_att_se,
         overall_acrt = dose_obj$overall_acrt,
         overall_acrt_se = dose_obj$overall_acrt_se,
-        dose = dose_obj$dose,
         att.d = dose_obj$att.d,
         att.d_se = dose_obj$att.d_se,
         att.d_crit.val = dose_obj$att.d_crit.val,
@@ -221,62 +271,109 @@ summary.dose_obj <- function(object, ...) {
 #' @keywords internal
 #' @export
 print.summary.dose_obj <- function(x, ...) {
-    # browser()
     alp <- x$alp
     cband <- x$cband
-    bstrap <- TRUE # TODO: hardcoded because this only option
+    bstrap <- x$bstrap
+    if (is.null(bstrap)) bstrap <- TRUE # TODO: hardcoded because this only option
 
-    # ATT(d)
-    cat("ATT(d):\n")
-
-    cband_text1a <- paste0(100 * (1 - alp), "% ")
-    cband_text1b <- ifelse(bstrap,
-        ifelse(cband, "Simult. ", "Pointwise "),
-        "Pointwise "
+    z <- qnorm(1 - alp / 2)
+    att_cband_lower <- x$overall_att - z * x$overall_att_se
+    att_cband_upper <- x$overall_att + z * x$overall_att_se
+    overall_att_res <- cbind.data.frame(
+        x$overall_att,
+        x$overall_att_se,
+        att_cband_lower,
+        att_cband_upper
     )
-    cband_text1 <- paste0("[", cband_text1a, cband_text1b)
-
-    cband_lower <- x$att.d - x$att.d_crit.val * x$att.d_se
-    cband_upper <- x$att.d + x$att.d_crit.val * x$att.d_se
-
-    sig <- (cband_upper < 0) | (cband_lower > 0)
+    overall_att_res <- round(overall_att_res, 4)
+    sig <- (att_cband_upper < 0) | (att_cband_lower > 0)
     sig[is.na(sig)] <- FALSE
     sig_text <- ifelse(sig, "*", "")
+    overall_att_res <- cbind.data.frame(overall_att_res, sig_text)
 
-    out <- cbind.data.frame(x$dose, x$att.d, x$att.d_se, cband_lower, cband_upper)
-    out <- round(out, 4)
-    out <- cbind.data.frame(out, sig_text)
+    # print overall att
+    cat("\n")
+    cat("Overall ATT:  \n")
+    colnames(overall_att_res) <- c("ATT", "   Std. Error", paste0("    [ ", 100 * (1 - alp), "% "), "Conf. Int.]", "")
+    print(overall_att_res, row.names = FALSE)
+    cat("\n")
 
-
-    colnames(out) <- c("dose", "ATT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
-    print(out, row.names = FALSE, justify = "centre")
-    cat("\n\n")
-
-    # ATT(d)
-    cat("ACRT(d):\n")
-
-    cband_text1a <- paste0(100 * (1 - alp), "% ")
-    cband_text1b <- ifelse(bstrap,
-        ifelse(cband, "Simult. ", "Pointwise "),
-        "Pointwise "
+    # overall acrt
+    acrt_cband_lower <- x$overall_acrt - z * x$overall_acrt_se
+    acrt_cband_upper <- x$overall_acrt + z * x$overall_acrt_se
+    overall_acrt_res <- cbind.data.frame(
+        x$overall_acrt,
+        x$overall_acrt_se,
+        acrt_cband_lower,
+        acrt_cband_upper
     )
-    cband_text1 <- paste0("[", cband_text1a, cband_text1b)
-
-    cband_lower <- x$acrt.d - x$acrt.d_crit.val * x$acrt.d_se
-    cband_upper <- x$acrt.d + x$acrt.d_crit.val * x$acrt.d_se
-
-    sig <- (cband_upper < 0) | (cband_lower > 0)
+    overall_acrt_res <- round(overall_acrt_res, 4)
+    sig <- (acrt_cband_upper < 0) | (acrt_cband_lower > 0)
     sig[is.na(sig)] <- FALSE
     sig_text <- ifelse(sig, "*", "")
+    overall_acrt_res <- cbind.data.frame(overall_acrt_res, sig_text)
 
-    out <- cbind.data.frame(x$dose, x$acrt.d, x$acrt.d_se, cband_lower, cband_upper)
-    out <- round(out, 4)
-    out <- cbind.data.frame(out, sig_text)
-
-
-    colnames(out) <- c("dose", "ACRT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
-    print(out, row.names = FALSE, justify = "centre")
+    # print overall att
+    cat("\n")
+    cat("Overall ACRT:  \n")
+    colnames(overall_acrt_res) <- c("ACRT", "   Std. Error", paste0("    [ ", 100 * (1 - alp), "% "), "Conf. Int.]", "")
+    print(overall_acrt_res, row.names = FALSE)
     cat("---\n")
     cat("Signif. codes: `*' confidence band does not cover 0")
     cat("\n\n")
+
+    # note to self: commented out code that reported results at each value of the dose
+    # # ATT(d)
+    # cat("ATT(d):\n")
+
+    # cband_text1a <- paste0(100 * (1 - alp), "% ")
+    # cband_text1b <- ifelse(bstrap,
+    #     ifelse(cband, "Simult. ", "Pointwise "),
+    #     "Pointwise "
+    # )
+    # cband_text1 <- paste0("[", cband_text1a, cband_text1b)
+
+    # cband_lower <- x$att.d - x$att.d_crit.val * x$att.d_se
+    # cband_upper <- x$att.d + x$att.d_crit.val * x$att.d_se
+
+    # sig <- (cband_upper < 0) | (cband_lower > 0)
+    # sig[is.na(sig)] <- FALSE
+    # sig_text <- ifelse(sig, "*", "")
+
+    # out <- cbind.data.frame(x$dose, x$att.d, x$att.d_se, cband_lower, cband_upper)
+    # out <- round(out, 4)
+    # out <- cbind.data.frame(out, sig_text)
+
+
+    # colnames(out) <- c("dose", "ATT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
+    # print(out, row.names = FALSE, justify = "centre")
+    # cat("\n\n")
+
+    # # ATT(d)
+    # cat("ACRT(d):\n")
+
+    # cband_text1a <- paste0(100 * (1 - alp), "% ")
+    # cband_text1b <- ifelse(bstrap,
+    #     ifelse(cband, "Simult. ", "Pointwise "),
+    #     "Pointwise "
+    # )
+    # cband_text1 <- paste0("[", cband_text1a, cband_text1b)
+
+    # cband_lower <- x$acrt.d - x$acrt.d_crit.val * x$acrt.d_se
+    # cband_upper <- x$acrt.d + x$acrt.d_crit.val * x$acrt.d_se
+
+    # sig <- (cband_upper < 0) | (cband_lower > 0)
+    # sig[is.na(sig)] <- FALSE
+    # sig_text <- ifelse(sig, "*", "")
+
+    # out <- cbind.data.frame(x$dose, x$acrt.d, x$acrt.d_se, cband_lower, cband_upper)
+    # out <- round(out, 4)
+    # out <- cbind.data.frame(out, sig_text)
+
+
+    # colnames(out) <- c("dose", "ACRT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
+    # print(out, row.names = FALSE, justify = "centre")
+    # cat("---\n")
+    # cat("Signif. codes: `*' confidence band does not cover 0")
+    # cat("\n\n")
 }

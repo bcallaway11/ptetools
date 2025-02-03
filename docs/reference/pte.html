@@ -60,6 +60,7 @@ Main function for computing panel treatment effects"><meta property="og:image" c
 <span>  process_dose_gt_fun <span class="op">=</span> <span class="va">process_dose_gt</span>,</span>
 <span>  biters <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  cl <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  call <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -229,6 +230,10 @@ return.  This is unused except in cases where the results involve doses.</p></dd
 <dd><p>number of clusters to be used when bootstrapping; default is 1</p></dd>
 
 
+<dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
+<dd><p>keeps track of through the <code>call</code> from external functions/packages</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>extra arguments that can be passed to create the correct subsets
 of the data (depending on <code>subset_fun</code>), to estimate group time
@@ -261,7 +266,7 @@ aggregating treatment effects (particularly useful are <code>min_e</code>,
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
