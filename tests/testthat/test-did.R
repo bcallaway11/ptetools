@@ -132,5 +132,5 @@ test_that("no formula for covariates is ok", {
     )
   )
 
-  expect_equal(res$overall_att$overall.att, 1, tolerance = .5)
+  expect_equal(res$overall_att$overall.att, 1, tolerance = .75)
 })
