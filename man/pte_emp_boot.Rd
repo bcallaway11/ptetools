@@ -2,7 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{pte_emp_boot}
 \alias{pte_emp_boot}
-\title{Class to hold empirical bootstrap results}
+\title{Class for Empirical Bootstrap Results}
 \usage{
 pte_emp_boot(
   attgt_results,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_params.R
 \name{setup_pte}
 \alias{setup_pte}
-\title{A function for setting up data, etc. to use the \code{ptetools} package}
+\title{Generic Setup Function}
 \usage{
 setup_pte(
   yname,

@@ -1,5 +1,4 @@
-#' @title Example function to setup data for using subsequent functions in
-#'  the `ptetools` package
+#' @title Basic Setup Function
 #'
 #' @description This is a lightweight (example) function for how to setup
 #' the data to be used in the \code{ptetools} package.
@@ -84,7 +83,7 @@ setup_pte_basic <- function(yname,
 }
 
 
-#' @title A function for setting up data, etc. to use the `ptetools` package
+#' @title Generic Setup Function
 #'
 #' @description This is a function for how to setup
 #' the data to be used in the \code{ptetools} package.
@@ -219,9 +218,9 @@ setup_pte <- function(yname,
 }
 
 
-#' @title An object to carry around parameters in the `ptetools` package
+#' @title PTE Parameters Class
 #'
-#' @description Object that contain pte parameters
+#' @description Class that contains pte parameters
 #'
 #' @param yname Name of outcome in \code{data}
 #' @param gname Name of group in \code{data}

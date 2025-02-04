@@ -2,8 +2,7 @@
 % Please edit documentation in R/attgt_functions.R
 \name{pte_attgt}
 \alias{pte_attgt}
-\title{A flexible way to estimate ATT(g,t) using difference-in-differences or
-lagged outcome unconfoundedness, for a particular group and time period}
+\title{General ATT(g,t)}
 \usage{
 pte_attgt(
   gt_data,
@@ -44,9 +43,9 @@ attgt_if
 \code{pte_attgt} takes a "local" data.frame and computes
 an estimate of a group time average treatment effect
 and a corresponding influence function.  This function generalizes
-a number of existing methods.
+a number of existing methods and underlies the \code{pte_default} function.
 
-The code relies on \code{this.data} having certain variables defined.
+The code relies on \code{gt_data} having certain variables defined.
 In particular, there should be an \code{id} column (individual identifier),
 \code{G} (group identifier), \code{period} (time period), \code{name}
 (equal to "pre" for pre-treatment periods and equal to "post" for post

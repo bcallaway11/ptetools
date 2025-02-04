@@ -16,13 +16,8 @@ navbar:
 reference:
   - title: Generic functions for panel data causal inference
     contents:
-      - aggte_obj
-      - attgt_if
-      - attgt_noif
       - attgt_pte_aggregations
       - compute.pte
-      - dose_obj
-      - group_time_att
       - gt_data_frame
       - overall_weights
       - panel_empirical_bootstrap
@@ -30,9 +25,6 @@ reference:
       - pte
       - pte_aggte
       - pte_attgt
-      - pte_emp_boot
-      - pte_params
-      - pte_results
       - setup_pte
       - setup_pte_basic
 
@@ -66,3 +58,14 @@ reference:
     contents:
       - crit_val_checks
       - mboot2
+
+  - title: Classes
+    contents:
+      - aggte_obj
+      - attgt_if
+      - attgt_noif
+      - dose_obj
+      - group_time_att
+      - pte_emp_boot
+      - pte_params
+      - pte_results

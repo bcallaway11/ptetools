@@ -2,8 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{pte_results}
 \alias{pte_results}
-\title{Class for holding overall results with a staggered treatment,
-including an overall ATT and an event study}
+\title{Class for PTE Results}
 \usage{
 pte_results(att_gt, overall_att, event_study, ptep)
 }
@@ -17,5 +16,6 @@ pte_results(att_gt, overall_att, event_study, ptep)
 \item{ptep}{\code{pte_params} object}
 }
 \description{
-class for holding pte results
+Class for holding overall results with a staggered treatment,
+including an overall ATT and an event study
 }

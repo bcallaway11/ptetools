@@ -2,8 +2,7 @@
 % Please edit documentation in R/pte_params.R
 \name{setup_pte_basic}
 \alias{setup_pte_basic}
-\title{Example function to setup data for using subsequent functions in
-the \code{ptetools} package}
+\title{Basic Setup Function}
 \usage{
 setup_pte_basic(
   yname,

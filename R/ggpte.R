@@ -1,7 +1,7 @@
-#' @title The main plotting function in the `ptetools` package.  It plots
-#'  event studies.
+#' @title ptetools Generic Plotting Function
 #'
-#' @description Simple event study plots for panel treatment effects.  This
+#' @description The main plotting function in the `ptetools` package.  It plots
+#'  event studies.  This
 #'  function is generic enough that most packages that otherwise use
 #'  the `ptetools` package can call it directly to plot an event study.
 #'
@@ -22,9 +22,9 @@ ggpte <- function(pte_results) {
 }
 
 
-#' @title Plots dose-specific results in applications with a continuous treatment
+#' @title Generic Plots with a Continuous Treatment
 #'
-#' @description a function for plotting results in applications with a continuous treatment
+#' @description Plots dose-specific results in applications with a continuous treatment
 #'
 #' @param dose_obj a `dose_obj` that holds results with a continuous treatment
 #' @param type whether to plot ATT(d) or ACRT(d), defaults to `att` for

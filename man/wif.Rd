@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{wif}
 \alias{wif}
-\title{Compute extra term in influence function due to estimating weights}
+\title{Compute Extra Terms in Influence Functions}
 \usage{
 wif(keepers, pg, weights.ind, G, group)
 }

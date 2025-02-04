@@ -1,4 +1,4 @@
-#' @title compute.pte
+#' @title Heavy-Lifting for pte Function
 #'
 #' @description Function that actually computes panel treatment effects.
 #'   The difference relative to \code{compute.pte} is that this function
@@ -133,7 +133,7 @@ compute.pte <- function(ptep,
   return(list(attgt.list = attgt.list, inffunc = inffunc, extra_gt_returns = extra_gt_returns))
 }
 
-#' @title pte
+#' @title Main Function for Generically Computing Panel Treatment Effects
 #'
 #' @description Main function for computing panel treatment effects
 #'
@@ -335,10 +335,7 @@ pte <- function(yname,
   out
 }
 
-#' @title Default, highly generic function for computing causal effects with
-#'  staggered treatment adoption
-#'
-#' @name pte_default
+#' @title Default, General Function for Computing Treatment Effects with Panel Data
 #'
 #' @description This is a generic/example wrapper for a call to the `pte` function.
 #'

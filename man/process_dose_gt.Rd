@@ -2,8 +2,7 @@
 % Please edit documentation in R/process_dose_gt.R
 \name{process_dose_gt}
 \alias{process_dose_gt}
-\title{Processes results from each group and time period in settings
-with a continuous treatment.}
+\title{Process Results with a Continuous Treatment}
 \usage{
 process_dose_gt(gt_results, ptep, ...)
 }

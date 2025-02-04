@@ -2,7 +2,7 @@
 % Please edit documentation in R/empirical_bootstrap.R
 \name{qott_pte_aggregations}
 \alias{qott_pte_aggregations}
-\title{qott_pte_aggregations}
+\title{Aggregate Group-Time Quantile of the Treatment Effect}
 \usage{
 qott_pte_aggregations(attgt.list, ptep, extra_gt_returns)
 }

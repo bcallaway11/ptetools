@@ -1,5 +1,4 @@
-#' @title Aggregates group-time specific effects into either an overall estimate
-#'  or an event study
+#' @title Aggregates (g,t)-Specific Results
 #'
 #' @description This is a slight edit of the aggte function from the `did` package.
 #' Currently, it only provides aggregations for "overall" treatment effects
@@ -275,7 +274,7 @@ pte_aggte <- function(attgt,
   }
 }
 
-#' @title Compute extra term in influence function due to estimating weights
+#' @title Compute Extra Terms in Influence Functions
 #'
 #' @description A function to compute the extra term that shows up in the
 #'  influence function for aggregated treatment effect parameters
@@ -312,7 +311,7 @@ wif <- function(keepers, pg, weights.ind, G, group) {
 }
 
 
-#' @title Get an influence function for particular aggregate parameters
+#' @title Recover Aggregated Influence Function
 #'
 #' @title This is a generic internal function for combining influence
 #'  functions across ATT(g,t)'s to return an influence function for
@@ -348,7 +347,7 @@ get_agg_inf_func <- function(att, inffunc1, whichones, weights.agg, wif = NULL) 
 }
 
 
-#' @title Take influence function and return standard errors
+#' @title Influence Functions to Standard Errors
 #'
 #' @description Function to take an nx1 influence function and return
 #'  a standard error
@@ -370,12 +369,13 @@ getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
 }
 
 
-#' @title Computes weights across post-treatment groups and time periods to
-#'  deliver overall treatment effect parameters
+#' @title Weights for Overall Aggregation
 #'
-#' @description A function that returns weights on gt's to deliver overall
+#' @description A function that returns weights on (g,t)'s to deliver overall
 #'  (averaged across groups and time periods) treatment effect parameters
+#'
 #' @inheritParams pte_aggte
+#'
 #' @return a data.frame with columns containing the group, the time period
 #'  and the amount of weight that it should get for an overall treatment
 #'  effect parameter
@@ -459,8 +459,7 @@ overall_weights <- function(attgt,
   )
 }
 
-#' @title Performs sanity checks on critical values for forming uniform
-#'  confidence bands
+#' @title Sanity Checks on Critical Values
 #'
 #' @description A function to perform sanity checks and possibly adjust a
 #'  a critical value to form a uniform confidence band
@@ -493,7 +492,7 @@ crit_val_checks <- function(crit_val, alp = 0.05) {
 
 
 
-#' @title Object to hold aggregated treatment effect results
+#' @title Aggregated Treatment Effects Class
 #'
 #' @description Objects of this class hold results on aggregated
 #'  group-time average treatment effects.  This is derived from the AGGTEobj

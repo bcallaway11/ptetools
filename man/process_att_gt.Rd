@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_att_gt.R
 \name{process_att_gt}
 \alias{process_att_gt}
-\title{process_att_gt}
+\title{Process ATT(g,t) Results}
 \usage{
 process_att_gt(att_gt_results, ptep)
 }
@@ -12,5 +12,5 @@ process_att_gt(att_gt_results, ptep)
 \item{ptep}{\code{pte_params} object}
 }
 \description{
-process attgt results when influence function is available
+Process ATT(g,t) results when influence function is available
 }

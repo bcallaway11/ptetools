@@ -2,8 +2,7 @@
 % Please edit documentation in R/attgt_functions.R
 \name{did_attgt}
 \alias{did_attgt}
-\title{Difference-in-differences estimates of ATT(g,t), given a group g and
-time period t.}
+\title{Difference-in-differences for ATT(g,t)}
 \usage{
 did_attgt(gt_data, xformula = ~1, ...)
 }
@@ -20,7 +19,8 @@ and outcome regression models}
 attgt_if
 }
 \description{
-Takes a "local" data.frame and computes
+Takes a data.frame and computes for a particular group g
+and time period t and computes
 an estimate of a group time average treatment effect
 and a corresponding influence function using a difference in differences
 approach.

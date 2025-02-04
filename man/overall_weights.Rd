@@ -2,8 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{overall_weights}
 \alias{overall_weights}
-\title{Computes weights across post-treatment groups and time periods to
-deliver overall treatment effect parameters}
+\title{Weights for Overall Aggregation}
 \usage{
 overall_weights(attgt, balance_e = NULL, min_e = -Inf, max_e = Inf, ...)
 }
@@ -29,6 +28,6 @@ and the amount of weight that it should get for an overall treatment
 effect parameter
 }
 \description{
-A function that returns weights on gt's to deliver overall
+A function that returns weights on (g,t)'s to deliver overall
 (averaged across groups and time periods) treatment effect parameters
 }

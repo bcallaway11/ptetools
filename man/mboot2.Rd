@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_att_gt.R
 \name{mboot2}
 \alias{mboot2}
-\title{mboot2}
+\title{Multiplier Bootstrap}
 \usage{
 mboot2(inffunc, biters = 1000, alp = 0.05)
 }
@@ -14,6 +14,6 @@ mboot2(inffunc, biters = 1000, alp = 0.05)
 \item{alp}{significance level; default is 0.05}
 }
 \description{
-function for using multiplier bootstrap to conduct
+Function for using multiplier bootstrap to conduct
 inference
 }

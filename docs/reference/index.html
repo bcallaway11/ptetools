@@ -40,70 +40,40 @@
 
       <dl><dt>
 
-          <code><a href="aggte_obj.html">aggte_obj()</a></code>
-
-        </dt>
-        <dd>Object to hold aggregated treatment effect results</dd>
-      </dl><dl><dt>
-
-          <code><a href="attgt_if.html">attgt_if()</a></code>
-
-        </dt>
-        <dd>Class for holding returns from group-time specific estimates in settings when an influence function is returned</dd>
-      </dl><dl><dt>
-
-          <code><a href="attgt_noif.html">attgt_noif()</a></code>
-
-        </dt>
-        <dd>Class for holding returns from group-time specific estimates in settings when an influence function is not returned</dd>
-      </dl><dl><dt>
-
           <code><a href="attgt_pte_aggregations.html">attgt_pte_aggregations()</a></code>
 
         </dt>
-        <dd>attgt_pte_aggregations</dd>
+        <dd>Aggregate Group-Time Average Treatment Effects</dd>
       </dl><dl><dt>
 
           <code><a href="compute.pte.html">compute.pte()</a></code>
 
         </dt>
-        <dd>compute.pte</dd>
-      </dl><dl><dt>
-
-          <code><a href="dose_obj.html">dose_obj()</a></code>
-
-        </dt>
-        <dd>An object that holds results when there is a continuous treatment</dd>
-      </dl><dl><dt>
-
-          <code><a href="group_time_att.html">group_time_att()</a></code>
-
-        </dt>
-        <dd>Class that holds causal effect parameter estimates across timing groups and time periods</dd>
+        <dd>Heavy-Lifting for pte Function</dd>
       </dl><dl><dt>
 
           <code><a href="gt_data_frame.html">gt_data_frame()</a></code>
 
         </dt>
-        <dd>Checks if data satisfies criteria to be used in internal <code>ptetools</code> functions</dd>
+        <dd>Convert Data to Usable Format</dd>
       </dl><dl><dt>
 
           <code><a href="overall_weights.html">overall_weights()</a></code>
 
         </dt>
-        <dd>Computes weights across post-treatment groups and time periods to deliver overall treatment effect parameters</dd>
+        <dd>Weights for Overall Aggregation</dd>
       </dl><dl><dt>
 
           <code><a href="panel_empirical_bootstrap.html">panel_empirical_bootstrap()</a></code>
 
         </dt>
-        <dd>panel_empirical_bootstrap</dd>
+        <dd>Panel Empirical Bootstrap</dd>
       </dl><dl><dt>
 
           <code><a href="process_att_gt.html">process_att_gt()</a></code>
 
         </dt>
-        <dd>process_att_gt</dd>
+        <dd>Process ATT(g,t) Results</dd>
       </dl><dl><dt>
 
           <code><a href="pte.html">pte()</a></code>
@@ -115,43 +85,25 @@
           <code><a href="pte_aggte.html">pte_aggte()</a></code>
 
         </dt>
-        <dd>Aggregates group-time specific effects into either an overall estimate or an event study</dd>
+        <dd>Aggregates (g,t)-Specific Results</dd>
       </dl><dl><dt>
 
           <code><a href="pte_attgt.html">pte_attgt()</a></code>
 
         </dt>
-        <dd>A flexible way to estimate ATT(g,t) using difference-in-differences or lagged outcome unconfoundedness, for a particular group and time period</dd>
-      </dl><dl><dt>
-
-          <code><a href="pte_emp_boot.html">pte_emp_boot()</a></code>
-
-        </dt>
-        <dd>Class to hold empirical bootstrap results</dd>
-      </dl><dl><dt>
-
-          <code><a href="pte_params.html">pte_params()</a></code>
-
-        </dt>
-        <dd>An object to carry around parameters in the <code>ptetools</code> package</dd>
-      </dl><dl><dt>
-
-          <code><a href="pte_results.html">pte_results()</a></code>
-
-        </dt>
-        <dd>Class for holding overall results with a staggered treatment, including an overall ATT and an event study</dd>
+        <dd>General ATT(g,t)</dd>
       </dl><dl><dt>
 
           <code><a href="setup_pte.html">setup_pte()</a></code>
 
         </dt>
-        <dd>A function for setting up data, etc. to use the <code>ptetools</code> package</dd>
+        <dd>Generic Setup Function</dd>
       </dl><dl><dt>
 
           <code><a href="setup_pte_basic.html">setup_pte_basic()</a></code>
 
         </dt>
-        <dd>Example function to setup data for using subsequent functions in the <code>ptetools</code> package</dd>
+        <dd>Basic Setup Function</dd>
       </dl></div><div class="section level2">
       <h2 id="group-time-average-treatment-effects-with-a-binary-treatment">Group-time average treatment effects with a binary treatment<a class="anchor" aria-label="anchor" href="#group-time-average-treatment-effects-with-a-binary-treatment"></a></h2>
 
@@ -168,13 +120,13 @@
           <code><a href="did_attgt.html">did_attgt()</a></code>
 
         </dt>
-        <dd>Difference-in-differences estimates of ATT(g,t), given a group g and time period t.</dd>
+        <dd>Difference-in-differences for ATT(g,t)</dd>
       </dl><dl><dt>
 
           <code><a href="pte_default.html">pte_default()</a></code>
 
         </dt>
-        <dd>Default, highly generic function for computing causal effects with staggered treatment adoption</dd>
+        <dd>Default, General Function for Computing Treatment Effects with Panel Data</dd>
       </dl></div><div class="section level2">
       <h2 id="functions-for-dealing-with-a-continuous-treatment">Functions for dealing with a continuous treatment<a class="anchor" aria-label="anchor" href="#functions-for-dealing-with-a-continuous-treatment"></a></h2>
 
@@ -191,13 +143,13 @@
           <code><a href="pte_dose_results.html">pte_dose_results()</a></code>
 
         </dt>
-        <dd>Class for holding results with a continuous treatment</dd>
+        <dd>Class for Continuous Treatment Results</dd>
       </dl><dl><dt>
 
           <code><a href="process_dose_gt.html">process_dose_gt()</a></code>
 
         </dt>
-        <dd>Processes results from each group and time period in settings with a continuous treatment.</dd>
+        <dd>Process Results with a Continuous Treatment</dd>
       </dl></div><div class="section level2">
       <h2 id="functions-for-dealing-with-distributional-treatment-effects">Functions for dealing with distributional treatment effects<a class="anchor" aria-label="anchor" href="#functions-for-dealing-with-distributional-treatment-effects"></a></h2>
 
@@ -214,13 +166,13 @@
           <code><a href="qott_pte_aggregations.html">qott_pte_aggregations()</a></code>
 
         </dt>
-        <dd>qott_pte_aggregations</dd>
+        <dd>Aggregate Group-Time Quantile of the Treatment Effect</dd>
       </dl><dl><dt>
 
           <code><a href="qtt_pte_aggregations.html">qtt_pte_aggregations()</a></code>
 
         </dt>
-        <dd>qtt_pte_aggregations</dd>
+        <dd>Aggregate Group-Time Quantile Treatment Effects</dd>
       </dl></div><div class="section level2">
       <h2 id="functions-for-group-time-specific-subsets-of-data">Functions for group-time specific subsets of data<a class="anchor" aria-label="anchor" href="#functions-for-group-time-specific-subsets-of-data"></a></h2>
 
@@ -237,19 +189,19 @@
           <code><a href="keep_all_pretreatment_subset.html">keep_all_pretreatment_subset()</a></code>
 
         </dt>
-        <dd>keep_all_pretreatment_subset</dd>
+        <dd>Keep All Pre-Treatment Subset</dd>
       </dl><dl><dt>
 
           <code><a href="keep_all_untreated_subset.html">keep_all_untreated_subset()</a></code>
 
         </dt>
-        <dd>keep_all_untreated_subset</dd>
+        <dd>Keep All Untreated Subset</dd>
       </dl><dl><dt>
 
           <code><a href="two_by_two_subset.html">two_by_two_subset()</a></code>
 
         </dt>
-        <dd>two_by_two_subset</dd>
+        <dd>Two Period Two Group Subset</dd>
       </dl></div><div class="section level2">
       <h2 id="plotting-functions">Plotting functions<a class="anchor" aria-label="anchor" href="#plotting-functions"></a></h2>
 
@@ -266,13 +218,13 @@
           <code><a href="ggpte.html">ggpte()</a></code>
 
         </dt>
-        <dd>The main plotting function in the <code>ptetools</code> package. It plots event studies.</dd>
+        <dd>ptetools Generic Plotting Function</dd>
       </dl><dl><dt>
 
           <code><a href="ggpte_cont.html">ggpte_cont()</a></code>
 
         </dt>
-        <dd>Plots dose-specific results in applications with a continuous treatment</dd>
+        <dd>Generic Plots with a Continuous Treatment</dd>
       </dl></div><div class="section level2">
       <h2 id="helper-functions">Helper functions<a class="anchor" aria-label="anchor" href="#helper-functions"></a></h2>
 
@@ -289,13 +241,72 @@
           <code><a href="crit_val_checks.html">crit_val_checks()</a></code>
 
         </dt>
-        <dd>Performs sanity checks on critical values for forming uniform confidence bands</dd>
+        <dd>Sanity Checks on Critical Values</dd>
       </dl><dl><dt>
 
           <code><a href="mboot2.html">mboot2()</a></code>
 
         </dt>
-        <dd>mboot2</dd>
+        <dd>Multiplier Bootstrap</dd>
+      </dl></div><div class="section level2">
+      <h2 id="classes">Classes<a class="anchor" aria-label="anchor" href="#classes"></a></h2>
+
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="aggte_obj.html">aggte_obj()</a></code>
+
+        </dt>
+        <dd>Aggregated Treatment Effects Class</dd>
+      </dl><dl><dt>
+
+          <code><a href="attgt_if.html">attgt_if()</a></code>
+
+        </dt>
+        <dd>Class for (g,t)-Specific Results with Influence Function</dd>
+      </dl><dl><dt>
+
+          <code><a href="attgt_noif.html">attgt_noif()</a></code>
+
+        </dt>
+        <dd>Class for (g,t)-Specific Results without Influence Function</dd>
+      </dl><dl><dt>
+
+          <code><a href="dose_obj.html">dose_obj()</a></code>
+
+        </dt>
+        <dd>Class for Continous Treatments</dd>
+      </dl><dl><dt>
+
+          <code><a href="group_time_att.html">group_time_att()</a></code>
+
+        </dt>
+        <dd>Class for Estimates across Groups and Time</dd>
+      </dl><dl><dt>
+
+          <code><a href="pte_emp_boot.html">pte_emp_boot()</a></code>
+
+        </dt>
+        <dd>Class for Empirical Bootstrap Results</dd>
+      </dl><dl><dt>
+
+          <code><a href="pte_params.html">pte_params()</a></code>
+
+        </dt>
+        <dd>PTE Parameters Class</dd>
+      </dl><dl><dt>
+
+          <code><a href="pte_results.html">pte_results()</a></code>
+
+        </dt>
+        <dd>Class for PTE Results</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

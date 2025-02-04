@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{aggte_obj}
 \alias{aggte_obj}
-\title{Object to hold aggregated treatment effect results}
+\title{Aggregated Treatment Effects Class}
 \usage{
 aggte_obj(
   overall.att = NULL,

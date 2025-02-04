@@ -2,7 +2,7 @@
 % Please edit documentation in R/empirical_bootstrap.R
 \name{panel_empirical_bootstrap}
 \alias{panel_empirical_bootstrap}
-\title{panel_empirical_bootstrap}
+\title{Panel Empirical Bootstrap}
 \usage{
 panel_empirical_bootstrap(
   attgt.list,

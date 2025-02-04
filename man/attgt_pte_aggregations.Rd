@@ -2,7 +2,7 @@
 % Please edit documentation in R/empirical_bootstrap.R
 \name{attgt_pte_aggregations}
 \alias{attgt_pte_aggregations}
-\title{attgt_pte_aggregations}
+\title{Aggregate Group-Time Average Treatment Effects}
 \usage{
 attgt_pte_aggregations(attgt.list, ptep)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/subset_functions.R
 \name{two_by_two_subset}
 \alias{two_by_two_subset}
-\title{two_by_two_subset}
+\title{Two Period Two Group Subset}
 \usage{
 two_by_two_subset(
   data,

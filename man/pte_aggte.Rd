@@ -2,8 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{pte_aggte}
 \alias{pte_aggte}
-\title{Aggregates group-time specific effects into either an overall estimate
-or an event study}
+\title{Aggregates (g,t)-Specific Results}
 \usage{
 pte_aggte(
   attgt,

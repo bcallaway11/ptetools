@@ -2,7 +2,7 @@
 % Please edit documentation in R/subset_functions.R
 \name{keep_all_pretreatment_subset}
 \alias{keep_all_pretreatment_subset}
-\title{keep_all_pretreatment_subset}
+\title{Keep All Pre-Treatment Subset}
 \usage{
 keep_all_pretreatment_subset(data, g, tp, ...)
 }

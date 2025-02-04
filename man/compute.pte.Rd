@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte.R
 \name{compute.pte}
 \alias{compute.pte}
-\title{compute.pte}
+\title{Heavy-Lifting for pte Function}
 \usage{
 compute.pte(ptep, subset_fun, attgt_fun, ...)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_params.R
 \name{pte_params}
 \alias{pte_params}
-\title{An object to carry around parameters in the \code{ptetools} package}
+\title{PTE Parameters Class}
 \usage{
 pte_params(
   yname,
@@ -100,5 +100,5 @@ These functions aim at reducing or eliminating running the same code multiple ti
 \item{call}{keeps track of through the \code{call} from external functions/packages}
 }
 \description{
-Object that contain pte parameters
+Class that contains pte parameters
 }

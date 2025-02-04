@@ -2,8 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{attgt_noif}
 \alias{attgt_noif}
-\title{Class for holding returns from group-time specific estimates
-in settings when an influence function is not returned}
+\title{Class for (g,t)-Specific Results without Influence Function}
 \usage{
 attgt_noif(attgt, extra_gt_returns = NULL)
 }
@@ -21,6 +20,6 @@ potentially useful for debugging.}
 attgt_noif object
 }
 \description{
-Class for holding group-time average treatment effects
-which don't include influence functions
+Class for holding returns from group-time specific estimates
+in settings when an influence function is not returned
 }

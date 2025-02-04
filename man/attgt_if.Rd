@@ -2,8 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{attgt_if}
 \alias{attgt_if}
-\title{Class for holding returns from group-time specific estimates
-in settings when an influence function is returned}
+\title{Class for (g,t)-Specific Results with Influence Function}
 \usage{
 attgt_if(attgt, inf_func, extra_gt_returns = NULL)
 }

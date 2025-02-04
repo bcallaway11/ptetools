@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{getSE}
 \alias{getSE}
-\title{Take influence function and return standard errors}
+\title{Influence Functions to Standard Errors}
 \usage{
 getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05)
 }

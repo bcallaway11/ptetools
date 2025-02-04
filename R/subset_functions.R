@@ -1,10 +1,10 @@
-#' @title two_by_two_subset
+#' @title Two Period Two Group Subset
 #'
 #' @description A function for computing a 2x2 subset of original data.
 #'   This is the subset with post treatment periods separately for the
 #'   treated group and comparison group and pre-treatment periods in the period
 #'   immediately before the treated group became treated.
-#' 
+#'
 #' @inheritParams pte_params
 #'
 #' @param data the full dataset
@@ -83,7 +83,7 @@ two_by_two_subset <- function(data,
 }
 
 
-#' @title keep_all_untreated_subset
+#' @title Keep All Untreated Subset
 #'
 #' @description A function that takes an original data set and keeps all
 #' pre-treatment data for all groups.  For group g, it also includes data
@@ -128,7 +128,7 @@ keep_all_untreated_subset <- function(data, g, tp, ...) {
 }
 
 
-#' @title keep_all_pretreatment_subset
+#' @title Keep All Pre-Treatment Subset
 #'
 #' @description A function that takes an original data set and keeps all
 #' data for all groups that are not-yet-treated by period `tp` as well

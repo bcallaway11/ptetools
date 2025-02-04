@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{get_agg_inf_func}
 \alias{get_agg_inf_func}
-\title{Get an influence function for particular aggregate parameters}
+\title{Recover Aggregated Influence Function}
 \usage{
 get_agg_inf_func(att, inffunc1, whichones, weights.agg, wif = NULL)
 }
@@ -25,7 +25,7 @@ should be n x k matrix where k is dimension of whichones}
 nx1 influence function
 }
 \description{
-Get an influence function for particular aggregate parameters
+Recover Aggregated Influence Function
 
 This is a generic internal function for combining influence
 functions across ATT(g,t)'s to return an influence function for

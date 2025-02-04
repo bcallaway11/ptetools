@@ -1,5 +1,4 @@
-#' @title Processes results from each group and time period in settings
-#'  with a continuous treatment.
+#' @title Process Results with a Continuous Treatment
 #'
 #' @description After computing results for each group and time period,
 #'  `process_dose_gt` combines/averages them into overall effects and/or
@@ -161,7 +160,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     )
 }
 
-#' @title An object that holds results when there is a continuous treatment
+#' @title Class for Continous Treatments
 #'
 #' @description Holds results from computing dose-specific treatment effects
 #'  with a continuous treatment

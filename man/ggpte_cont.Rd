@@ -2,7 +2,7 @@
 % Please edit documentation in R/ggpte.R
 \name{ggpte_cont}
 \alias{ggpte_cont}
-\title{Plots dose-specific results in applications with a continuous treatment}
+\title{Generic Plots with a Continuous Treatment}
 \usage{
 ggpte_cont(dose_obj, type = "att")
 }
@@ -13,5 +13,5 @@ ggpte_cont(dose_obj, type = "att")
 plotting ATT(d).  For ACRT(d), use "acrt"}
 }
 \description{
-a function for plotting results in applications with a continuous treatment
+Plots dose-specific results in applications with a continuous treatment
 }

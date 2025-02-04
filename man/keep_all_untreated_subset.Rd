@@ -2,7 +2,7 @@
 % Please edit documentation in R/subset_functions.R
 \name{keep_all_untreated_subset}
 \alias{keep_all_untreated_subset}
-\title{keep_all_untreated_subset}
+\title{Keep All Untreated Subset}
 \usage{
 keep_all_untreated_subset(data, g, tp, ...)
 }

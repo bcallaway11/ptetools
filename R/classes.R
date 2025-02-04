@@ -1,7 +1,7 @@
-#' @title Class that holds causal effect parameter estimates across
-#'  timing groups and time periods
+#' @title Class for Estimates across Groups and Time
 #'
-#' @description group_time_att class
+#' @description Class that holds causal effect parameter estimates across
+#'  timing groups and time periods
 #'
 #' @param group numeric vector of groups for ATT(g,t)
 #' @param time.period numeric vector of time periods for ATT(g,t)
@@ -132,10 +132,10 @@ print.group_time_att <- function(x, ...) {
 }
 
 
-#' @title Class for holding overall results with a staggered treatment,
-#'  including an overall ATT and an event study
+#' @title Class for PTE Results
 #'
-#' @description class for holding pte results
+#' @description Class for holding overall results with a staggered treatment,
+#'  including an overall ATT and an event study
 #'
 #' @param att_gt attgt results
 #' @param overall_att overall_att results
@@ -291,8 +291,7 @@ print.summary.pte_results <- function(x, ...) {
   cat("\n\n")
 }
 
-#' @title Class for holding returns from group-time specific estimates
-#'  in settings when an influence function is returned
+#' @title Class for (g,t)-Specific Results with Influence Function
 #'
 #' @description Class for holding group-time average treatment effects
 #'  along with their influence function
@@ -315,11 +314,10 @@ attgt_if <- function(attgt, inf_func, extra_gt_returns = NULL) {
   out
 }
 
-#' @title Class for holding returns from group-time specific estimates
-#'  in settings when an influence function is not returned
+#' @title Class for (g,t)-Specific Results without Influence Function
 #'
-#' @description Class for holding group-time average treatment effects
-#'  which don't include influence functions
+#' @description Class for holding returns from group-time specific estimates
+#'  in settings when an influence function is not returned
 #'
 #' @inheritParams attgt_if
 #'
@@ -333,10 +331,11 @@ attgt_noif <- function(attgt, extra_gt_returns = NULL) {
 }
 
 
-#' @title Checks if data satisfies criteria to be used in internal
-#'  `ptetools` functions
+#' @title Convert Data to Usable Format
 #'
-#' @description function to take in a data.frame, check if it has the right
+#' @description Checks and converts data to satisfy criteria to be used in internal
+#'  `ptetools` functions.  In particular,
+#'  the function takes in a data.frame, checks if it has the right
 #'  columns to be used to calculate a group-time average treatment effect,
 #'  and sets the class of the data.frame to include \code{gt_data_frame}
 #'
@@ -359,7 +358,7 @@ gt_data_frame <- function(data) {
   data
 }
 
-#' @title Class to hold empirical bootstrap results
+#' @title Class for Empirical Bootstrap Results
 #'
 #' @description Class for holding `ptetools` empirical bootstrap results
 #'
@@ -476,9 +475,9 @@ summary.pte_emp_boot <- function(object, ...) {
 }
 
 
-#' @title Class for holding results with a continuous treatment
+#' @title Class for Continuous Treatment Results
 #'
-#' @description class for holding pte results
+#' @description Class for holding results with a continuous treatment
 #'
 #' @param att_gt attgt results
 #' @param dose vector of doses

@@ -1,4 +1,4 @@
-#' @title panel_empirical_bootstrap
+#' @title Panel Empirical Bootstrap
 #'
 #' @description Computes empirical bootstrap pointwise standard errors
 #'
@@ -158,7 +158,7 @@ panel_empirical_bootstrap <- function(attgt.list,
 }
 
 
-#' @title attgt_pte_aggregations
+#' @title Aggregate Group-Time Average Treatment Effects
 #'
 #' @description Aggregate group-time average treatment effects into
 #'  overall, group, and dynamic effects.  This function is only used
@@ -303,7 +303,7 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 }
 
 
-#' @title qtt_pte_aggregations
+#' @title Aggregate Group-Time Quantile Treatment Effects
 #'
 #' @description Aggregate group-time distributions into qtt versions of
 #'  overall, group, and dynamic effects.
@@ -384,7 +384,7 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
 
 
 
-#' @title qott_pte_aggregations
+#' @title Aggregate Group-Time Quantile of the Treatment Effect
 #'
 #' @description Aggregate group-time distribution of the treatment effect into
 #'  overall, group, and dynamic effects.

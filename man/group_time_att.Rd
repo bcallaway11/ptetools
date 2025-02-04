@@ -2,8 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{group_time_att}
 \alias{group_time_att}
-\title{Class that holds causal effect parameter estimates across
-timing groups and time periods}
+\title{Class for Estimates across Groups and Time}
 \usage{
 group_time_att(
   group,
@@ -59,5 +58,6 @@ trends assumption}
 object of class \code{group_time_att}
 }
 \description{
-group_time_att class
+Class that holds causal effect parameter estimates across
+timing groups and time periods
 }

@@ -2,8 +2,7 @@
 % Please edit documentation in R/classes.R
 \name{gt_data_frame}
 \alias{gt_data_frame}
-\title{Checks if data satisfies criteria to be used in internal
-\code{ptetools} functions}
+\title{Convert Data to Usable Format}
 \usage{
 gt_data_frame(data)
 }
@@ -15,7 +14,9 @@ computing group-time average treatment effects}
 \code{gt_data_frame} object
 }
 \description{
-function to take in a data.frame, check if it has the right
+Checks and converts data to satisfy criteria to be used in internal
+\code{ptetools} functions.  In particular,
+the function takes in a data.frame, checks if it has the right
 columns to be used to calculate a group-time average treatment effect,
 and sets the class of the data.frame to include \code{gt_data_frame}
 }

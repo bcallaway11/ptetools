@@ -2,8 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{crit_val_checks}
 \alias{crit_val_checks}
-\title{Performs sanity checks on critical values for forming uniform
-confidence bands}
+\title{Sanity Checks on Critical Values}
 \usage{
 crit_val_checks(crit_val, alp = 0.05)
 }
