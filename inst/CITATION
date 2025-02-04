@@ -1,21 +1,21 @@
 citHeader("To cite this package, use:")
 
 
-          bibentry(
+bibentry(
 
-            bibtype = "Manual",
+  bibtype = "Manual",
 
-            title = "Panel Treatment Effects Tools",
+  title = "Panel Treatment Effects Tools",
 
-            author = 
+  author = 
     person(given = "Brantly",
            family = "Callaway",
            role = c("aut", "cre"),
            email = "brantly.callaway@uga.edu"),
 
-            year = "2025",
+  year = "2025",
 
-            note = "R package version 1.0.0",
+  note = "R package version 1.0.0",
 
-            url = "https://github.com/bcallaway11/ptetools"
-          )
+  url = "https://github.com/bcallaway11/ptetools"
+)
