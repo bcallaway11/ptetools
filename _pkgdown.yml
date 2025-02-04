@@ -3,6 +3,19 @@ url: https://github.com/bcallaway11/ptetools
 template:
   bootstrap: 5
   bootswatch: united
+  bslib:
+    primary: "#168a53"  # logo color
+    secondary: "#ffffff"  # background
+    success: "#1e7e34"  # complementary green
+    info: "#5bc0de"
+    warning: "#f0ad4e"
+    danger: "#d9534f"
+    link-color: "#168a53"
+
+home:
+  sidebar:
+    structure: [links, license, community, citation]
+  logo: man/figures/logo.png
 
 navbar:
   structure:

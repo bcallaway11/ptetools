@@ -27,3 +27,4 @@ Suggests:
     testthat (>= 3.0.0),
     did
 Config/testthat/edition: 3
+Logo: man/figures/logo.png
