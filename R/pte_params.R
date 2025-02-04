@@ -247,7 +247,7 @@ setup_pte <- function(yname,
 #'  difference-in-differences applications, but can be unnatural for other
 #'  identification strategies.
 #' @param weightsname The name of the column that contains sampling weights.
-#'  The defaul is NULL, in which case no sampling weights are used.
+#'  The default is NULL, in which case no sampling weights are used.
 #' @param control_group Which group is used as the comparison group.
 #'  The default choice is "notyettreated", but
 #'  different estimation strategies can implement their own choices

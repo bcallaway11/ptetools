@@ -67,7 +67,7 @@ difference-in-differences applications, but can be unnatural for other
 identification strategies.}
 
 \item{weightsname}{The name of the column that contains sampling weights.
-The defaul is NULL, in which case no sampling weights are used.}
+The default is NULL, in which case no sampling weights are used.}
 
 \item{control_group}{Which group is used as the comparison group.
 The default choice is "notyettreated", but

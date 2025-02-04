@@ -31,7 +31,7 @@ Essentially, the idea is that many panel data causal inference problems involve 
 
 1. Defining an identification strategy (e.g., difference-in-differences)
 
-2. Defining a notion of a group (e.g., based on treatment timing) 
+2. Defining a notion of a group (e.g., based on treatment timing)
 
 3. Looping over groups and time periods
 
@@ -51,7 +51,7 @@ The main function is called `pte`.  The most important parameters that it takes 
 
 `subset_fun` takes in the overall data, a group, a time period, and possibly other arguments and returns a `data.frame` containing the relevant subset of the data, an outcome, and whether or not a unit should be considered to be in the treated or comparison group for that group/time.  There is one example of a relevant subset function provided in the package: [the `two_by_two_subset` function](https://github.com/bcallaway11/ptetools/blob/master/R/subset_functions.R). This function takes an original dataset, subsets it into pre- and post-treatment periods and denotes treated and untreated units.  This particular subset is perhaps the most common/important one for thinking about treatment effects with panel data, and this function can be reused across applications.
 
-The other main function is `attgt_fun`.  This function should be able to take in the correct subset of data, possibly along with other arguments to the function, and report an *ATT* for that subset.  With minor modification, this function should be availble for most any sort of treatment effects application --- for example, if you can solve the baseline 2x2 case in difference in differences, you should use that function here, and the `ptetools` package will take care of dealing with the variation in treatment timing.
+The other main function is `attgt_fun`.  This function should be able to take in the correct subset of data, possibly along with other arguments to the function, and report an *ATT* for that subset.  With minor modification, this function should be available for most any sort of treatment effects application --- for example, if you can solve the baseline 2x2 case in difference in differences, you should use that function here, and the `ptetools` package will take care of dealing with the variation in treatment timing.
 
 If `attgt_fun` returns an influence function, then the `ptetools` package will also conduct inference using the multiplier bootstrap (which is fast) and produce uniform confidence bands (which adjust for multiple testing).
 
@@ -84,11 +84,11 @@ summary(did_res)
 ggpte(did_res)
 ```
 
-What's most interesting here, is that the only "new" code that needs to be writte is in [the `did_attgt` function](https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R).  You will see that this is a very small amount of code.
+What's most interesting here, is that the only "new" code that needs to be write is in [the `did_attgt` function](https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R).  You will see that this is a very small amount of code.
 
 ## Example 2: Policy Evaluation during a Pandemic
 
-As a next example, consider trying to estimate effects of Covid-19 related policies during a pandemic.  The estimates below are for the effects of state-leve shelter-in-place orders during the early part of the pandemic.
+As a next example, consider trying to estimate effects of COVID-19 related policies during a pandemic.  The estimates below are for the effects of state-level shelter-in-place orders during the early part of the pandemic.
 
 The data for this example comes from the `ppe` package which can be loaded by running
 ```{r eval=FALSE}
@@ -97,7 +97,7 @@ library(ppe)
 data(covid_data)
 ```
 
-[Callaway and Li (2021)](https://arxiv.org/abs/2105.06927) argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of Covid-19 cases being highly nonlinear.  However, they still deal with the challenge of variation in treatment timing.  Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.
+[Callaway and Li (2021)](https://arxiv.org/abs/2105.06927) argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of COVID-19 cases being highly nonlinear.  However, they still deal with the challenge of variation in treatment timing.  Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.
 
 The `ptetools` package is particularly useful here.
 

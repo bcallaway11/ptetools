@@ -45,7 +45,7 @@ The default is FALSE.  To use difference-in-differences, set this to be TRUE.}
 
 \item{d_covs_formula}{A formula for time varying covariates to enter the
 first estimation step models.  The default is not to include any, and, hence,
-to only include pre-treatment covariats.}
+to only include pre-treatment covariates.}
 
 \item{lagged_outcome_cov}{Whether to include the lagged outcome as a covariate.
 Default is FALSE.}
@@ -72,7 +72,7 @@ different estimation strategies can implement their own choices
 for the control group}
 
 \item{weightsname}{The name of the column that contains sampling weights.
-The defaul is NULL, in which case no sampling weights are used.}
+The default is NULL, in which case no sampling weights are used.}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}

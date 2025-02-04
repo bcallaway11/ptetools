@@ -90,7 +90,7 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
 #'  The default is FALSE.  To use difference-in-differences, set this to be TRUE.
 #' @param d_covs_formula A formula for time varying covariates to enter the
 #'  first estimation step models.  The default is not to include any, and, hence,
-#'  to only include pre-treatment covariats.
+#'  to only include pre-treatment covariates.
 #' @param lagged_outcome_cov Whether to include the lagged outcome as a covariate.
 #'  Default is FALSE.
 #' @param est_method Which type of estimation method to use. Default is "dr" for

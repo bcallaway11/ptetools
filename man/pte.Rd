@@ -119,7 +119,7 @@ package will use the empirical bootstrap no matter what the value of this
 parameter.}
 
 \item{weightsname}{The name of the column that contains sampling weights.
-The defaul is NULL, in which case no sampling weights are used.}
+The default is NULL, in which case no sampling weights are used.}
 
 \item{gt_type}{which type of group-time effects are computed.
 The default is "att".  Different estimation strategies can implement

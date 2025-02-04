@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_dose_gt.R
 \name{dose_obj}
 \alias{dose_obj}
-\title{Class for Continous Treatments}
+\title{Class for Continuous Treatments}
 \usage{
 dose_obj(
   dose,
@@ -30,11 +30,11 @@ dose_obj(
 
 \item{overall_att_se}{the standard error of the estimate of overall_att}
 
-\item{overall_att_inffunc}{the influence funciton for estimating overall_att}
+\item{overall_att_inffunc}{the influence function for estimating overall_att}
 
 \item{overall_acrt}{estimate of the overall ACRT, the mean of ACRT(D|D) given D > 0}
 
-\item{overall_acrt_se}{the standard error fo the estimate of overall_acrt}
+\item{overall_acrt_se}{the standard error for the estimate of overall_acrt}
 
 \item{overall_acrt_inffunc}{the influence function for estimating overall_acrt}
 

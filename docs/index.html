@@ -75,7 +75,7 @@
 </h2>
 <p>The main function is called <code>pte</code>. The most important parameters that it takes in are <code>subset_fun</code> and <code>attgt_fun</code>. These are functions that the user should pass to <code>pte</code>.</p>
 <p><code>subset_fun</code> takes in the overall data, a group, a time period, and possibly other arguments and returns a <code>data.frame</code> containing the relevant subset of the data, an outcome, and whether or not a unit should be considered to be in the treated or comparison group for that group/time. There is one example of a relevant subset function provided in the package: <a href="https://github.com/bcallaway11/ptetools/blob/master/R/subset_functions.R">the <code>two_by_two_subset</code> function</a>. This function takes an original dataset, subsets it into pre- and post-treatment periods and denotes treated and untreated units. This particular subset is perhaps the most common/important one for thinking about treatment effects with panel data, and this function can be reused across applications.</p>
-<p>The other main function is <code>attgt_fun</code>. This function should be able to take in the correct subset of data, possibly along with other arguments to the function, and report an <em>ATT</em> for that subset. With minor modification, this function should be availble for most any sort of treatment effects application — for example, if you can solve the baseline 2x2 case in difference in differences, you should use that function here, and the <code>ptetools</code> package will take care of dealing with the variation in treatment timing.</p>
+<p>The other main function is <code>attgt_fun</code>. This function should be able to take in the correct subset of data, possibly along with other arguments to the function, and report an <em>ATT</em> for that subset. With minor modification, this function should be available for most any sort of treatment effects application — for example, if you can solve the baseline 2x2 case in difference in differences, you should use that function here, and the <code>ptetools</code> package will take care of dealing with the variation in treatment timing.</p>
 <p>If <code>attgt_fun</code> returns an influence function, then the <code>ptetools</code> package will also conduct inference using the multiplier bootstrap (which is fast) and produce uniform confidence bands (which adjust for multiple testing).</p>
 <p>The default output of <code>pte</code> is an overall treatment effect on the treated (i.e., across all groups that participate in the treatment in any time period) and and event study. More aggregations are possible, but these seem to be the leading cases; aggregations of group-time average treatment effects are discussed at length in <a href="https://doi.org/10.1016/j.jeconom.2020.12.001" class="external-link">Callaway and Sant’Anna (2021)</a>.</p>
 <p>Below are several examples of how the <code>ptetools</code> package can be used to implement an identification strategy with a very small amount of new code.</p>
@@ -104,34 +104,34 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
-<span><span class="co">#&gt;  -0.0305        0.0118    -0.0536     -0.0074 *</span></span>
+<span><span class="co">#&gt;  -0.0305         0.013     -0.056     -0.0049 *</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error   [95%  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0298     0.0126 -0.0043      0.0639  </span></span>
-<span><span class="co">#&gt;          -2  -0.0024     0.0128 -0.0371      0.0322  </span></span>
-<span><span class="co">#&gt;          -1  -0.0243     0.0154 -0.0659      0.0174  </span></span>
-<span><span class="co">#&gt;           0  -0.0189     0.0151 -0.0600      0.0221  </span></span>
-<span><span class="co">#&gt;           1  -0.0536     0.0142 -0.0922     -0.0150 *</span></span>
-<span><span class="co">#&gt;           2  -0.1363     0.0406 -0.2463     -0.0263 *</span></span>
-<span><span class="co">#&gt;           3  -0.1008     0.0378 -0.2033      0.0017  </span></span>
+<span><span class="co">#&gt;          -3   0.0298     0.0143 -0.0048      0.0643  </span></span>
+<span><span class="co">#&gt;          -2  -0.0024     0.0142 -0.0370      0.0321  </span></span>
+<span><span class="co">#&gt;          -1  -0.0243     0.0122 -0.0538      0.0053  </span></span>
+<span><span class="co">#&gt;           0  -0.0189     0.0148 -0.0547      0.0169  </span></span>
+<span><span class="co">#&gt;           1  -0.0536     0.0193 -0.1004     -0.0067 *</span></span>
+<span><span class="co">#&gt;           2  -0.1363     0.0390 -0.2307     -0.0418 *</span></span>
+<span><span class="co">#&gt;           3  -0.1008     0.0331 -0.1809     -0.0207 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3-1.png"><!-- --></p>
-<p>What’s most interesting here, is that the only “new” code that needs to be writte is in <a href="https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R">the <code>did_attgt</code> function</a>. You will see that this is a very small amount of code.</p>
+<p>What’s most interesting here, is that the only “new” code that needs to be write is in <a href="https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R">the <code>did_attgt</code> function</a>. You will see that this is a very small amount of code.</p>
 </div>
 <div class="section level2">
 <h2 id="example-2-policy-evaluation-during-a-pandemic">Example 2: Policy Evaluation during a Pandemic<a class="anchor" aria-label="anchor" href="#example-2-policy-evaluation-during-a-pandemic"></a>
 </h2>
-<p>As a next example, consider trying to estimate effects of Covid-19 related policies during a pandemic. The estimates below are for the effects of state-leve shelter-in-place orders during the early part of the pandemic.</p>
+<p>As a next example, consider trying to estimate effects of COVID-19 related policies during a pandemic. The estimates below are for the effects of state-level shelter-in-place orders during the early part of the pandemic.</p>
 <p>The data for this example comes from the <code>ppe</code> package which can be loaded by running</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"bcallaway11/ppe"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ppe</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">covid_data</span><span class="op">)</span></span></code></pre></div>
-<p><a href="https://arxiv.org/abs/2105.06927" class="external-link">Callaway and Li (2021)</a> argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of Covid-19 cases being highly nonlinear. However, they still deal with the challenge of variation in treatment timing. Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.</p>
+<p><a href="https://arxiv.org/abs/2105.06927" class="external-link">Callaway and Li (2021)</a> argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of COVID-19 cases being highly nonlinear. However, they still deal with the challenge of variation in treatment timing. Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.</p>
 <p>The <code>ptetools</code> package is particularly useful here.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># formula for covariates</span></span>
@@ -155,43 +155,43 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
-<span><span class="co">#&gt;  14.8882       76.5164  -135.0812    164.8575 </span></span>
+<span><span class="co">#&gt;  14.8882       76.5819  -135.2096    164.9859 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error     [95%  Conf. Band] </span></span>
-<span><span class="co">#&gt;         -10  -3.7266     4.2464  -15.9383      8.4851 </span></span>
-<span><span class="co">#&gt;          -9   2.6607     1.4796   -1.5943      6.9156 </span></span>
-<span><span class="co">#&gt;          -8   0.8290     2.4757   -6.2905      7.9485 </span></span>
-<span><span class="co">#&gt;          -7   5.2843     2.0298   -0.5529     11.1216 </span></span>
-<span><span class="co">#&gt;          -6   2.8555     1.7480   -2.1714      7.8824 </span></span>
-<span><span class="co">#&gt;          -5   1.3589     4.1753  -10.6483     13.3661 </span></span>
-<span><span class="co">#&gt;          -4   0.3294     4.1769  -11.6824     12.3411 </span></span>
-<span><span class="co">#&gt;          -3  -4.2227     5.2942  -19.4475     11.0021 </span></span>
-<span><span class="co">#&gt;          -2  -3.8447     3.0224  -12.5366      4.8471 </span></span>
-<span><span class="co">#&gt;          -1  -0.2234     3.3887   -9.9686      9.5218 </span></span>
-<span><span class="co">#&gt;           0 -10.8156     9.2327  -37.3669     15.7356 </span></span>
-<span><span class="co">#&gt;           1 -13.7998    13.6120  -52.9447     25.3450 </span></span>
-<span><span class="co">#&gt;           2  -7.8432    10.0202  -36.6588     20.9725 </span></span>
-<span><span class="co">#&gt;           3  -4.5541    11.1520  -36.6247     27.5165 </span></span>
-<span><span class="co">#&gt;           4  -3.5368    13.1049  -41.2233     34.1497 </span></span>
-<span><span class="co">#&gt;           5   8.5221    13.5750  -30.5165     47.5608 </span></span>
-<span><span class="co">#&gt;           6   1.1140    20.7042  -58.4265     60.6545 </span></span>
-<span><span class="co">#&gt;           7   6.6384    17.0807  -42.4817     55.7586 </span></span>
-<span><span class="co">#&gt;           8   7.1288    23.9895  -61.8594     76.1170 </span></span>
-<span><span class="co">#&gt;           9  10.8758    27.1146  -67.0994     88.8511 </span></span>
-<span><span class="co">#&gt;          10  17.5057    34.2349  -80.9459    115.9573 </span></span>
-<span><span class="co">#&gt;          11  40.8318    42.9951  -82.8122    164.4758 </span></span>
-<span><span class="co">#&gt;          12  48.6134    44.5690  -79.5568    176.7835 </span></span>
-<span><span class="co">#&gt;          13  52.4228    60.0107 -120.1540    224.9996 </span></span>
-<span><span class="co">#&gt;          14  50.2000    57.8138 -116.0591    216.4591 </span></span>
-<span><span class="co">#&gt;          15  68.2960    75.0842 -147.6287    284.2207 </span></span>
-<span><span class="co">#&gt;          16  44.7305    58.8507 -124.5106    213.9716 </span></span>
-<span><span class="co">#&gt;          17  61.4670   100.3526 -227.1240    350.0580 </span></span>
-<span><span class="co">#&gt;          18  50.4635   117.1349 -286.3894    387.3164 </span></span>
-<span><span class="co">#&gt;          19  47.3392   110.0574 -269.1606    363.8390 </span></span>
-<span><span class="co">#&gt;          20  28.6326   114.4171 -300.4046    357.6698 </span></span>
-<span><span class="co">#&gt;          21   4.3445   161.5696 -460.2924    468.9815 </span></span>
+<span><span class="co">#&gt;         -10  -3.7266     3.7443  -13.6824      6.2291 </span></span>
+<span><span class="co">#&gt;          -9   2.6607     1.3125   -0.8292      6.1505 </span></span>
+<span><span class="co">#&gt;          -8   0.8290     2.4008   -5.5547      7.2126 </span></span>
+<span><span class="co">#&gt;          -7   5.2843     2.0354   -0.1277     10.6964 </span></span>
+<span><span class="co">#&gt;          -6   2.8555     1.9891   -2.4335      8.1445 </span></span>
+<span><span class="co">#&gt;          -5   1.3589     4.3728  -10.2680     12.9859 </span></span>
+<span><span class="co">#&gt;          -4   0.3294     3.9515  -10.1774     10.8361 </span></span>
+<span><span class="co">#&gt;          -3  -4.2227     5.3801  -18.5279     10.0825 </span></span>
+<span><span class="co">#&gt;          -2  -3.8447     2.3510  -10.0960      2.4065 </span></span>
+<span><span class="co">#&gt;          -1  -0.2234     3.8195  -10.3790      9.9323 </span></span>
+<span><span class="co">#&gt;           0 -10.8156     7.8065  -31.5725      9.9412 </span></span>
+<span><span class="co">#&gt;           1 -13.7998    13.2360  -48.9935     21.3939 </span></span>
+<span><span class="co">#&gt;           2  -7.8432    11.1086  -37.3801     21.6938 </span></span>
+<span><span class="co">#&gt;           3  -4.5541    11.5184  -35.1808     26.0725 </span></span>
+<span><span class="co">#&gt;           4  -3.5368    11.4626  -34.0151     26.9415 </span></span>
+<span><span class="co">#&gt;           5   8.5221    12.0109  -23.4141     40.4583 </span></span>
+<span><span class="co">#&gt;           6   1.1140    14.4510  -37.3100     39.5380 </span></span>
+<span><span class="co">#&gt;           7   6.6384    17.7043  -40.4361     53.7130 </span></span>
+<span><span class="co">#&gt;           8   7.1288    31.6224  -76.9530     91.2106 </span></span>
+<span><span class="co">#&gt;           9  10.8758    27.1430  -61.2955     83.0471 </span></span>
+<span><span class="co">#&gt;          10  17.5057    27.3018  -55.0877     90.0991 </span></span>
+<span><span class="co">#&gt;          11  40.8318    36.8285  -57.0926    138.7561 </span></span>
+<span><span class="co">#&gt;          12  48.6134    47.0816  -76.5730    173.7998 </span></span>
+<span><span class="co">#&gt;          13  52.4228    50.6093  -82.1436    186.9892 </span></span>
+<span><span class="co">#&gt;          14  50.2000    53.7874  -92.8168    193.2169 </span></span>
+<span><span class="co">#&gt;          15  68.2960    69.9730 -117.7571    254.3491 </span></span>
+<span><span class="co">#&gt;          16  44.7305    80.1319 -168.3345    257.7955 </span></span>
+<span><span class="co">#&gt;          17  61.4670    86.4689 -168.4476    291.3815 </span></span>
+<span><span class="co">#&gt;          18  50.4635   106.9963 -234.0318    334.9589 </span></span>
+<span><span class="co">#&gt;          19  47.3392   130.2984 -299.1149    393.7933 </span></span>
+<span><span class="co">#&gt;          20  28.6326   108.3420 -259.4409    316.7061 </span></span>
+<span><span class="co">#&gt;          21   4.3445   169.7318 -446.9601    455.6491 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">covid_res</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylim</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -233,18 +233,18 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
-<span><span class="co">#&gt;  -0.0323        0.0121    -0.0559     -0.0086 *</span></span>
+<span><span class="co">#&gt;  -0.0323        0.0128    -0.0574     -0.0071 *</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0269     0.0135          0.0005      0.0534 *</span></span>
-<span><span class="co">#&gt;          -2  -0.0050     0.0145         -0.0334      0.0235  </span></span>
-<span><span class="co">#&gt;          -1  -0.0229     0.0144         -0.0511      0.0054  </span></span>
-<span><span class="co">#&gt;           0  -0.0201     0.0115         -0.0427      0.0024  </span></span>
-<span><span class="co">#&gt;           1  -0.0547     0.0163         -0.0867     -0.0228 *</span></span>
-<span><span class="co">#&gt;           2  -0.1382     0.0333         -0.2034     -0.0730 *</span></span>
-<span><span class="co">#&gt;           3  -0.1069     0.0307         -0.1670     -0.0468 *</span></span>
+<span><span class="co">#&gt;          -3   0.0269     0.0110          0.0053      0.0485 *</span></span>
+<span><span class="co">#&gt;          -2  -0.0050     0.0133         -0.0311      0.0211  </span></span>
+<span><span class="co">#&gt;          -1  -0.0229     0.0152         -0.0526      0.0069  </span></span>
+<span><span class="co">#&gt;           0  -0.0201     0.0124         -0.0445      0.0042  </span></span>
+<span><span class="co">#&gt;           1  -0.0547     0.0166         -0.0872     -0.0222 *</span></span>
+<span><span class="co">#&gt;           2  -0.1382     0.0372         -0.2111     -0.0653 *</span></span>
+<span><span class="co">#&gt;           3  -0.1069     0.0392         -0.1836     -0.0302 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">did_res_noif</span><span class="op">)</span></span></code></pre></div>
