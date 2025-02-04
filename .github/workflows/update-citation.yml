@@ -63,6 +63,8 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/bcallaway11/ptetools.git
           git add inst/CITATION CITATION.cff
           git commit -m "Auto-update citation files" || echo "No changes to commit"
           git push
+
