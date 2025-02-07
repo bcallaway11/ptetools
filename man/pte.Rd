@@ -173,6 +173,29 @@ Tools for estimating treatment effects with panel data.
 
 Main function for computing panel treatment effects
 }
+\examples{
+# example using minimum wage data
+# and difference-in-differences identification strategy
+library(did)
+data(mpdta)
+did_res <- suppressWarnings(
+  pte(
+    yname = "lemp",
+    gname = "first.treat",
+    tname = "year",
+    idname = "countyreal",
+    data = mpdta,
+    setup_pte_fun = setup_pte,
+    subset_fun = two_by_two_subset,
+    attgt_fun = did_attgt,
+    xformla = ~lpop
+  )
+)
+
+summary(did_res)
+ggpte(did_res)
+
+}
 \seealso{
 Useful links:
 \itemize{
