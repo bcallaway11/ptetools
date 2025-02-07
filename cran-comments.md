@@ -15,3 +15,7 @@
 0 errors | 0 warnings | 1 note
 
 * This is a new release.
+
+## Additional comments
+
+* Removed Logo field from DESCRIPTION file which was generating a NOTE.
