@@ -12,6 +12,7 @@ library(pbapply)
 test_that("tests for inference", {
   #  skip_if(skip_inf)
   # cl <- as.numeric(readline("how many clusters would like to use for the inference tests?  "))
+  set.seed(123)
   cl <- 1
   mc_sims <- 100
   rejs <- pblapply(1:mc_sims, function(mc) {
