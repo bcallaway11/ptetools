@@ -258,6 +258,50 @@ aggregating treatment effects (particularly useful are <code>min_e</code>,
     <p><strong>Maintainer</strong>: Brantly Callaway <a href="mailto:brantly.callaway@uga.edu">brantly.callaway@uga.edu</a></p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example using minimum wage data</span></span></span>
+<span class="r-in"><span><span class="co"># and difference-in-differences identification strategy</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bcallaway11.github.io/did/" class="external-link">did</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mpdta</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">did_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">pte</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    yname <span class="op">=</span> <span class="st">"lemp"</span>,</span></span>
+<span class="r-in"><span>    gname <span class="op">=</span> <span class="st">"first.treat"</span>,</span></span>
+<span class="r-in"><span>    tname <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    idname <span class="op">=</span> <span class="st">"countyreal"</span>,</span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">mpdta</span>,</span></span>
+<span class="r-in"><span>    setup_pte_fun <span class="op">=</span> <span class="va">setup_pte</span>,</span></span>
+<span class="r-in"><span>    subset_fun <span class="op">=</span> <span class="va">two_by_two_subset</span>,</span></span>
+<span class="r-in"><span>    attgt_fun <span class="op">=</span> <span class="va">did_attgt</span>,</span></span>
+<span class="r-in"><span>    xformla <span class="op">=</span> <span class="op">~</span><span class="va">lpop</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Overall ATT:  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      ATT    Std. Error     [ 95%  Conf. Int.]  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.0305        0.0118    -0.0535     -0.0074 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Effects:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Event Time Estimate Std. Error   [95%  Conf. Band]  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -3   0.0298     0.0167 -0.0086      0.0681  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -2  -0.0024     0.0120 -0.0300      0.0251  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -1  -0.0243     0.0105 -0.0484     -0.0001 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           0  -0.0189     0.0148 -0.0529      0.0150  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1  -0.0536     0.0171 -0.0928     -0.0144 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2  -0.1363     0.0378 -0.2228     -0.0497 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3  -0.1008     0.0402 -0.1928     -0.0089 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: `*' confidence band does not cover 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="pte-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

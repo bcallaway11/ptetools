@@ -178,6 +178,50 @@ parameter.</p></dd>
     <p><code>pte_results</code> object</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># example using minimum wage data</span></span></span>
+<span class="r-in"><span><span class="co"># and a lagged outcome unconfoundedness strategy</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bcallaway11.github.io/did/" class="external-link">did</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mpdta</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lou_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">pte_default</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    yname <span class="op">=</span> <span class="st">"lemp"</span>,</span></span>
+<span class="r-in"><span>    gname <span class="op">=</span> <span class="st">"first.treat"</span>,</span></span>
+<span class="r-in"><span>    tname <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    idname <span class="op">=</span> <span class="st">"countyreal"</span>,</span></span>
+<span class="r-in"><span>    data <span class="op">=</span> <span class="va">mpdta</span>,</span></span>
+<span class="r-in"><span>    xformula <span class="op">=</span> <span class="op">~</span><span class="va">lpop</span>,</span></span>
+<span class="r-in"><span>    d_outcome <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    d_covs_formula <span class="op">=</span> <span class="op">~</span><span class="va">lpop</span>,</span></span>
+<span class="r-in"><span>    lagged_outcome_cov <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">lou_res</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Overall ATT:  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ATT    Std. Error     [ 95%  Conf. Int.]  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.037        0.0126    -0.0618     -0.0122 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Effects:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Event Time Estimate Std. Error   [95%  Conf. Band]  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -3   0.0262     0.0130 -0.0073      0.0597  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -2  -0.0100     0.0151 -0.0490      0.0290  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -1  -0.0222     0.0173 -0.0669      0.0225  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           0  -0.0266     0.0120 -0.0577      0.0045  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1  -0.0448     0.0167 -0.0881     -0.0015 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2  -0.1312     0.0422 -0.2404     -0.0220 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3  -0.0968     0.0323 -0.1804     -0.0133 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: `*' confidence band does not cover 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="fu"><a href="ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">lou_res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="pte_default-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
