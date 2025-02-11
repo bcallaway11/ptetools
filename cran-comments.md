@@ -18,6 +18,6 @@
 
 ## Additional comments
 
-* Removed Logo field from DESCRIPTION file which was generating a NOTE.
-* Removed inference tests and don't run some examples to remove NOTE
-   related to overall check time > 10 minutes.
+* Added return and \value to documentation for all functions
+* Removed \dontrun tag from examples
+* There are no missing references in the DESCRIPTION file

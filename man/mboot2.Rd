@@ -13,6 +13,13 @@ mboot2(inffunc, biters = 1000, alp = 0.05)
 
 \item{alp}{significance level; default is 0.05}
 }
+\value{
+list with the following elements:
+\itemize{
+\item \code{boot_se}: bootstrap standard errors
+\item \code{crit_val}: critical value for uniform confidence bands
+}
+}
 \description{
 Function for using multiplier bootstrap to conduct
 inference

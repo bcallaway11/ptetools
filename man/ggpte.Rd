@@ -9,6 +9,9 @@ ggpte(pte_results)
 \arguments{
 \item{pte_results}{A \code{pte_results} object}
 }
+\value{
+A ggplot object
+}
 \description{
 The main plotting function in the \code{ptetools} package.  It plots
 event studies.  This

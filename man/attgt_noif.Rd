@@ -17,7 +17,7 @@ like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 }
 \value{
-attgt_noif object
+an \code{attgt_noif} object
 }
 \description{
 Class for holding returns from group-time specific estimates

@@ -11,6 +11,9 @@ process_att_gt(att_gt_results, ptep)
 
 \item{ptep}{\code{pte_params} object}
 }
+\value{
+\code{group_time_att} object
+}
 \description{
 Process ATT(g,t) results when influence function is available
 }

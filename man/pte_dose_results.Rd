@@ -17,6 +17,9 @@ pte_dose_results(att_gt, dose, att_d = NULL, acrt_d = NULL, ptep)
 
 \item{ptep}{a \code{pte_params} object}
 }
+\value{
+a \code{pte_dose_results} object
+}
 \description{
 Class for holding results with a continuous treatment
 }

@@ -7,6 +7,7 @@
 #'
 #' @param pte_results A \code{pte_results} object
 #'
+#' @return A ggplot object
 #' @export
 ggpte <- function(pte_results) {
   plot_df <- summary(pte_results)$event_study
@@ -30,6 +31,7 @@ ggpte <- function(pte_results) {
 #' @param type whether to plot ATT(d) or ACRT(d), defaults to `att` for
 #'  plotting ATT(d).  For ACRT(d), use "acrt"
 #'
+#' @return A ggplot object
 #' @export
 ggpte_cont <- function(dose_obj, type = "att") {
   dose <- dose_obj$dose

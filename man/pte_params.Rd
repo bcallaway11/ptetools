@@ -99,6 +99,9 @@ These functions aim at reducing or eliminating running the same code multiple ti
 
 \item{call}{keeps track of through the \code{call} from external functions/packages}
 }
+\value{
+\code{pte_params} object
+}
 \description{
 Class that contains pte parameters
 }

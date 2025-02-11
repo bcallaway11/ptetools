@@ -78,6 +78,7 @@ group_time_att <- function(group,
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return None. Prints a summary of the \code{group_time_att} object
 #' @export
 summary.group_time_att <- function(object, ...) {
   group_time_att_obj <- object
@@ -126,6 +127,7 @@ summary.group_time_att <- function(object, ...) {
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return None. Prints a summary of the \code{group_time_att} object
 #' @export
 print.group_time_att <- function(x, ...) {
   summary.group_time_att(x, ...)
@@ -142,6 +144,7 @@ print.group_time_att <- function(x, ...) {
 #' @param event_study event_study results
 #' @param ptep \code{pte_params} object
 #'
+#' @return a `pte_results` object
 #' @export
 pte_results <- function(att_gt,
                         overall_att,
@@ -168,6 +171,7 @@ pte_results <- function(att_gt,
 #' @param ... other arguments
 #'
 #' @keywords internal
+#' @return a \code{summary.pte_results} object
 #' @export
 summary.pte_results <- function(object, ...) {
   overall_att <- object$overall_att$overall.att
@@ -239,6 +243,7 @@ summary.pte_results <- function(object, ...) {
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return None. Prints a summary of the \code{pte_results} object
 #' @export
 print.pte_results <- function(x, ...) {
   # summary.pte_results(x,...)
@@ -256,6 +261,7 @@ print.pte_results <- function(x, ...) {
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return None. Prints a summary of the \code{summary.pte_results} object
 #' @export
 print.summary.pte_results <- function(x, ...) {
   object <- x
@@ -305,7 +311,7 @@ print.summary.pte_results <- function(x, ...) {
 #'  like the first step regression 2sls estimates.  This argument is also
 #'  potentially useful for debugging.
 #'
-#' @return attgt_if object
+#' @return `attgt_if` object
 #'
 #' @export
 attgt_if <- function(attgt, inf_func, extra_gt_returns = NULL) {
@@ -321,7 +327,7 @@ attgt_if <- function(attgt, inf_func, extra_gt_returns = NULL) {
 #'
 #' @inheritParams attgt_if
 #'
-#' @return attgt_noif object
+#' @return an `attgt_noif` object
 #'
 #' @export
 attgt_noif <- function(attgt, extra_gt_returns = NULL) {
@@ -376,7 +382,7 @@ gt_data_frame <- function(data) {
 #'
 #' @inheritParams attgt_if
 #'
-#' @return pte_emp_boot object
+#' @return a `pte_emp_boot` object
 #'
 #' @export
 pte_emp_boot <- function(attgt_results,
@@ -484,6 +490,8 @@ summary.pte_emp_boot <- function(object, ...) {
 #' @param att_d ATT(d) for each value of `dose`
 #' @param acrt_d ACRT(d) for each value of `dose`
 #' @param ptep a `pte_params` object
+#'
+#' @return a `pte_dose_results` object
 #'
 #' @export
 pte_dose_results <- function(att_gt,

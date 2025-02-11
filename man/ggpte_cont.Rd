@@ -12,6 +12,9 @@ ggpte_cont(dose_obj, type = "att")
 \item{type}{whether to plot ATT(d) or ACRT(d), defaults to \code{att} for
 plotting ATT(d).  For ACRT(d), use "acrt"}
 }
+\value{
+A ggplot object
+}
 \description{
 Plots dose-specific results in applications with a continuous treatment
 }

@@ -41,10 +41,13 @@ identification strategies.}
 \item{...}{extra arguments to get the subset correct}
 }
 \value{
-list that contains correct subset of data, \code{n1}
-number of observations
-in this subset, and \code{disidx} a vector of the correct ids for this
-subset.
+list that contains the following elements:
+\itemize{
+\item \code{gt_data}: a \code{gt_data_frame} object that contains the
+correct subset of data
+\item \code{n1}: the number of observations in this subset
+\item \code{disidx}: a vector of the correct ids for this subset
+}
 }
 \description{
 A function for computing a 2x2 subset of original data.

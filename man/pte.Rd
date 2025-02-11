@@ -174,7 +174,6 @@ Tools for estimating treatment effects with panel data.
 Main function for computing panel treatment effects
 }
 \examples{
-\dontrun{
 # example using minimum wage data
 # and difference-in-differences identification strategy
 library(did)
@@ -193,7 +192,6 @@ did_res <- pte(
 
 summary(did_res)
 ggpte(did_res)
-}
 
 }
 \seealso{

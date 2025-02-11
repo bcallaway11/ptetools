@@ -11,6 +11,9 @@
 
 \item{...}{extra arguments}
 }
+\value{
+None. Prints a summary of the \code{group_time_att} object
+}
 \description{
 prints a summary of a \code{group_time_att} object
 }

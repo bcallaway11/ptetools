@@ -12,6 +12,8 @@
 #' @param gt_results list of group-time specific results
 #' @param ... extra arguments
 #'
+#' @return a `dose_obj` object
+#'
 #' @export
 process_dose_gt <- function(gt_results, ptep, ...) {
     # make the call to att, to get same format of results
@@ -185,7 +187,8 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 #' @param acrt.d_inffunc matrix containing the influence function from estimating
 #'  ACRT(d)
 #' @param pte_params a pte_params object containing other parameters passed to the function
-#' @return dose_obj
+#'
+#' @return a `dose_obj` object
 #'
 #' @export
 dose_obj <- function(
@@ -237,6 +240,22 @@ dose_obj <- function(
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return a list containing the summary of a `dose_obj` object:
+#'   - `dose`: vector of dose values
+#'   - `overall_att`: overall ATT estimate
+#'   - `overall_att_se`: standard error of overall ATT estimate
+#'   - `overall_acrt`: overall ACRT estimate
+#'   - `overall_acrt_se`: standard error of overall ACRT estimate
+#'   - `att.d`: vector of ATT(d) estimates
+#'   - `att.d_se`: vector of standard errors for ATT(d) estimates
+#'   - `att.d_crit.val`: critical value for pointwise or uniform confidence interval for ATT(d)
+#'   - `acrt.d`: vector of ACRT(d) estimates
+#'   - `acrt.d_se`: vector of standard errors for ACRT(d) estimates
+#'   - `acrt.d_crit.val`: critical value for pointwise or uniform confidence interval for ACRT(d)
+#'   - `alp`: significance level
+#'   - `cband`: logical indicating whether to use simultaneous or pointwise confidence intervals
+#'   - `bstrap`: logical indicating whether to use bootstrap for critical value
+#'
 #' @export
 summary.dose_obj <- function(object, ...) {
     dose_obj <- object
@@ -268,6 +287,7 @@ summary.dose_obj <- function(object, ...) {
 #' @param ... extra arguments
 #'
 #' @keywords internal
+#' @return None. Prints a summary of a `dose_obj` object.
 #' @export
 print.summary.dose_obj <- function(x, ...) {
     alp <- x$alp

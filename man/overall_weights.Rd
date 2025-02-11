@@ -23,9 +23,12 @@ This is useful when there are a huge number of post-treatment periods.}
 \item{...}{extra arguments}
 }
 \value{
-a data.frame with columns containing the group, the time period
-and the amount of weight that it should get for an overall treatment
-effect parameter
+a data.frame containing columns:
+\itemize{
+\item group: the group
+\item time.period: the time period
+\item overall_weight: the weight
+}
 }
 \description{
 A function that returns weights on (g,t)'s to deliver overall

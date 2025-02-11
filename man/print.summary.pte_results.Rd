@@ -11,6 +11,9 @@
 
 \item{...}{extra arguments}
 }
+\value{
+None. Prints a summary of the \code{summary.pte_results} object
+}
 \description{
 prints value of a \code{summary.pte_results} object
 }

@@ -11,6 +11,10 @@
 
 \item{...}{other arguments}
 }
+\value{
+None.  This function prints a summary of an
+aggregated treatment effect parameter object.
+}
 \description{
 A function to summarize aggregated treatment effect parameters.
 }

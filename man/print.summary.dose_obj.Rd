@@ -11,6 +11,9 @@
 
 \item{...}{extra arguments}
 }
+\value{
+None. Prints a summary of a \code{dose_obj} object.
+}
 \description{
 prints a summary of a \code{dose_obj} object
 }

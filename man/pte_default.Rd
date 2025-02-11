@@ -101,7 +101,6 @@ based identification/estimation strategies given (i) panel data and (ii)
 staggered treatment adoption
 }
 \examples{
-\dontrun{
 # example using minimum wage data
 # and a lagged outcome unconfoundedness strategy
 library(did)
@@ -120,6 +119,5 @@ lou_res <- pte_default(
 
 summary(lou_res)
 ggpte(lou_res)
-}
 
 }

@@ -5,6 +5,8 @@
 #' @param att_gt_results ATT(g,t)'s
 #' @inheritParams pte_results
 #'
+#' @return `group_time_att` object
+#'
 #' @export
 process_att_gt <- function(att_gt_results, ptep) {
   # extract ATT(g,t) and influence functions
@@ -128,6 +130,10 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'
 #' @param inffunc influence function matrix
 #' @inheritParams pte
+#'
+#' @return list with the following elements:
+#'   - `boot_se`: bootstrap standard errors
+#'   - `crit_val`: critical value for uniform confidence bands
 #'
 #' @export
 mboot2 <- function(inffunc, biters = 1000, alp = .05) {

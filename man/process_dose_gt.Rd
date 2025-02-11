@@ -13,6 +13,9 @@ process_dose_gt(gt_results, ptep, ...)
 
 \item{...}{extra arguments}
 }
+\value{
+a \code{dose_obj} object
+}
 \description{
 After computing results for each group and time period,
 \code{process_dose_gt} combines/averages them into overall effects and/or

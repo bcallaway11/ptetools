@@ -42,7 +42,7 @@ like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 }
 \value{
-pte_emp_boot object
+a \code{pte_emp_boot} object
 }
 \description{
 Class for holding \code{ptetools} empirical bootstrap results

@@ -11,6 +11,9 @@
 
 \item{...}{other arguments}
 }
+\value{
+a \code{summary.pte_results} object
+}
 \description{
 A function to summarize \code{ptetools} results.
 }

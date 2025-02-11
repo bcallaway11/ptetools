@@ -19,7 +19,7 @@ like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 }
 \value{
-attgt_if object
+\code{attgt_if} object
 }
 \description{
 Class for holding group-time average treatment effects

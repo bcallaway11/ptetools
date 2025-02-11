@@ -270,6 +270,8 @@ setup_pte <- function(yname,
 #' @param cl number of clusters to be used when bootstrapping; default is 1
 #' @param call keeps track of through the `call` from external functions/packages
 #'
+#' @return \code{pte_params} object
+#'
 #' @export
 pte_params <- function(yname,
                        gname,

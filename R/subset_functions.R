@@ -17,10 +17,11 @@
 #'  affect the outcome)
 #' @param ... extra arguments to get the subset correct
 #'
-#' @return list that contains correct subset of data, \code{n1}
-#'  number of observations
-#'  in this subset, and \code{disidx} a vector of the correct ids for this
-#'  subset.
+#' @return list that contains the following elements:
+#'   - `gt_data`: a `gt_data_frame` object that contains the
+#'        correct subset of data
+#'   - `n1`: the number of observations in this subset
+#'   - `disidx`: a vector of the correct ids for this subset
 #'
 #' @export
 two_by_two_subset <- function(data,
@@ -99,7 +100,11 @@ two_by_two_subset <- function(data,
 #'
 #' @inheritParams two_by_two_subset
 #'
-#' @return all data but in correct format for computing ATT(g,t)
+#' @return list that contains the following elements:
+#'   - `gt_data`: a `gt_data_frame` object that contains the
+#'        correct subset of data
+#'   - `n1`: the number of observations in this subset
+#'   - `disidx`: a vector of the correct ids for this subset
 #'
 #' @export
 keep_all_untreated_subset <- function(data, g, tp, ...) {
@@ -143,7 +148,11 @@ keep_all_untreated_subset <- function(data, g, tp, ...) {
 #' @inheritParams two_by_two_subset
 #' @param ... additional arguments
 #'
-#' @return all data but in correct format for computing ATT(g,t)
+#' @return list that contains the following elements:
+#'   - `gt_data`: a `gt_data_frame` object that contains the
+#'     correct subset of data
+#'   - `n1`: the number of observations in this subset
+#'   - `disidx`: a vector of the correct ids for this subset
 #'
 #' @export
 keep_all_pretreatment_subset <- function(data, g, tp, ...) {

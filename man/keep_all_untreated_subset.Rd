@@ -16,7 +16,13 @@ keep_all_untreated_subset(data, g, tp, ...)
 \item{...}{extra arguments to get the subset correct}
 }
 \value{
-all data but in correct format for computing ATT(g,t)
+list that contains the following elements:
+\itemize{
+\item \code{gt_data}: a \code{gt_data_frame} object that contains the
+correct subset of data
+\item \code{n1}: the number of observations in this subset
+\item \code{disidx}: a vector of the correct ids for this subset
+}
 }
 \description{
 A function that takes an original data set and keeps all

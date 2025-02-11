@@ -376,9 +376,11 @@ getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
 #'
 #' @inheritParams pte_aggte
 #'
-#' @return a data.frame with columns containing the group, the time period
-#'  and the amount of weight that it should get for an overall treatment
-#'  effect parameter
+#' @return a data.frame containing columns:
+#'   - group: the group
+#'   - time.period: the time period
+#'   - overall_weight: the weight
+#'
 #' @export
 overall_weights <- function(attgt,
                             balance_e = NULL,
@@ -557,6 +559,8 @@ aggte_obj <- function(overall.att = NULL,
 #' @param ... other arguments
 #'
 #' @keywords internal
+#' @return None.  This function prints a summary of an
+#'  aggregated treatment effect parameter object.
 #' @export
 summary.aggte_obj <- function(object, ...) {
   # call

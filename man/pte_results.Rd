@@ -15,6 +15,9 @@ pte_results(att_gt, overall_att, event_study, ptep)
 
 \item{ptep}{\code{pte_params} object}
 }
+\value{
+a \code{pte_results} object
+}
 \description{
 Class for holding overall results with a staggered treatment,
 including an overall ATT and an event study

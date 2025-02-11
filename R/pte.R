@@ -8,7 +8,10 @@
 #' @inheritParams pte
 #' @param ptep \code{pte_params} object
 #'
-#' @return list of attgt results and, sometimes, an influence function
+#' @return a list containing the following elements:
+#'   - `attgt.list`: list of ATT(g,t) estimates
+#'   - `inffunc`: influence function matrix
+#'   - `extra_gt_returns`: list of extra returns from gt-specific calculationsons
 #'
 #' @export
 compute.pte <- function(ptep,
@@ -228,7 +231,6 @@ compute.pte <- function(ptep,
 #' @return \code{pte_results} object
 #'
 #' @examples
-#' \dontrun{
 #' # example using minimum wage data
 #' # and difference-in-differences identification strategy
 #' library(did)
@@ -247,7 +249,6 @@ compute.pte <- function(ptep,
 #'
 #' summary(did_res)
 #' ggpte(did_res)
-#' }
 #'
 #' @export
 pte <- function(yname,
@@ -372,7 +373,6 @@ pte <- function(yname,
 #' @return `pte_results` object
 #'
 #' @examples
-#' \dontrun{
 #' # example using minimum wage data
 #' # and a lagged outcome unconfoundedness strategy
 #' library(did)
@@ -391,7 +391,6 @@ pte <- function(yname,
 #'
 #' summary(lou_res)
 #' ggpte(lou_res)
-#' }
 #'
 #' @export
 pte_default <- function(yname,

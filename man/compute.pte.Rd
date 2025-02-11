@@ -52,7 +52,12 @@ aggregating treatment effects (particularly useful are \code{min_e},
 \code{max_e}, and \code{balance_e} arguments to event study aggregations)}
 }
 \value{
-list of attgt results and, sometimes, an influence function
+a list containing the following elements:
+\itemize{
+\item \code{attgt.list}: list of ATT(g,t) estimates
+\item \code{inffunc}: influence function matrix
+\item \code{extra_gt_returns}: list of extra returns from gt-specific calculationsons
+}
 }
 \description{
 Function that actually computes panel treatment effects.

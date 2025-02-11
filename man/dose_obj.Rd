@@ -61,7 +61,7 @@ ACRT(d)}
 \item{pte_params}{a pte_params object containing other parameters passed to the function}
 }
 \value{
-dose_obj
+a \code{dose_obj} object
 }
 \description{
 Holds results from computing dose-specific treatment effects
