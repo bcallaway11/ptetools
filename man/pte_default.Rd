@@ -101,25 +101,25 @@ based identification/estimation strategies given (i) panel data and (ii)
 staggered treatment adoption
 }
 \examples{
+\dontrun{
 # example using minimum wage data
 # and a lagged outcome unconfoundedness strategy
 library(did)
 data(mpdta)
-lou_res <- suppressWarnings(
-  pte_default(
-    yname = "lemp",
-    gname = "first.treat",
-    tname = "year",
-    idname = "countyreal",
-    data = mpdta,
-    xformula = ~lpop,
-    d_outcome = FALSE,
-    d_covs_formula = ~lpop,
-    lagged_outcome_cov = TRUE
-  )
+lou_res <- pte_default(
+  yname = "lemp",
+  gname = "first.treat",
+  tname = "year",
+  idname = "countyreal",
+  data = mpdta,
+  xformula = ~lpop,
+  d_outcome = FALSE,
+  d_covs_formula = ~lpop,
+  lagged_outcome_cov = TRUE
 )
 
 summary(lou_res)
 ggpte(lou_res)
+}
 
 }

@@ -5,13 +5,8 @@
 library(did)
 library(pbapply)
 
-
-# skip_inf <- menu(c("run", "skip"), title="would you like to run or skip the inference tests?")
-# skip_inf <- skip_inf == 2
-
 test_that("tests for inference", {
-  #  skip_if(skip_inf)
-  # cl <- as.numeric(readline("how many clusters would like to use for the inference tests?  "))
+  skip_on_cran()
   set.seed(123)
   cl <- 1
   mc_sims <- 100

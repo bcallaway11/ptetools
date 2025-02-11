@@ -228,26 +228,26 @@ compute.pte <- function(ptep,
 #' @return \code{pte_results} object
 #'
 #' @examples
+#' \dontrun{
 #' # example using minimum wage data
 #' # and difference-in-differences identification strategy
 #' library(did)
 #' data(mpdta)
-#' did_res <- suppressWarnings(
-#'   pte(
-#'     yname = "lemp",
-#'     gname = "first.treat",
-#'     tname = "year",
-#'     idname = "countyreal",
-#'     data = mpdta,
-#'     setup_pte_fun = setup_pte,
-#'     subset_fun = two_by_two_subset,
-#'     attgt_fun = did_attgt,
-#'     xformla = ~lpop
-#'   )
+#' did_res <- pte(
+#'   yname = "lemp",
+#'   gname = "first.treat",
+#'   tname = "year",
+#'   idname = "countyreal",
+#'   data = mpdta,
+#'   setup_pte_fun = setup_pte,
+#'   subset_fun = two_by_two_subset,
+#'   attgt_fun = did_attgt,
+#'   xformla = ~lpop
 #' )
 #'
 #' summary(did_res)
 #' ggpte(did_res)
+#' }
 #'
 #' @export
 pte <- function(yname,
@@ -372,26 +372,26 @@ pte <- function(yname,
 #' @return `pte_results` object
 #'
 #' @examples
+#' \dontrun{
 #' # example using minimum wage data
 #' # and a lagged outcome unconfoundedness strategy
 #' library(did)
 #' data(mpdta)
-#' lou_res <- suppressWarnings(
-#'   pte_default(
-#'     yname = "lemp",
-#'     gname = "first.treat",
-#'     tname = "year",
-#'     idname = "countyreal",
-#'     data = mpdta,
-#'     xformula = ~lpop,
-#'     d_outcome = FALSE,
-#'     d_covs_formula = ~lpop,
-#'     lagged_outcome_cov = TRUE
-#'   )
+#' lou_res <- pte_default(
+#'   yname = "lemp",
+#'   gname = "first.treat",
+#'   tname = "year",
+#'   idname = "countyreal",
+#'   data = mpdta,
+#'   xformula = ~lpop,
+#'   d_outcome = FALSE,
+#'   d_covs_formula = ~lpop,
+#'   lagged_outcome_cov = TRUE
 #' )
 #'
 #' summary(lou_res)
 #' ggpte(lou_res)
+#' }
 #'
 #' @export
 pte_default <- function(yname,
