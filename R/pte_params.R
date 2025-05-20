@@ -140,6 +140,13 @@ setup_pte <- function(yname,
   data$.w <- .w
 
   time.periods <- unique(period)
+
+  # check that time periods are positive integers
+  if (!(is.numeric(time.periods) && all(time.periods == floor(time.periods)) && all(time.periods > 0))) {
+    stop("time periods must be positive integers (numeric, integer-valued, and > 0).")
+  }
+
+
   groups <- unique(data$G)
 
   # drop never treated group
