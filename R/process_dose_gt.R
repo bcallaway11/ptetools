@@ -74,7 +74,6 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     overall_acrt_inffunc <- as.matrix(rowSums(sweep(acrt_gt_inffunc_mat, 2, o_weights$overall_weight, "*")) / sum(o_weights$overall_weight))
     overall_acrt_se <- getSE(overall_acrt_inffunc, biters = biters, alp = alp)
 
-
     # point estimates of ATT(d) and ACRT(d)
     att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
     acrt.d <- BMisc::weighted_combine_list(acrt.d_gt, o_weights$overall_weight)
@@ -92,7 +91,16 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     # estimating the \beta's
     n1_vec <- sapply(Xe_gt, nrow)
     n <- nrow(acrt_gt_inffunc_mat)
+    # these are treated observations
     keep_mat <- acrt_gt_inffunc_mat != 0
+    # these are both treated and control observations
+    keep_mat2 <- overall_att_res$att_gt$inffunc != 0
+    # these keep track of untreated comparison units
+    keep_mat2 <- keep_mat2 & !keep_mat
+    #
+    comparison_inffunc <- overall_att_res$att_gt$inffunc
+    comparison_inffunc[!keep_mat2] <- 0
+    n0_vec <- colSums(keep_mat2)
     if (!all(colSums(keep_mat) == n1_vec)) {
         stop("something off with overall influence function")
     }
@@ -103,6 +111,12 @@ process_dose_gt <- function(gt_results, ptep, ...) {
             out_inffunc <- matrix(data = 0, nrow = n, ncol = length(dvals))
             this_inffunc <- (Xe_gt[[i]] %*% bread_gt[[i]] %*% t(bs_grid))
             out_inffunc[keep_mat[, i], ] <- (n / n1_vec[i]) * this_inffunc
+            # add comparison group part of the influence function
+            # every d is the same with respect to comparison group
+            # note-to-self: don't rescale the influence function for untreated
+            # because these were already rescaled in the call to pte_default above
+            # out_inffunc[keep_mat2[, i], ] <- -(n / n0_vec[i]) * replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
+            out_inffunc[keep_mat2[, i], ] <- -replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
             out_inffunc
         }
     )
