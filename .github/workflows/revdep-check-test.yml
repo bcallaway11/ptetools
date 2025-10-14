@@ -1,98 +1,137 @@
-name: Reverse Dependency Check
+name: Reverse Dependency Check (ptetools)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
-  revdep_check:
+  revdep_cran:
     runs-on: ubuntu-latest
-
-    name: Reverse check ${{ inputs.which }} dependents
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: 'release'
 
-      - name: Install system dependencies
+      - name: System libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libssl-dev \
-            libxml2-dev \
-            libfreetype6-dev \
-            libfontconfig1-dev \
-            libharfbuzz-dev \
-            libfribidi-dev \
-            libpng-dev \
-            libjpeg-dev \
-            libtiff5-dev \
-            gfortran \
-            libblas-dev \
-            liblapack-dev
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+            libpng-dev libjpeg-dev libtiff5-dev \
+            gfortran libblas-dev liblapack-dev
 
-      - name: Install R dependencies
+      - name: Install tools (cached)
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::revdepcheck
+            any::rcmdcheck
+            any::remotes
+          cache-version: 1
+
+      - name: Install ptetools deps
         run: |
-          Rscript -e "install.packages(c('remotes', 'revdepcheck', 'testthat', 'rcmdcheck'))"
-          Rscript -e "remotes::install_deps(dependencies = TRUE)"
+          Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); remotes::install_deps(dependencies=TRUE)"
 
-      - name: Setup Reverse Dependency Check
-        run: |
-          Rscript -e "
-          rev_deps <- tools::package_dependencies(
-            packages = 'ptetools',
-            db = available.packages(),
-            reverse = TRUE
-          )
-          rev_deps <- rev_deps[['ptetools']]
-          cat('Testing the following reverse dependencies:', rev_deps, '\n')
-
-          for (pkg in rev_deps) {
-            cat('Installing package:', pkg, '\n')
-            install.packages(pkg, dependencies = TRUE)
-          }
-          "
-      - name: Reverse Dependency Check
+      - name: Run revdepcheck (CRAN/Bioc reverse deps of ptetools)
+        env:
+          _R_CHECK_FORCE_SUGGESTS_: "false"   # keep tests ON, but avoid heavy Suggests
+          WORKERS: "2"                        # parallelism within runner
+          CHECK_ARGS: "--no-manual"
         run: |
           Rscript -e "
-          rev_deps <- tools::package_dependencies(
-            packages = 'BMisc',
-            db = available.packages(),
-            reverse = TRUE
-          )
-          rev_deps <- rev_deps[['BMisc']]
-
-          dir.create('revdep_tarballs', showWarnings = FALSE)
-
-          for (pkg in rev_deps) {
-            cat('Checking package:', pkg, '\n')
-            # Download the source tarball
-            tarball <- tryCatch({
-              tarball_info <- download.packages(pkg, destdir = 'revdep_tarballs', type = 'source')
-              # Extract the correct tarball file path
-              tarball_path <- tarball_info[, 2]  # The second column contains the file path
-              tarball_path  # Return the correct path
-            }, error = function(e) {
-              cat('Error downloading source tarball for package:', pkg, '\n', conditionMessage(e), '\n')
-              next
-            })
-            pkg_path <- find.package(pkg, quiet = TRUE)
-            tryCatch({
-              rcmdcheck::rcmdcheck(tarball, error_on = 'never', args = '--no-manual')
-            }, error = function(e) {
-              cat('Error checking package:', pkg, '\n', conditionMessage(e), '\n')
-            })
-          }
+            options(repos=c(CRAN='https://cloud.r-project.org'))
+            dir.create('revdep', showWarnings=FALSE)
+            revdepcheck::revdep_check(
+              path='.',
+              num_workers=as.integer(Sys.getenv('WORKERS')),
+              quiet=FALSE,
+              args=Sys.getenv('CHECK_ARGS')
+            )
           "
 
-      - name: Upload Results
+      - name: Fail build if any reverse dep has errors
+        if: always()
+        run: |
+          Rscript -e "
+            s <- revdepcheck::revdep_summary()
+            if (is.null(s)) quit(status=0)
+            print(s)
+            has_err <- any(s$errors > 0, na.rm=TRUE)
+            if (has_err) {
+              message('One or more reverse dependencies have errors.')
+              quit(status=1)
+            }
+          "
+
+      - name: Upload revdepcheck results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Reverse-Dependency-Check-Results
+          name: revdep-CRAN-results
           path: revdep/
+
+  gh_deps:
+    runs-on: ubuntu-latest
+    needs: revdep_cran
+    env:
+      # ==== HARD-CODED GitHub reverse dependents ====
+      GH_REPOS: |
+        bcallaway11/ife
+        bcallaway11/qte
+      CHECK_ARGS: "--no-manual"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+
+      - name: System libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libfreetype6-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+            libpng-dev libjpeg-dev libtiff5-dev \
+            gfortran libblas-dev liblapack-dev
+
+      - name: Install tools (cached)
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: any::rcmdcheck
+          cache-version: 1
+
+      - name: Check GitHub reverse dependents (sequential)
+        run: |
+          set -e
+          mkdir -p gh_src gh_results
+          python3 - << 'PY'
+import os, subprocess, sys, shlex, pathlib
+repos = [r.strip() for r in os.environ["GH_REPOS"].splitlines() if r.strip()]
+fail = False
+for repo in repos:
+    dest = f"gh_src/{repo.replace('/', '__')}"
+    print(f"== Cloning {repo} ==")
+    subprocess.run(["git", "clone", "--depth", "1", f"https://github.com/{repo}", dest], check=False)
+    outdir = f"gh_results/{repo.replace('/', '__')}"
+    pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)
+    # Run R CMD check with tests; fail the workflow on errors
+    cmd = f'Rscript -e "res<-rcmdcheck::rcmdcheck(\\"{dest}\\", build=TRUE, error_on=\\"error\\", args=\\"{os.environ.get("CHECK_ARGS","")}\\"); rcmdcheck::save_logs(res, \\"{outdir}\\")"'
+    print(f"== rcmdcheck for {repo} ==")
+    rc = subprocess.call(cmd, shell=True)
+    if rc != 0:
+        print(f"!! {repo} check failed")
+        fail = True
+print('GitHub checks done.')
+sys.exit(1 if fail else 0)
+PY
+
+      - name: Upload GitHub results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: revdep-GitHub-results
+          path: gh_results/
