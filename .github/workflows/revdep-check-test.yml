@@ -22,9 +22,10 @@ jobs:
             libpng-dev libjpeg-dev libtiff5-dev \
             gfortran libblas-dev liblapack-dev
 
-      - name: Install tools explicitly (no cache)
-        run: |
-          Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); install.packages(c('revdepcheck','rcmdcheck','remotes'))"
+    - name: Install tools explicitly (no cache)
+      run: |
+        Rscript -e 'if (!requireNamespace("pak", quietly=TRUE)) install.packages("pak", repos="https://cloud.r-project.org")'
+        Rscript -e 'pak::pkg_install(c("github::r-lib/revdepcheck","cran::rcmdcheck","cran::remotes"))
 
       - name: Install ptetools deps
         run: |
