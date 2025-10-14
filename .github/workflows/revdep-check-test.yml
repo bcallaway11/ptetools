@@ -1,4 +1,4 @@
-name: Reverse Dependency Check (ptetools)
+name: Reverse Dependency Check, Including Tests
 
 on:
   workflow_dispatch: {}
@@ -25,7 +25,7 @@ jobs:
       - name: Install tools (cached)
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: |
+          extra-packages: |
             any::revdepcheck
             any::rcmdcheck
             any::remotes
