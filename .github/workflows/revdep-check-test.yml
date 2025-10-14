@@ -22,14 +22,9 @@ jobs:
             libpng-dev libjpeg-dev libtiff5-dev \
             gfortran libblas-dev liblapack-dev
 
-      - name: Install tools (cached)
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::revdepcheck
-            any::rcmdcheck
-            any::remotes
-          cache-version: 1
+      - name: Install tools explicitly (no cache)
+        run: |
+          Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); install.packages(c('revdepcheck','rcmdcheck','remotes'))"
 
       - name: Install ptetools deps
         run: |
