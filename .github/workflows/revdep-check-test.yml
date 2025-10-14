@@ -105,29 +105,39 @@ jobs:
           cache-version: 1
 
       - name: Check GitHub reverse dependents (sequential)
+        env:
+          GH_REPOS: |
+            owner1/repoA
+            owner2/repoB
+          CHECK_ARGS: --no-manual
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p gh_src gh_results
-          python3 - << 'PY'
-import os, subprocess, sys, shlex, pathlib
-repos = [r.strip() for r in os.environ["GH_REPOS"].splitlines() if r.strip()]
-fail = False
-for repo in repos:
-    dest = f"gh_src/{repo.replace('/', '__')}"
-    print(f"== Cloning {repo} ==")
-    subprocess.run(["git", "clone", "--depth", "1", f"https://github.com/{repo}", dest], check=False)
-    outdir = f"gh_results/{repo.replace('/', '__')}"
-    pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)
-    # Run R CMD check with tests; fail the workflow on errors
-    cmd = f'Rscript -e "res<-rcmdcheck::rcmdcheck(\\"{dest}\\", build=TRUE, error_on=\\"error\\", args=\\"{os.environ.get("CHECK_ARGS","")}\\"); rcmdcheck::save_logs(res, \\"{outdir}\\")"'
-    print(f"== rcmdcheck for {repo} ==")
-    rc = subprocess.call(cmd, shell=True)
-    if rc != 0:
-        print(f"!! {repo} check failed")
-        fail = True
-print('GitHub checks done.')
-sys.exit(1 if fail else 0)
-PY
+          python3 - <<'PY'
+          import os, subprocess, sys, pathlib
+          repos = [r.strip() for r in os.environ.get("GH_REPOS","").splitlines() if r.strip()]
+          fail = False
+          for repo in repos:
+              dest = f"gh_src/{repo.replace('/', '__')}"
+              print(f"== Cloning {repo} ==")
+              subprocess.run(["git","clone","--depth","1",f"https://github.com/{repo}",dest], check=False)
+              outdir = f"gh_results/{repo.replace('/', '__')}"
+              pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)
+              # Run R CMD check with tests; fail on errors
+              cmd = [
+                  "Rscript","-e",
+                  f"res<-rcmdcheck::rcmdcheck('{dest}', build=TRUE, error_on='error', args='{os.environ.get('CHECK_ARGS','')}'); rcmdcheck::save_logs(res, '{outdir}')"
+              ]
+              print(f"== rcmdcheck for {repo} ==")
+              rc = subprocess.call(cmd)
+              if rc != 0:
+                  print(f\"!! {repo} check failed\")
+                  fail = True
+          print('GitHub checks done.')
+          sys.exit(1 if fail else 0)
+          PY
+
 
       - name: Upload GitHub results
         if: always()
