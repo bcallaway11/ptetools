@@ -25,7 +25,7 @@ jobs:
       - name: Install tools explicitly (no cache)
         run: |
           Rscript -e 'if (!requireNamespace("pak", quietly=TRUE)) install.packages("pak", repos="https://cloud.r-project.org")'
-          Rscript -e 'pak::pkg_install(c("r-lib/revdepcheck","rcmdcheck","remotes"))'
+          Rscript -e 'pak::pkg_install(c("r-lib/revdepcheck","r-lib/rcmdcheck","r-lib/remotes"))'
 
       - name: Install ptetools deps
         run: |
