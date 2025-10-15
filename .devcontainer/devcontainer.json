@@ -1,0 +1,24 @@
+{
+  "name": "R devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "features": {
+    // Install R via apt (fast, binary packages)
+    "ghcr.io/rocker-org/devcontainer-features/r-apt:latest": {},
+    // Helpful system libs for building many R packages
+    "ghcr.io/rocker-org/devcontainer-features/apt-packages:latest": {
+      "packages": "libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev libharfbuzz-dev libfreetype6-dev libpng-dev libjpeg-dev libtiff5-dev gfortran libblas-dev liblapack-dev"
+    }
+  },
+  "postCreateCommand": "R -q -e \"install.packages(c('languageserver','httpgd'), repos='https://cloud.r-project.org')\"",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "REditorSupport.r"   // VS Code R extension
+      ],
+      "settings": {
+        "r.plot.useHttpgd": true,
+        "r.bracketedPaste": true
+      }
+    }
+  }
+}
