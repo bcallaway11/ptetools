@@ -26,6 +26,7 @@ compute.pte <- function(ptep,
   gname <- ptep$gname
   idname <- ptep$idname
   tname <- ptep$tname
+  panel <- ptep$panel
   base_period <- ptep$base_period
   anticipation <- ptep$anticipation
   global_fun <- ptep$global_fun
@@ -35,9 +36,13 @@ compute.pte <- function(ptep,
 
   # setup data
   G <- data[, gname]
-  id <- data[, idname]
+  if (isTRUE(panel)) {
+    id <- data[, idname]
+  } else {
+    id <- data$.rowid
+  }
   period <- data[, tname]
-  n <- length(unique(data$id))
+  n <- if (isTRUE(panel)) length(unique(data$id)) else nrow(data)
 
   # pick up all time periods
   time.periods <- ptep$tlist
@@ -254,11 +259,12 @@ compute.pte <- function(ptep,
 pte <- function(yname,
                 gname,
                 tname,
-                idname,
+                idname = NULL,
                 data,
                 setup_pte_fun,
                 subset_fun,
                 attgt_fun,
+                panel = TRUE,
                 cband = TRUE,
                 alp = 0.05,
                 boot_type = "multiplier",
@@ -280,6 +286,7 @@ pte <- function(yname,
     tname = tname,
     idname = idname,
     data = data,
+    panel = panel,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
@@ -396,8 +403,9 @@ pte <- function(yname,
 pte_default <- function(yname,
                         gname,
                         tname,
-                        idname,
+                        idname = NULL,
                         data,
+                        panel = TRUE,
                         xformula = ~1,
                         d_outcome = FALSE,
                         d_covs_formula = ~ -1,
@@ -412,15 +420,25 @@ pte_default <- function(yname,
                         boot_type = "multiplier",
                         biters = 100,
                         cl = 1) {
+  use_subset_fun <- if (isTRUE(panel)) two_by_two_subset else two_by_two_rcs_subset
+  use_attgt_fun <- if (isTRUE(panel)) pte_attgt else did_rcs_attgt
+
+  if (!isTRUE(panel) && (isTRUE(d_outcome) ||
+    !identical(d_covs_formula, ~ -1) ||
+    isTRUE(lagged_outcome_cov))) {
+    warning("For panel = FALSE, pte_default uses repeated cross sections DID and ignores d_outcome, d_covs_formula, and lagged_outcome_cov.")
+  }
+
   res <- pte(
     yname = yname,
     gname = gname,
     tname = tname,
     idname = idname,
     data = data,
+    panel = panel,
     setup_pte_fun = setup_pte,
-    subset_fun = two_by_two_subset,
-    attgt_fun = pte_attgt,
+    subset_fun = use_subset_fun,
+    attgt_fun = use_attgt_fun,
     xformula = xformula,
     d_outcome = d_outcome,
     d_covs_formula = d_covs_formula,

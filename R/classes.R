@@ -59,7 +59,7 @@ group_time_att <- function(group,
   # might eventually drop this, but add a few things to get access
   # to aggregations from did package
   out$DIDparams <- out$ptep
-  out$DIDparams$panel <- TRUE
+  out$DIDparams$panel <- out$ptep$panel
   out$DIDparams$data$w <- 1
   out$c <- out$crit_val
   out$inffunc <- out$inf_func

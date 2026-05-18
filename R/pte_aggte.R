@@ -33,6 +33,7 @@ pte_aggte <- function(attgt,
   att <- attgt$att
   inf_func <- attgt$inf_func
   ptep <- attgt$ptep
+  panel <- ptep$panel
   bstrap <- ptep$bstrap
   if (is.null(bstrap)) bstrap <- TRUE # default to bootstrap
   cband <- ptep$cband
@@ -45,6 +46,7 @@ pte_aggte <- function(attgt,
   tlist <- sort(unique(time.period))
 
   first_period_data <- data[data[, tname] == tlist[1], ]
+  group_weight_data <- if (isTRUE(panel)) first_period_data else data
 
   originalt <- time.period
   originalgroup <- group
@@ -61,10 +63,10 @@ pte_aggte <- function(attgt,
   tlist <- unique(time.period)
   maxT <- max(time.period)
 
-  weights.ind <- first_period_data$.w
+  weights.ind <- group_weight_data$.w
 
   # relative group sizes for all ever-treated groups
-  pg <- sapply(originalglist, function(g) mean(weights.ind * (first_period_data[, gname] == g)))
+  pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))
   # normalized so that probabilities sum to 1
   pg <- pg / sum(pg)
 
@@ -78,7 +80,7 @@ pte_aggte <- function(attgt,
   keepers <- which(group <= time.period & time.period <= (group + max_e)) ### added second condition to allow for limit on longest period included in att
 
   # n x 1 vector of group variable
-  G <- unlist(lapply(first_period_data[, gname], orig2t, originaltlist))
+  G <- unlist(lapply(group_weight_data[, gname], orig2t, originaltlist))
 
   if (type == "group") {
     # get group specific ATTs
@@ -130,13 +132,16 @@ pte_aggte <- function(attgt,
     selective.att <- sum(selective.att.g * pgg) / sum(pgg)
 
     # account for having to estimate pgg in the influence function
-    selective.wif <- wif(
-      keepers = 1:length(glist),
-      pg = pgg,
-      weights.ind = weights.ind,
-      G = G,
-      group = group
-    )
+    selective.wif <- NULL
+    if (isTRUE(panel)) {
+      selective.wif <- wif(
+        keepers = 1:length(glist),
+        pg = pgg,
+        weights.ind = weights.ind,
+        G = G,
+        group = group
+      )
+    }
 
     # get overall influence function
     selective.inf.func <- get_agg_inf_func(
@@ -210,7 +215,10 @@ pte_aggte <- function(attgt,
     dynamic.se.inner <- lapply(eseq, function(e) {
       whiche <- which((originalt - originalgroup == e) & (include.balanced.gt))
       pge <- pg[whiche] / (sum(pg[whiche]))
-      wif.e <- wif(whiche, pg, weights.ind, G, group)
+      wif.e <- NULL
+      if (isTRUE(panel)) {
+        wif.e <- wif(whiche, pg, weights.ind, G, group)
+      }
       inf.func.e <- as.numeric(get_agg_inf_func(
         att = att,
         inffunc1 = inf_func,
@@ -392,6 +400,7 @@ overall_weights <- function(attgt,
   att <- attgt$att
   inf_func <- attgt$inf_func
   ptep <- attgt$ptep
+  panel <- ptep$panel
   bstrap <- ptep$bstrap
   if (is.null(bstrap)) bstrap <- TRUE # default to bootstrap
   cband <- ptep$cband
@@ -404,6 +413,7 @@ overall_weights <- function(attgt,
   tlist <- sort(unique(time.period))
 
   first_period_data <- data[data[, tname] == tlist[1], ]
+  group_weight_data <- if (isTRUE(panel)) first_period_data else data
 
   originalt <- time.period
   originalgroup <- group
@@ -420,10 +430,10 @@ overall_weights <- function(attgt,
   tlist <- unique(time.period)
   maxT <- max(time.period)
 
-  weights.ind <- first_period_data$.w
+  weights.ind <- group_weight_data$.w
 
   # relative group sizes for all ever-treated groups
-  pg <- sapply(originalglist, function(g) mean(weights.ind * (first_period_data[, gname] == g)))
+  pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))
   # normalized so that probabilities sum to 1
   pg <- pg / sum(pg)
 

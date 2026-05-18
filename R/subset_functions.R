@@ -83,6 +83,58 @@ two_by_two_subset <- function(data,
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }
 
+#' @title Two Period Two Group Repeated Cross Sections Subset
+#'
+#' @description A function for computing a 2x2 subset for repeated cross
+#' sections data.  This is analogous to \code{two_by_two_subset}, but indexes
+#' observations by rows rather than by panel ids.
+#'
+#' @inheritParams two_by_two_subset
+#'
+#' @return list that contains the following elements:
+#'   - `gt_data`: a `gt_data_frame` object that contains the
+#'        correct subset of data
+#'   - `n1`: the number of observations in this subset
+#'   - `disidx`: a vector of the correct rows for this subset
+#'
+#' @export
+two_by_two_rcs_subset <- function(data,
+                                  g,
+                                  tp,
+                                  control_group = "notyettreated",
+                                  anticipation = 0,
+                                  base_period = "varying",
+                                  ...) {
+  # get the correct "base" period for this group
+  main.base.period <- g - anticipation - 1
+
+  if (base_period == "varying") {
+    if (tp < (g - anticipation)) {
+      base.period <- tp - 1
+    } else {
+      base.period <- main.base.period
+    }
+  } else {
+    base.period <- main.base.period
+  }
+
+  if (control_group == "notyettreated") {
+    this.data <- subset(data, G == g | G > tp | G == 0)
+  } else {
+    this.data <- subset(data, G == g | G == 0)
+  }
+
+  this.data <- subset(this.data, period == tp | period == base.period)
+  this.data$name <- ifelse(this.data$period == tp, "post", "pre")
+  this.data$D <- 1 * (this.data$G == g)
+  this.data <- gt_data_frame(this.data)
+
+  n1 <- nrow(this.data)
+  disidx <- data$.rowid %in% this.data$.rowid
+
+  list(gt_data = this.data, n1 = n1, disidx = disidx)
+}
+
 
 #' @title Keep All Untreated Subset
 #'

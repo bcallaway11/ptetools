@@ -8,8 +8,9 @@ setup_pte_basic(
   yname,
   gname,
   tname,
-  idname,
+  idname = NULL,
   data,
+  panel = TRUE,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -30,7 +31,10 @@ setup_pte_basic(
 
 \item{idname}{Name of id in \code{data}}
 
-\item{data}{balanced panel data}
+\item{data}{balanced panel or repeated cross sections data}
+
+\item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
+FALSE for repeated cross sections.}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}

@@ -57,8 +57,15 @@ panel_empirical_bootstrap <- function(attgt.list,
 
   # loop for each nonparametric bootstrap iteration
   boot.res <- pbapply::pblapply(1:biters, function(b) {
-    # draw a bootstrap sample; here, we'll call an outside function
-    bdata <- BMisc::blockBootSample(data, idname)
+    # draw a bootstrap sample; panel data are resampled by unit while repeated
+    # cross sections are resampled at the observation level
+    if (isTRUE(ptep$panel)) {
+      bdata <- BMisc::blockBootSample(data, idname)
+    } else {
+      bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+      bdata$.rowid <- seq_len(nrow(bdata))
+      bdata$id <- bdata$.rowid
+    }
 
     bptep <- setup_pte_fun(
       yname = ptep$yname,
@@ -66,6 +73,7 @@ panel_empirical_bootstrap <- function(attgt.list,
       tname = ptep$tname,
       idname = ptep$idname,
       data = bdata,
+      panel = ptep$panel,
       alp = ptep$alp,
       boot_type = boot_type,
       gt_type = gt_type,

@@ -28,8 +28,9 @@
 setup_pte_basic <- function(yname,
                             gname,
                             tname,
-                            idname,
+                            idname = NULL,
                             data,
+                            panel = TRUE,
                             cband = TRUE,
                             alp = 0.05,
                             boot_type = "multiplier",
@@ -43,16 +44,25 @@ setup_pte_basic <- function(yname,
 
   # setup data
   G <- data[, gname]
-  id <- data[, idname]
   period <- data[, tname]
+  if (isTRUE(panel)) {
+    if (is.null(idname)) {
+      stop("idname must be provided when panel = TRUE")
+    }
+    id <- data[, idname]
+  } else {
+    id <- seq_len(nrow(data))
+  }
 
   data$G <- G
   data$id <- id
   n <- length(unique(data$id))
   data$period <- period
   data$Y <- data[, yname]
+  data$.w <- rep(1, nrow(data))
+  data$.rowid <- seq_len(nrow(data))
 
-  time.periods <- unique(data$period)
+  time.periods <- sort(unique(data$period))
   groups <- unique(data$G)
 
   # drop never treated group
@@ -67,6 +77,7 @@ setup_pte_basic <- function(yname,
     tname = tname,
     idname = idname,
     data = data,
+    panel = panel,
     glist = groups,
     tlist = time.periods,
     cband = cband,
@@ -104,8 +115,9 @@ setup_pte_basic <- function(yname,
 setup_pte <- function(yname,
                       gname,
                       tname,
-                      idname,
+                      idname = NULL,
                       data,
+                      panel = TRUE,
                       required_pre_periods = 1,
                       anticipation = 0,
                       base_period = "varying",
@@ -123,8 +135,15 @@ setup_pte <- function(yname,
 
   # setup data
   G <- data[, gname]
-  id <- data[, idname]
   period <- data[, tname]
+  if (isTRUE(panel)) {
+    if (is.null(idname)) {
+      stop("idname must be provided when panel = TRUE")
+    }
+    id <- data[, idname]
+  } else {
+    id <- seq_len(nrow(data))
+  }
   if (is.null(weightsname)) {
     .w <- rep(1, nrow(data))
   } else {
@@ -139,7 +158,7 @@ setup_pte <- function(yname,
   data$Y <- data[, yname]
   data$.w <- .w
 
-  time.periods <- unique(period)
+  time.periods <- sort(unique(period))
 
   # check that time periods are positive integers
   if (!(is.numeric(time.periods) && all(time.periods == floor(time.periods)) && all(time.periods > 0))) {
@@ -198,6 +217,7 @@ setup_pte <- function(yname,
     data <- data[!(data$G %in% seq(1, required_pre_periods + anticipation)), ]
   }
 
+  data$.rowid <- seq_len(nrow(data))
 
 
   params <- pte_params(
@@ -206,6 +226,7 @@ setup_pte <- function(yname,
     tname = tname,
     idname = idname,
     data = data,
+    panel = panel,
     glist = groups,
     tlist = time.periods,
     cband = cband,
@@ -233,7 +254,9 @@ setup_pte <- function(yname,
 #' @param gname Name of group in \code{data}
 #' @param tname Name of time period in \code{data}
 #' @param idname Name of id in \code{data}
-#' @param data balanced panel data
+#' @param data balanced panel or repeated cross sections data
+#' @param panel Whether the data are panel data.  The default is TRUE.  Set to
+#'  FALSE for repeated cross sections.
 #' @param glist list of groups to create group-time average treatment effects
 #'  for
 #' @param tlist list of time periods to create group-time average treatment
@@ -283,8 +306,9 @@ setup_pte <- function(yname,
 pte_params <- function(yname,
                        gname,
                        tname,
-                       idname,
+                       idname = NULL,
                        data,
+                       panel = TRUE,
                        glist,
                        tlist,
                        cband,
@@ -308,6 +332,7 @@ pte_params <- function(yname,
     tname = tname,
     idname = idname,
     data = data,
+    panel = panel,
     glist = glist,
     tlist = tlist,
     cband = cband,

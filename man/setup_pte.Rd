@@ -8,8 +8,9 @@ setup_pte(
   yname,
   gname,
   tname,
-  idname,
+  idname = NULL,
   data,
+  panel = TRUE,
   required_pre_periods = 1,
   anticipation = 0,
   base_period = "varying",
@@ -34,7 +35,10 @@ setup_pte(
 
 \item{idname}{Name of id in \code{data}}
 
-\item{data}{balanced panel data}
+\item{data}{balanced panel or repeated cross sections data}
+
+\item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
+FALSE for repeated cross sections.}
 
 \item{required_pre_periods}{The number of required pre-treatment periods to implement
 the estimation strategy.  Default is 1.}

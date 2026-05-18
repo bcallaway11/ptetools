@@ -65,6 +65,53 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
   attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)
 }
 
+#' @title Repeated Cross Sections Difference-in-Differences for ATT(g,t)
+#'
+#' @description Takes a local repeated cross sections data set and computes
+#'  an estimate of a group-time average treatment effect and corresponding
+#'  influence function using a repeated cross sections DID approach.
+#'
+#' @inheritParams did_attgt
+#' @param est_method Which type of estimation method to use. Default is "dr" for
+#'  doubly robust.  The other option is "reg" for regression adjustment.
+#'
+#' @return attgt_if
+#'
+#' @export
+did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "dr", ...) {
+  gt_data <- droplevels(gt_data)
+
+  y <- gt_data$Y
+  post <- 1 * (gt_data$name == "post")
+  D <- gt_data$D
+  covariates <- model.matrix(xformula, data = gt_data)
+  i.weights <- gt_data$.w / mean(gt_data$.w)
+
+  if (est_method == "dr") {
+    attgt <- DRDID::drdid_rc(
+      y = y,
+      post = post,
+      D = D,
+      covariates = covariates,
+      i.weights = i.weights,
+      inffunc = TRUE
+    )
+  } else if (est_method == "reg") {
+    attgt <- DRDID::reg_did_rc(
+      y = y,
+      post = post,
+      D = D,
+      covariates = covariates,
+      i.weights = i.weights,
+      inffunc = TRUE
+    )
+  } else {
+    stop(paste0("est_method: ", est_method, " is not supported"))
+  }
+
+  attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)
+}
+
 
 #' @title General ATT(g,t)
 #'

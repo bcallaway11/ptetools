@@ -11,11 +11,12 @@ pte(
   yname,
   gname,
   tname,
-  idname,
+  idname = NULL,
   data,
   setup_pte_fun,
   subset_fun,
   attgt_fun,
+  panel = TRUE,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -42,7 +43,7 @@ pte(
 
 \item{idname}{Name of id in \code{data}}
 
-\item{data}{balanced panel data}
+\item{data}{balanced panel or repeated cross sections data}
 
 \item{setup_pte_fun}{This is a function that should take in \code{data},
 \code{yname} (the name of the outcome variable in \code{data}),
@@ -105,6 +106,9 @@ treatment effect parameter (i.e., event study parameter).  If
 objects will be computed using the empirical bootstrap.  This is usually
 (perhaps substantially) easier to code, but also will usually be (perhaps
 substantially) computationally slower.}
+
+\item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
+FALSE for repeated cross sections.}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}
@@ -204,5 +208,10 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Brantly Callaway \email{brantly.callaway@uga.edu}
+
+Authors:
+\itemize{
+  \item Brantly Callaway \email{brantly.callaway@uga.edu}
+}
 
 }
