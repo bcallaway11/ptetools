@@ -16,6 +16,7 @@ pte(
   setup_pte_fun,
   subset_fun,
   attgt_fun,
+  aggregation_fun = NULL,
   panel = TRUE,
   cband = TRUE,
   alp = 0.05,
@@ -28,6 +29,7 @@ pte(
   group_fun = FALSE,
   process_dtt_gt_fun = process_dtt_gt,
   process_dose_gt_fun = process_dose_gt,
+  probs = NULL,
   biters = 100,
   cl = 1,
   call = NULL,
@@ -156,6 +158,9 @@ function returns treatment effects that depend on dose (i.e., amount of the
 treatment).  The default is \code{process_dose_gt}, which is a function provided
 by the package.  See that function for an example of what this function should
 return.  This is unused except in cases where the results involve doses.}
+
+\item{probs}{For \code{gt_type = "qtt"}, a numeric vector of quantile levels at
+which to evaluate the QTT curve.  Defaults to \code{seq(0.05, 0.95, 0.05)}.}
 
 \item{biters}{number of bootstrap iterations; default is 100}
 

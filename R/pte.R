@@ -1,3 +1,12 @@
+# =============================================================================
+# Title: Core pte Functions
+# Description: compute.pte (inner loop over groups/time periods) and pte
+#   (main user-facing function) for computing panel treatment effects.
+# Author: Brant Callaway
+# Last update: 2026-05-18
+# Date created: 2021-05-14
+# =============================================================================
+
 #' @title Heavy-Lifting for pte Function
 #'
 #' @description Function that actually computes panel treatment effects.
@@ -227,6 +236,9 @@ compute.pte <- function(ptep,
 #'  by the package.  See that function for an example of what this function should
 #'  return.  This is unused except in cases where the results involve doses.
 #'
+#' @param probs For `gt_type = "qtt"`, a numeric vector of quantile levels at
+#'  which to evaluate the QTT curve.  Defaults to `seq(0.05, 0.95, 0.05)`.
+#'
 #' @param ... extra arguments that can be passed to create the correct subsets
 #'  of the data (depending on \code{subset_fun}), to estimate group time
 #'  average treatment effects (depending on \code{attgt_fun}), or to
@@ -264,6 +276,7 @@ pte <- function(yname,
                 setup_pte_fun,
                 subset_fun,
                 attgt_fun,
+                aggregation_fun = NULL,
                 panel = TRUE,
                 cband = TRUE,
                 alp = 0.05,
@@ -276,6 +289,7 @@ pte <- function(yname,
                 group_fun = FALSE,
                 process_dtt_gt_fun = process_dtt_gt,
                 process_dose_gt_fun = process_dose_gt,
+                probs = NULL,
                 biters = 100,
                 cl = 1,
                 call = NULL,
@@ -293,6 +307,7 @@ pte <- function(yname,
     gt_type = gt_type,
     weightsname = weightsname,
     ret_quantile = ret_quantile,
+    probs = probs,
     global_fun = global_fun,
     time_period_fun = time_period_fun,
     group_fun = group_fun,
@@ -308,12 +323,6 @@ pte <- function(yname,
     attgt_fun = attgt_fun,
     ...
   )
-
-  # handle distributional results
-  if (gt_type == "dtt") {
-    stop("not supported yet...")
-    return(process_dtt_gt_fun(res, ptep))
-  }
 
   # handle aggregations into dose
   if (gt_type == "dose") {
@@ -331,7 +340,8 @@ pte <- function(yname,
       setup_pte_fun,
       subset_fun,
       attgt_fun,
-      extra_gt_returns = res$extra_gt_returns,
+      extra_gt_returns   = res$extra_gt_returns,
+      aggregation_fun    = aggregation_fun,
       ...
     ))
   }
