@@ -22,6 +22,7 @@ pte_params(
   control_group = "notyettreated",
   gt_type = "att",
   ret_quantile = 0.5,
+  probs = NULL,
   global_fun = FALSE,
   time_period_fun = FALSE,
   group_fun = FALSE,
@@ -85,6 +86,10 @@ their own choices for \code{gt_type}}
 \item{ret_quantile}{For functions that compute quantile treatment effects,
 this is a specific quantile at which to report results, e.g.,
 \code{ret_quantile = 0.5} will return that the qte at the median.}
+
+\item{probs}{For \code{gt_type = "qtt"}, a numeric vector of quantile levels at
+which to evaluate the QTT curve (e.g., \code{seq(0.05, 0.95, 0.05)}).
+Defaults to \code{seq(0.05, 0.95, 0.05)} when NULL.}
 
 \item{global_fun}{Logical indicating whether or not untreated potential
 outcomes can be estimated in one shot, i.e., for all groups and time periods.

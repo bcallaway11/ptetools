@@ -1,3 +1,12 @@
+# =============================================================================
+# Title: PTE Parameter Setup Functions
+# Description: Functions for setting up pte_params objects used throughout
+#   the ptetools pipeline: setup_pte_basic, setup_pte, and pte_params.
+# Author: Brant Callaway
+# Last update: 2026-05-18
+# Date created: 2021-05-14
+# =============================================================================
+
 #' @title Basic Setup Function
 #'
 #' @description This is a lightweight (example) function for how to setup
@@ -36,6 +45,7 @@ setup_pte_basic <- function(yname,
                             boot_type = "multiplier",
                             gt_type = "att",
                             ret_quantile = 0.5,
+                            probs = NULL,
                             biters = 100,
                             cl = 1,
                             call = NULL,
@@ -85,6 +95,7 @@ setup_pte_basic <- function(yname,
     boot_type = boot_type,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
+    probs = probs,
     biters = biters,
     cl = cl,
     call = call
@@ -127,6 +138,7 @@ setup_pte <- function(yname,
                       weightsname = NULL,
                       gt_type = "att",
                       ret_quantile = 0.5,
+                      probs = NULL,
                       biters = 100,
                       cl = 1,
                       call = NULL,
@@ -237,6 +249,7 @@ setup_pte <- function(yname,
     weightsname = weightsname,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
+    probs = probs,
     biters = biters,
     cl = cl,
     call = call
@@ -288,6 +301,9 @@ setup_pte <- function(yname,
 #' @param ret_quantile For functions that compute quantile treatment effects,
 #'  this is a specific quantile at which to report results, e.g.,
 #'  `ret_quantile = 0.5` will return that the qte at the median.
+#' @param probs For `gt_type = "qtt"`, a numeric vector of quantile levels at
+#'  which to evaluate the QTT curve (e.g., `seq(0.05, 0.95, 0.05)`).
+#'  Defaults to `seq(0.05, 0.95, 0.05)` when NULL.
 #' @param global_fun Logical indicating whether or not untreated potential
 #'  outcomes can be estimated in one shot, i.e., for all groups and time periods.
 #'  Main use case would be for one-shot imputation estimators.  Not supported yet.
@@ -320,6 +336,7 @@ pte_params <- function(yname,
                        control_group = "notyettreated",
                        gt_type = "att",
                        ret_quantile = 0.5,
+                       probs = NULL,
                        global_fun = FALSE,
                        time_period_fun = FALSE,
                        group_fun = FALSE,
@@ -344,6 +361,7 @@ pte_params <- function(yname,
     weightsname = weightsname,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
+    probs = probs,
     biters = biters,
     cl = cl,
     call = call

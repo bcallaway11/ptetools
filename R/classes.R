@@ -1,3 +1,13 @@
+# =============================================================================
+# Title: ptetools S3 Classes
+# Description: S3 class constructors and print/summary methods for all major
+#   result types: group_time_att, pte_results, pte_emp_boot, pte_qtt,
+#   pte_dose_results, attgt_if, attgt_noif, gt_data_frame.
+# Author: Brant Callaway
+# Last update: 2026-05-18
+# Date created: 2021-05-17
+# =============================================================================
+
 #' @title Class for Estimates across Groups and Time
 #'
 #' @description Class that holds causal effect parameter estimates across
@@ -478,6 +488,85 @@ summary.pte_emp_boot <- function(object, ...) {
   class(out) <- "summary.pte_results"
 
   out
+}
+
+
+#' @title Class for QTT Curve Results
+#'
+#' @description Holds the full quantile treatment effect (QTT) curve at the
+#'  overall, group-specific, and dynamic (event-study) aggregation levels.
+#'  Each aggregation contains estimates at all quantile levels in \code{probs}
+#'  together with bootstrap standard errors and pointwise confidence intervals.
+#'
+#' @param overall data.frame with columns \code{probs}, \code{qtt}, \code{se},
+#'  \code{lower}, \code{upper}
+#' @param dynamic data.frame with columns \code{e}, \code{probs}, \code{qtt},
+#'  \code{se}, \code{lower}, \code{upper}
+#' @param group data.frame with columns \code{group}, \code{probs}, \code{qtt},
+#'  \code{se}, \code{lower}, \code{upper}
+#' @param F0_overall mixture CDF of untreated potential outcomes
+#' @param F1_overall mixture CDF of treated potential outcomes
+#' @param ptep \code{pte_params} object
+#'
+#' @return a \code{pte_qtt} object
+#'
+#' @export
+pte_qtt <- function(overall,
+                    dynamic,
+                    group,
+                    F0_overall = NULL, # nolint: object_name_linter
+                    F1_overall = NULL, # nolint: object_name_linter
+                    ptep) {
+  out <- list(
+    overall    = overall,
+    dynamic    = dynamic,
+    group      = group,
+    F0_overall = F0_overall, # nolint: object_name_linter
+    F1_overall = F1_overall, # nolint: object_name_linter
+    ptep       = ptep
+  )
+  class(out) <- "pte_qtt"
+  out
+}
+
+
+#' @title summary.pte_qtt
+#'
+#' @description Summary for \code{pte_qtt} object; prints the overall QTT curve.
+#'
+#' @param object a \code{pte_qtt} object
+#' @param ... additional arguments
+#'
+#' @keywords internal
+#' @return None. Prints the overall QTT curve.
+#' @export
+summary.pte_qtt <- function(object, ...) {
+  alp <- object$ptep$alp
+
+  cat("\nOverall QTT Curve:\n")
+  out <- object$overall
+  out <- round(out, 4)
+  colnames(out) <- c("Quantile", "QTT", "Std. Error",
+                     paste0(100 * (1 - alp), "% CI Lower"),
+                     paste0(100 * (1 - alp), "% CI Upper"))
+  print(out, row.names = FALSE)
+  cat("\n")
+  invisible(object)
+}
+
+
+#' @title print.pte_qtt
+#'
+#' @description Prints a \code{pte_qtt} object.
+#'
+#' @param x a \code{pte_qtt} object
+#' @param ... extra arguments
+#'
+#' @keywords internal
+#' @return None. Prints the overall QTT curve.
+#' @export
+print.pte_qtt <- function(x, ...) {
+  summary.pte_qtt(x, ...)
 }
 
 

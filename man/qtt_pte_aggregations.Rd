@@ -19,9 +19,13 @@ like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 }
 \value{
-\code{pte_emp_boot} object
+named list with elements \code{overall_results},
+\code{dyn_results}, \code{group_results}, \code{F0_overall},
+\code{F1_overall}
 }
 \description{
-Aggregate group-time distributions into qtt versions of
-overall, group, and dynamic effects.
+Aggregate group-time F0/F1 distributions into QTT curves at
+the overall, group, and dynamic level.  CDFs are mixed first using
+\code{BMisc::combineDfs} and then inverted at all quantile levels in
+\code{probs}, avoiding the bias from averaging scalar QTTs.
 }

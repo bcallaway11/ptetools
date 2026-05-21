@@ -16,6 +16,7 @@ setup_pte_basic(
   boot_type = "multiplier",
   gt_type = "att",
   ret_quantile = 0.5,
+  probs = NULL,
   biters = 100,
   cl = 1,
   call = NULL,
@@ -50,6 +51,10 @@ their own choices for \code{gt_type}}
 \item{ret_quantile}{For functions that compute quantile treatment effects,
 this is a specific quantile at which to report results, e.g.,
 \code{ret_quantile = 0.5} will return that the qte at the median.}
+
+\item{probs}{For \code{gt_type = "qtt"}, a numeric vector of quantile levels at
+which to evaluate the QTT curve (e.g., \code{seq(0.05, 0.95, 0.05)}).
+Defaults to \code{seq(0.05, 0.95, 0.05)} when NULL.}
 
 \item{biters}{number of bootstrap iterations; default is 100}
 
