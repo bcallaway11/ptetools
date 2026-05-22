@@ -544,11 +544,11 @@ summary.pte_qtt <- function(object, ...) {
   alp <- object$ptep$alp
 
   cat("\nOverall QTT Curve:\n")
-  out <- object$overall
+  out <- object$overall[, c("probs", "qtt", "se", "lower_ub", "upper_ub")]
   out <- round(out, 4)
   colnames(out) <- c("Quantile", "QTT", "Std. Error",
-                     paste0(100 * (1 - alp), "% CI Lower"),
-                     paste0(100 * (1 - alp), "% CI Upper"))
+                     paste0(100 * (1 - alp), "% CB Lower"),
+                     paste0(100 * (1 - alp), "% CB Upper"))
   print(out, row.names = FALSE)
   cat("\n")
   invisible(object)
