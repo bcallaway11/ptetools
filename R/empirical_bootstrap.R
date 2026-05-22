@@ -487,16 +487,33 @@ qtt_empirical_bootstrap <- function(attgt.list,
     aggregation_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
   }, cl = ptep$cl)
 
-  alp <- ptep$alp
-  z   <- qnorm(1 - alp / 2)
+  alp   <- ptep$alp
+  cband <- isTRUE(ptep$cband)
+  z     <- qnorm(1 - alp / 2)
+
+  # Compute uniform critical value from a bootstrap matrix and point estimates.
+  # Uses IQR-based scale (more robust when some QTTs are near zero), following
+  # the same approach as computeSE() in the qte package. Returns a scalar c
+  # such that qtt +/- c * se gives a simultaneous band across quantiles.
+  qtt_crit_val <- function(boot_mat, qtt_est) {
+    sigmahalf <- (apply(boot_mat, 2, function(b) quantile(b, 0.75, type = 1)) -
+                  apply(boot_mat, 2, function(b) quantile(b, 0.25, type = 1))) /
+                 (qnorm(0.75) - qnorm(0.25))
+    if (any(sigmahalf == 0)) {
+      sigmahalf <- pmax(apply(boot_mat, 2, sd), 1e-9)
+    }
+    cb <- apply(boot_mat, 1, function(q) max(abs((q - qtt_est) / sigmahalf)))
+    quantile(cb, 1 - alp, type = 1)
+  }
 
   # --- overall SE --------------------------------------------------------
   overall_boot_mat <- do.call(rbind, lapply(boot.res, function(br) br$overall_results$qtt))
   overall_se <- apply(overall_boot_mat, 2, sd)
   overall_results        <- aggte$overall_results
   overall_results$se     <- overall_se
-  overall_results$lower  <- overall_results$qtt - z * overall_se
-  overall_results$upper  <- overall_results$qtt + z * overall_se
+  overall_cval <- if (cband) qtt_crit_val(overall_boot_mat, overall_results$qtt) else z
+  overall_results$lower  <- overall_results$qtt - overall_cval * overall_se
+  overall_results$upper  <- overall_results$qtt + overall_cval * overall_se
 
   # --- dynamic SE --------------------------------------------------------
   dyn_e_vals <- unique(aggte$dyn_results$e)
@@ -510,13 +527,17 @@ qtt_empirical_bootstrap <- function(attgt.list,
       warning(paste0("dropping event time ", this_e, " from dynamic QTT (small groups)"))
       return(NULL)
     }
-    boot_mat <- do.call(rbind, Filter(Negate(is.null), boot_rows))
-    data.frame(e = this_e, probs = probs, se = apply(boot_mat, 2, sd))
+    boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
+    qtt_est   <- aggte$dyn_results$qtt[aggte$dyn_results$e == this_e]
+    this_cval <- if (cband) qtt_crit_val(boot_mat, qtt_est) else z
+    data.frame(e = this_e, probs = probs, se = apply(boot_mat, 2, sd),
+               cval = this_cval)
   })
   dyn_se_df   <- do.call(rbind, Filter(Negate(is.null), dyn_se_list))
   dyn_results <- merge(aggte$dyn_results, dyn_se_df, by = c("e", "probs"), all.x = FALSE)
-  dyn_results$lower <- dyn_results$qtt - z * dyn_results$se
-  dyn_results$upper <- dyn_results$qtt + z * dyn_results$se
+  dyn_results$lower <- dyn_results$qtt - dyn_results$cval * dyn_results$se
+  dyn_results$upper <- dyn_results$qtt + dyn_results$cval * dyn_results$se
+  dyn_results$cval  <- NULL
 
   # --- group SE ----------------------------------------------------------
   group_vals <- unique(aggte$group_results$group)
@@ -530,13 +551,17 @@ qtt_empirical_bootstrap <- function(attgt.list,
       warning(paste0("dropping group ", this_g, " from group QTT (small groups)"))
       return(NULL)
     }
-    boot_mat <- do.call(rbind, Filter(Negate(is.null), boot_rows))
-    data.frame(group = this_g, probs = probs, se = apply(boot_mat, 2, sd))
+    boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
+    qtt_est   <- aggte$group_results$qtt[aggte$group_results$group == this_g]
+    this_cval <- if (cband) qtt_crit_val(boot_mat, qtt_est) else z
+    data.frame(group = this_g, probs = probs, se = apply(boot_mat, 2, sd),
+               cval = this_cval)
   })
   group_se_df   <- do.call(rbind, Filter(Negate(is.null), group_se_list))
   group_results <- merge(aggte$group_results, group_se_df, by = c("group", "probs"), all.x = FALSE)
-  group_results$lower <- group_results$qtt - z * group_results$se
-  group_results$upper <- group_results$qtt + z * group_results$se
+  group_results$lower <- group_results$qtt - group_results$cval * group_results$se
+  group_results$upper <- group_results$qtt + group_results$cval * group_results$se
+  group_results$cval  <- NULL
 
   pte_qtt( # nolint: object_usage_linter
     overall    = overall_results,
