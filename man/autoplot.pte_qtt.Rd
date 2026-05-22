@@ -4,13 +4,31 @@
 \alias{autoplot.pte_qtt}
 \title{autoplot.pte_qtt}
 \usage{
-\method{autoplot}{pte_qtt}(object, type = "overall", ...)
+\method{autoplot}{pte_qtt}(
+  object,
+  type = "overall",
+  cband = TRUE,
+  plot_probs = 0.5,
+  plot_ci = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{a \code{pte_qtt} object}
 
-\item{type}{which aggregation to plot. Currently only \code{"overall"} is
-implemented; \code{"dynamic"} and \code{"group"} are stubs.}
+\item{type}{which aggregation to plot: \code{"overall"} (default) or
+\code{"dynamic"}. \code{"group"} is a stub.}
+
+\item{cband}{logical; if \code{TRUE} (default), show uniform confidence band;
+if \code{FALSE}, show pointwise intervals. Applies when CIs are displayed.}
+
+\item{plot_probs}{numeric vector of quantile levels to show in the dynamic
+plot. Defaults to \code{0.5} (median). All values must be present in
+\code{object$dynamic$probs}.}
+
+\item{plot_ci}{logical or \code{NULL}. If \code{NULL} (default), CIs are
+shown when \code{length(plot_probs) == 1} and suppressed otherwise. Set
+\code{TRUE} to always show CIs, \code{FALSE} to never show them.}
 
 \item{...}{unused}
 }
@@ -18,8 +36,12 @@ implemented; \code{"dynamic"} and \code{"group"} are stubs.}
 a \code{ggplot} object
 }
 \description{
-Plot a \code{pte_qtt} object. The overall aggregation shows
-the QTT curve across quantiles. A confidence ribbon is included when
-standard errors are available, and omitted when they are \code{NA}
-(e.g., when \code{biters = 0}).
+Plot a \code{pte_qtt} object.
+
+For \code{type = "overall"}: QTT curve with quantile on the x-axis.
+
+For \code{type = "dynamic"}: event-study plot with event time on the x-axis.
+Each selected quantile is a separate colored line. CIs are shown by default
+when a single quantile is plotted, and suppressed by default when multiple
+quantiles are plotted.
 }

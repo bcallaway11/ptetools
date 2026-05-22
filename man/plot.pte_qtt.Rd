@@ -4,7 +4,7 @@
 \alias{plot.pte_qtt}
 \title{plot.pte_qtt}
 \usage{
-\method{plot}{pte_qtt}(x, type = "overall", ...)
+\method{plot}{pte_qtt}(x, type = "overall", cband = TRUE, plot_probs = 0.5, plot_ci = NULL, ...)
 }
 \arguments{
 \item{x}{a \code{pte_qtt} object}

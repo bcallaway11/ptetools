@@ -2,19 +2,17 @@
 % Please edit documentation in R/ggpte.R
 \name{ggpte}
 \alias{ggpte}
-\title{ptetools Generic Plotting Function}
+\title{ggpte}
 \usage{
 ggpte(pte_results)
 }
 \arguments{
-\item{pte_results}{A \code{pte_results} object}
+\item{pte_results}{a \code{pte_results} object}
 }
 \value{
-A ggplot object
+a \code{ggplot} object
 }
 \description{
-The main plotting function in the \code{ptetools} package.  It plots
-event studies.  This
-function is generic enough that most packages that otherwise use
-the \code{ptetools} package can call it directly to plot an event study.
+Deprecated. Use \code{autoplot()} on the \code{pte_results}
+object instead.
 }

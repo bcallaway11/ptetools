@@ -2,19 +2,19 @@
 % Please edit documentation in R/ggpte.R
 \name{ggpte_cont}
 \alias{ggpte_cont}
-\title{Generic Plots with a Continuous Treatment}
+\title{ggpte_cont}
 \usage{
 ggpte_cont(dose_obj, type = "att")
 }
 \arguments{
-\item{dose_obj}{a \code{dose_obj} that holds results with a continuous treatment}
+\item{dose_obj}{a \code{dose_obj} object}
 
-\item{type}{whether to plot ATT(d) or ACRT(d), defaults to \code{att} for
-plotting ATT(d).  For ACRT(d), use "acrt"}
+\item{type}{whether to plot \code{"att"} (default) or \code{"acrt"}}
 }
 \value{
-A ggplot object
+a \code{ggplot} object
 }
 \description{
-Plots dose-specific results in applications with a continuous treatment
+Deprecated. Use \code{autoplot()} on the \code{dose_obj}
+instead.
 }
