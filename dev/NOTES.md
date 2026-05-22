@@ -57,3 +57,25 @@ exploration, testing, sanity checks).
 
 **Note:** do not add a standalone `se` argument to user-facing functions
 yet. `biters = 0` is the mechanism for now.
+
+---
+
+## Future idea: generic group support
+
+Explore whether `ptetools` should support more generic group definitions beyond the current staggered-adoption-style `gname` setup. Useful follow-up questions:
+
+- What group structures should be admissible besides first-treatment-period groups?
+- Should setup functions validate and normalize arbitrary group labels before computing group-time effects?
+- What aggregation weights are appropriate when groups are not treatment-timing cohorts?
+
+Track future implementation work in a GitHub issue when GitHub authentication is available.
+
+## Future idea: unequally spaced periods
+
+Improve handling of time variables that are integer-valued but not consecutive, such as years 2001, 2004, 2007. Useful follow-up questions:
+
+- Should `setup_pte()` internally map original periods to consecutive event-time indices while preserving original labels in output?
+- Which subset and aggregation functions assume consecutive periods?
+- How should anticipation and base-period logic behave when gaps between periods are unequal?
+
+Track future implementation work in a GitHub issue when GitHub authentication is available.
