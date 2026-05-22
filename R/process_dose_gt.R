@@ -22,22 +22,22 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 
     # main dose-specific results are in extra_gt_returns
     all_extra_gt_returns <- att_gt$extra_gt_returns
-    groups <- unlist(BMisc::getListElement(all_extra_gt_returns, "group"))
-    time.periods <- unlist(BMisc::getListElement(all_extra_gt_returns, "time.period"))
+    groups <- unlist(BMisc::get_list_element(all_extra_gt_returns, "group"))
+    time.periods <- unlist(BMisc::get_list_element(all_extra_gt_returns, "time.period"))
 
     # check that order of groups and time periods matches
     if (!all(cbind(groups, time.periods) == o_weights[, c("group", "time.period")])) {
         stop("in processing dose results, mismatch between order of groups and time periods")
     }
 
-    inner_extra_gt_returns <- BMisc::getListElement(all_extra_gt_returns, "extra_gt_returns")
-    att.d_gt <- BMisc::getListElement(inner_extra_gt_returns, "att.d")
-    acrt.d_gt <- BMisc::getListElement(inner_extra_gt_returns, "acrt.d")
-    att.overall_gt <- unlist(BMisc::getListElement(inner_extra_gt_returns, "att.overall"))
-    acrt.overall_gt <- unlist(BMisc::getListElement(inner_extra_gt_returns, "acrt.overall"))
-    bet_gt <- BMisc::getListElement(inner_extra_gt_returns, "bet")
-    bread_gt <- BMisc::getListElement(inner_extra_gt_returns, "bread")
-    Xe_gt <- BMisc::getListElement(inner_extra_gt_returns, "Xe")
+    inner_extra_gt_returns <- BMisc::get_list_element(all_extra_gt_returns, "extra_gt_returns")
+    att.d_gt <- BMisc::get_list_element(inner_extra_gt_returns, "att.d")
+    acrt.d_gt <- BMisc::get_list_element(inner_extra_gt_returns, "acrt.d")
+    att.overall_gt <- unlist(BMisc::get_list_element(inner_extra_gt_returns, "att.overall"))
+    acrt.overall_gt <- unlist(BMisc::get_list_element(inner_extra_gt_returns, "acrt.overall"))
+    bet_gt <- BMisc::get_list_element(inner_extra_gt_returns, "bet")
+    bread_gt <- BMisc::get_list_element(inner_extra_gt_returns, "bread")
+    Xe_gt <- BMisc::get_list_element(inner_extra_gt_returns, "Xe")
 
     acrt_gt_inffunc_mat <- gt_results$inffunc
     biters <- ptep$biters

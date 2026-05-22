@@ -192,7 +192,7 @@ pte_attgt <- function(
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
-  use_formula <- BMisc::toformula("", c(BMisc::rhs.vars(xformula), colnames(dX)))
+  use_formula <- BMisc::toformula("", c(BMisc::rhs_vars(xformula), colnames(dX)))
   if (lagged_outcome_cov) use_formula <- BMisc::addCovToFormla("pre", use_formula)
   covmat <- model.matrix(use_formula, data = gt_dataX)
   covmat2 <- covmat[D == 0, ]

@@ -133,7 +133,7 @@ panel_empirical_bootstrap <- function(attgt.list,
   }, cl = cl)
 
   # attgt results
-  attgt_results_inner <- bind_rows(BMisc::getListElement(boot.res, "attgt_results")) %>%
+  attgt_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "attgt_results")) %>%
     group_by(group, time.period)
   attgt_results_se <- unlist(attgt_results_inner %>%
     group_map(~ sd(.x$att)))
@@ -141,7 +141,7 @@ panel_empirical_bootstrap <- function(attgt.list,
   attgt_results$se <- attgt_results_se
 
   # dynamic results
-  dyn_results_inner <- bind_rows(BMisc::getListElement(boot.res, "dyn_results")) %>%
+  dyn_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "dyn_results")) %>%
     group_by(e) %>%
     mutate(length.e = length(e))
   original_elength <- length(unique(dyn_results_inner$e))
@@ -160,7 +160,7 @@ panel_empirical_bootstrap <- function(attgt.list,
 
   # group results
   group_results <- aggte$group_results
-  group_results_inner <- bind_rows(BMisc::getListElement(boot.res, "group_results")) %>%
+  group_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "group_results")) %>%
     group_by(group) %>%
     mutate(length.group = length(group))
   original_glength <- length(unique(group_results_inner$group))
@@ -179,7 +179,7 @@ panel_empirical_bootstrap <- function(attgt.list,
   # overall results
   alp <- ptep$alp
   overall_att    <- aggte$overall_results
-  overall_draws  <- unlist(BMisc::getListElement(boot.res, "overall_results"))
+  overall_draws  <- unlist(BMisc::get_list_element(boot.res, "overall_results"))
   overall_se     <- sd(overall_draws)
   overall_cval   <- quantile(abs((overall_draws - overall_att) / overall_se),
                              1 - alp, type = 1)
@@ -348,7 +348,7 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 #'
 #' @description Aggregate group-time F0/F1 distributions into QTT curves at
 #'  the overall, group, and dynamic level.  CDFs are mixed first using
-#'  \code{BMisc::combineDfs} and then inverted at all quantile levels in
+#'  \code{BMisc::combine_ecdfs} and then inverted at all quantile levels in
 #'  \code{probs}, avoiding the bias from averaging scalar QTTs.
 #'
 #' @inheritParams attgt_pte_aggregations
@@ -372,11 +372,11 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   y.seq <- quantile(ptep$data[, yname], probs = seq(0, 1, length.out = 1000))
 
   # --- overall -----------------------------------------------------------
-  F0_overall <- BMisc::combineDfs( # nolint: object_name_linter
-    y.seq = y.seq, dflist = F0_gt, pstrat = attgt_res$overall_weights
+  F0_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
+    y.seq = y.seq, ecdflist = F0_gt, weights = attgt_res$overall_weights
   )
-  F1_overall <- BMisc::combineDfs( # nolint: object_name_linter
-    y.seq = y.seq, dflist = F1_gt, pstrat = attgt_res$overall_weights
+  F1_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
+    y.seq = y.seq, ecdflist = F1_gt, weights = attgt_res$overall_weights
   )
   overall_qtt <- quantile(F1_overall, probs = probs, type = 1) -
     quantile(F0_overall, probs = probs, type = 1)
@@ -384,11 +384,11 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
 
   # --- dynamic -----------------------------------------------------------
   dyn_results_list <- lapply(attgt_res$dyn_weights, function(dw) {
-    F0_e <- BMisc::combineDfs( # nolint: object_name_linter
-      y.seq = y.seq, dflist = F0_gt, pstrat = dw$weights
+    F0_e <- BMisc::combine_ecdfs( # nolint: object_name_linter
+      y.seq = y.seq, ecdflist = F0_gt, weights = dw$weights
     )
-    F1_e <- BMisc::combineDfs( # nolint: object_name_linter
-      y.seq = y.seq, dflist = F1_gt, pstrat = dw$weights
+    F1_e <- BMisc::combine_ecdfs( # nolint: object_name_linter
+      y.seq = y.seq, ecdflist = F1_gt, weights = dw$weights
     )
     qtt_e <- quantile(F1_e, probs = probs, type = 1) -
       quantile(F0_e, probs = probs, type = 1)
@@ -398,11 +398,11 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
 
   # --- group -------------------------------------------------------------
   group_results_list <- lapply(attgt_res$group_weights, function(gw) {
-    F0_g <- BMisc::combineDfs( # nolint: object_name_linter
-      y.seq = y.seq, dflist = F0_gt, pstrat = gw$weights
+    F0_g <- BMisc::combine_ecdfs( # nolint: object_name_linter
+      y.seq = y.seq, ecdflist = F0_gt, weights = gw$weights
     )
-    F1_g <- BMisc::combineDfs( # nolint: object_name_linter
-      y.seq = y.seq, dflist = F1_gt, pstrat = gw$weights
+    F1_g <- BMisc::combine_ecdfs( # nolint: object_name_linter
+      y.seq = y.seq, ecdflist = F1_gt, weights = gw$weights
     )
     qtt_g <- quantile(F1_g, probs = probs, type = 1) -
       quantile(F0_g, probs = probs, type = 1)
@@ -510,7 +510,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
       sigmahalf <- pmax(apply(boot_mat, 2, sd), 1e-9)
     }
     cb <- apply(boot_mat, 1, function(q) max(abs((q - qtt_est) / sigmahalf)))
-    quantile(cb, 1 - alp, type = 1)
+    as.numeric(quantile(cb, 1 - alp, type = 1))
   }
 
   # --- overall SE --------------------------------------------------------
@@ -539,7 +539,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
     boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
     qtt_est   <- aggte$dyn_results$qtt[aggte$dyn_results$e == this_e]
     this_cval <- qtt_crit_val(boot_mat, qtt_est)
-    data.frame(e = this_e, probs = probs, se = apply(boot_mat, 2, sd),
+    data.frame(e = this_e, probs = probs, se = unname(apply(boot_mat, 2, sd)),
                cval = this_cval)
   })
   dyn_se_df   <- do.call(rbind, Filter(Negate(is.null), dyn_se_list))
@@ -565,7 +565,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
     boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
     qtt_est   <- aggte$group_results$qtt[aggte$group_results$group == this_g]
     this_cval <- qtt_crit_val(boot_mat, qtt_est)
-    data.frame(group = this_g, probs = probs, se = apply(boot_mat, 2, sd),
+    data.frame(group = this_g, probs = probs, se = unname(apply(boot_mat, 2, sd)),
                cval = this_cval)
   })
   group_se_df   <- do.call(rbind, Filter(Negate(is.null), group_se_list))
@@ -608,32 +608,32 @@ qott_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   qott_gt <- unlist(lapply(1:length(Fte_gt), function(j) {
     quantile(Fte_gt[[j]], probs = ret_quantile, type = 1)
   }))
-  groups <- unlist(BMisc::getListElement(attgt.list, "group"))
-  time.periods <- unlist(BMisc::getListElement(attgt.list, "time.period"))
+  groups <- unlist(BMisc::get_list_element(attgt.list, "group"))
+  time.periods <- unlist(BMisc::get_list_element(attgt.list, "time.period"))
   yname <- ptep$yname
   y.seq <- seq(-max(ptep$data[, yname]), max(ptep$data[, yname]), length.out = 1000)
 
-  Fte_overall <- BMisc::combineDfs(
+  Fte_overall <- BMisc::combine_ecdfs(
     y.seq = y.seq,
-    dflist = Fte_gt,
-    pstrat = attgt_res$overall_weights
+    ecdflist = Fte_gt,
+    weights = attgt_res$overall_weights
   )
   overall_qott <- quantile(Fte_overall, probs = ret_quantile, type = 1)
 
   dyn_qott <- lapply(attgt_res$dyn_weights, function(dw) {
-    Fte_e <- BMisc::combineDfs(
+    Fte_e <- BMisc::combine_ecdfs(
       y.seq = y.seq,
-      dflist = Fte_gt,
-      pstrat = dw$weights
+      ecdflist = Fte_gt,
+      weights = dw$weights
     )
     list(e = dw$e, att.e = quantile(Fte_e, probs = ret_quantile, type = 1))
   })
 
   group_qott <- lapply(attgt_res$group_weights, function(gw) {
-    Fte_g <- BMisc::combineDfs(
+    Fte_g <- BMisc::combine_ecdfs(
       y.seq = y.seq,
-      dflist = Fte_gt,
-      pstrat = gw$weights
+      ecdflist = Fte_gt,
+      weights = gw$weights
     )
     list(group = gw$g, att.g = quantile(Fte_g, probs = ret_quantile, type = 1))
   })
