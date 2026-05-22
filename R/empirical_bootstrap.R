@@ -177,9 +177,14 @@ panel_empirical_bootstrap <- function(attgt.list,
   group_results <- inner_join(group_results, group_results_se, by = "group")
 
   # overall results
-  overall_results <- aggte$overall_results
-  overall_results_se <- sd(unlist(BMisc::getListElement(boot.res, "overall_results")))
-  overall_results <- tibble(att = overall_results, se = overall_results_se)
+  alp <- ptep$alp
+  overall_att    <- aggte$overall_results
+  overall_draws  <- unlist(BMisc::getListElement(boot.res, "overall_results"))
+  overall_se     <- sd(overall_draws)
+  overall_cval   <- quantile(abs((overall_draws - overall_att) / overall_se),
+                             1 - alp, type = 1)
+  overall_results <- tibble(att = overall_att, se = overall_se,
+                            crit_val = overall_cval)
 
 
   # return all results
@@ -188,7 +193,8 @@ panel_empirical_bootstrap <- function(attgt.list,
     overall_results = overall_results,
     group_results = group_results,
     dyn_results = dyn_results,
-    extra_gt_returns = extra_gt_returns
+    extra_gt_returns = extra_gt_returns,
+    ptep = ptep
   )
 }
 
