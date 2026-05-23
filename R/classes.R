@@ -472,7 +472,6 @@ summary.pte_emp_boot <- function(object, ...) {
     overall_att = out1,
     event_study = out2,
     alp = alp,
-    bstrap = bstrap,
     cband = cband
   )
 

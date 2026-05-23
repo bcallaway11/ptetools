@@ -32,10 +32,9 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
   Xpre <- model.frame(xformula, data = subset(gt_data, name == "pre"))
 
   # convert two period panel into one period
-  gt_data_outcomes <- tidyr::pivot_wider(gt_data[, c("D", "id", "period", "name", "Y")],
-    id_cols = c(id, D),
-    names_from = c(name),
-    values_from = c(Y)
+  gt_data_outcomes <- data.table::dcast(
+    data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
+    id + D ~ name, value.var = "Y"
   )
 
   # merge outcome and covariate data
@@ -170,10 +169,9 @@ pte_attgt <- function(
   if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
 
   # convert two period panel into one period
-  gt_data_outcomes <- tidyr::pivot_wider(gt_data[, c("D", "id", "period", "name", "Y")],
-    id_cols = c(id, D),
-    names_from = c(name),
-    values_from = c(Y)
+  gt_data_outcomes <- data.table::dcast(
+    data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
+    id + D ~ name, value.var = "Y"
   )
 
   # merge outcome and covariate data

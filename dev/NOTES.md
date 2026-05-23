@@ -34,6 +34,36 @@ when SEs are available, no ribbon when SEs are NA (i.e., when `biters = 0`).
 
 ---
 
+## Remove tidyr dependency — replace pivot_wider with data.table::dcast
+
+**Status:** Not yet done. Simple change, low risk.
+
+`tidyr::pivot_wider` is called at exactly two sites in `R/attgt_functions.R`
+(lines 35 and 173). ptetools already imports `data.table`, so no new dependency
+is needed. The replacement pattern:
+
+```r
+# Replace:
+gt_data_outcomes <- tidyr::pivot_wider(
+  gt_data[, c("D", "id", "period", "name", "Y")],
+  id_cols = c(id, D), names_from = name, values_from = Y
+)
+
+# With:
+gt_data_outcomes <- data.table::dcast(
+  data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
+  id + D ~ name, value.var = "Y"
+)
+```
+
+After replacing both sites:
+1. Remove `tidyr` from DESCRIPTION Imports.
+2. Remove the `@import tidyr` tag from `R/imports.R` (if present).
+3. Run `devtools::test()` to confirm nothing breaks.
+4. Commit and push separately from any qte changes.
+
+---
+
 ## biters = 0: skip bootstrap, return NA standard errors
 
 **Motivation:** QTT estimation is computationally heavier than ATT because

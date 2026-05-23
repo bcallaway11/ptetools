@@ -8,13 +8,13 @@ pte_qtt(overall, dynamic, group, F0_overall = NULL, F1_overall = NULL, ptep)
 }
 \arguments{
 \item{overall}{data.frame with columns \code{probs}, \code{qtt}, \code{se},
-\code{lower}, \code{upper}}
+\code{lower_pw}, \code{upper_pw}, \code{lower_ub}, \code{upper_ub}}
 
 \item{dynamic}{data.frame with columns \code{e}, \code{probs}, \code{qtt},
-\code{se}, \code{lower}, \code{upper}}
+\code{se}, \code{lower_pw}, \code{upper_pw}, \code{lower_ub}, \code{upper_ub}}
 
 \item{group}{data.frame with columns \code{group}, \code{probs}, \code{qtt},
-\code{se}, \code{lower}, \code{upper}}
+\code{se}, \code{lower_pw}, \code{upper_pw}, \code{lower_ub}, \code{upper_ub}}
 
 \item{F0_overall}{mixture CDF of untreated potential outcomes}
 

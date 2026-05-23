@@ -170,6 +170,22 @@ autoplot.pte_results <- function(object, ...) {
 }
 
 
+#' @title autoplot.pte_emp_boot
+#'
+#' @description Event-study plot for a \code{pte_emp_boot} object returned by
+#'   empirical-bootstrap estimators (e.g., \code{cic()}, \code{qdid()},
+#'   \code{mdid()}). Pre- and post-treatment periods are distinguished by color.
+#'
+#' @param object a \code{pte_emp_boot} object
+#' @param ... unused
+#'
+#' @return a \code{ggplot} object
+#' @export
+autoplot.pte_emp_boot <- function(object, ...) {
+  autoplot.pte_results(object, ...)
+}
+
+
 #' @title plot.pte_results
 #'
 #' @description Convenience wrapper around \code{\link{autoplot.pte_results}}.
@@ -180,6 +196,22 @@ autoplot.pte_results <- function(object, ...) {
 #' @return invisibly returns the \code{ggplot} object
 #' @export
 plot.pte_results <- function(x, ...) {
+  p <- autoplot(x, ...)
+  print(p)
+  invisible(p)
+}
+
+
+#' @title plot.pte_emp_boot
+#'
+#' @description Convenience wrapper around \code{\link{autoplot.pte_emp_boot}}.
+#'
+#' @param x a \code{pte_emp_boot} object
+#' @param ... passed to \code{autoplot.pte_emp_boot}
+#'
+#' @return invisibly returns the \code{ggplot} object
+#' @export
+plot.pte_emp_boot <- function(x, ...) {
   p <- autoplot(x, ...)
   print(p)
   invisible(p)

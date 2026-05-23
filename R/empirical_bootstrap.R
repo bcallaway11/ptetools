@@ -133,16 +133,16 @@ panel_empirical_bootstrap <- function(attgt.list,
   }, cl = cl)
 
   # attgt results
-  attgt_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "attgt_results")) %>%
+  attgt_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "attgt_results")) |>
     group_by(group, time.period)
-  attgt_results_se <- unlist(attgt_results_inner %>%
+  attgt_results_se <- unlist(attgt_results_inner |>
     group_map(~ sd(.x$att)))
   attgt_results <- aggte$attgt_results
   attgt_results$se <- attgt_results_se
 
   # dynamic results
-  dyn_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "dyn_results")) %>%
-    group_by(e) %>%
+  dyn_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "dyn_results")) |>
+    group_by(e) |>
     mutate(length.e = length(e))
   original_elength <- length(unique(dyn_results_inner$e))
   dyn_results_inner <- subset(dyn_results_inner, length.e == biters)
@@ -151,7 +151,7 @@ panel_empirical_bootstrap <- function(attgt.list,
     warning("dropping some event times due to small groups")
   }
 
-  dyn_results_se <- dyn_results_inner %>%
+  dyn_results_se <- dyn_results_inner |>
     transmute(se = sd(att.e))
   dyn_results_se <- dyn_results_se[1:new_elength, ]
 
@@ -160,8 +160,8 @@ panel_empirical_bootstrap <- function(attgt.list,
 
   # group results
   group_results <- aggte$group_results
-  group_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "group_results")) %>%
-    group_by(group) %>%
+  group_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "group_results")) |>
+    group_by(group) |>
     mutate(length.group = length(group))
   original_glength <- length(unique(group_results_inner$group))
   group_results_inner <- subset(group_results_inner, length.group == biters)
@@ -170,7 +170,7 @@ panel_empirical_bootstrap <- function(attgt.list,
     warning("dropping some groups due to small groups")
   }
 
-  group_results_se <- group_results_inner %>%
+  group_results_se <- group_results_inner |>
     transmute(se = sd(att.g))
   group_results_se <- group_results_se[1:new_glength, ]
 
@@ -183,8 +183,8 @@ panel_empirical_bootstrap <- function(attgt.list,
   overall_se     <- sd(overall_draws)
   overall_cval   <- quantile(abs((overall_draws - overall_att) / overall_se),
                              1 - alp, type = 1)
-  overall_results <- tibble(att = overall_att, se = overall_se,
-                            crit_val = overall_cval)
+  overall_results <- data.frame(att = overall_att, se = overall_se,
+                                crit_val = overall_cval)
 
 
   # return all results

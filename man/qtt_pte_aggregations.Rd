@@ -26,6 +26,6 @@ named list with elements \code{overall_results},
 \description{
 Aggregate group-time F0/F1 distributions into QTT curves at
 the overall, group, and dynamic level.  CDFs are mixed first using
-\code{BMisc::combineDfs} and then inverted at all quantile levels in
+\code{BMisc::combine_ecdfs} and then inverted at all quantile levels in
 \code{probs}, avoiding the bias from averaging scalar QTTs.
 }

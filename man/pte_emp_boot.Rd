@@ -12,7 +12,8 @@ pte_emp_boot(
   overall_weights = NULL,
   dyn_weights = NULL,
   group_weights = NULL,
-  extra_gt_returns = NULL
+  extra_gt_returns = NULL,
+  ptep = NULL
 )
 }
 \arguments{
