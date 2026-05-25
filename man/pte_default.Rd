@@ -24,7 +24,8 @@ pte_default(
   alp = 0.05,
   boot_type = "multiplier",
   biters = 100,
-  cl = 1
+  cl = 1,
+  ...
 )
 }
 \arguments{
@@ -93,6 +94,9 @@ parameter.}
 \item{biters}{number of bootstrap iterations; default is 100}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
+
+\item{...}{additional arguments passed to \code{pte}, such as \code{min_e},
+\code{max_e}, and \code{balance_e} for controlling the event study range.}
 }
 \value{
 \code{pte_results} object

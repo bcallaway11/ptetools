@@ -1,0 +1,99 @@
+# Class for Continuous Treatments
+
+Holds results from computing dose-specific treatment effects with a
+continuous treatment
+
+## Usage
+
+``` r
+dose_obj(
+  dose,
+  overall_att = NULL,
+  overall_att_se = NULL,
+  overall_att_inffunc = NULL,
+  overall_acrt = NULL,
+  overall_acrt_se = NULL,
+  overall_acrt_inffunc = NULL,
+  att.d = NULL,
+  att.d_se = NULL,
+  att.d_crit.val = NULL,
+  att.d_inffunc = NULL,
+  acrt.d = NULL,
+  acrt.d_se = NULL,
+  acrt.d_crit.val = NULL,
+  acrt.d_inffunc = NULL,
+  pte_params = NULL
+)
+```
+
+## Arguments
+
+- dose:
+
+  vector containing the values of the dose used in estimation
+
+- overall_att:
+
+  estimate of the overall ATT, the mean of ATT(D) given D \> 0
+
+- overall_att_se:
+
+  the standard error of the estimate of overall_att
+
+- overall_att_inffunc:
+
+  the influence function for estimating overall_att
+
+- overall_acrt:
+
+  estimate of the overall ACRT, the mean of ACRT(D\|D) given D \> 0
+
+- overall_acrt_se:
+
+  the standard error for the estimate of overall_acrt
+
+- overall_acrt_inffunc:
+
+  the influence function for estimating overall_acrt
+
+- att.d:
+
+  estimates of ATT(d) for each value of `dose`
+
+- att.d_se:
+
+  standard error of ATT(d) for each value of `dose`
+
+- att.d_crit.val:
+
+  critical value to produce pointwise or uniform confidence interval for
+  ATT(d)
+
+- att.d_inffunc:
+
+  matrix containing the influence function from estimating ATT(d)
+
+- acrt.d:
+
+  estimates of ACRT(d) for each value of `dose`
+
+- acrt.d_se:
+
+  standard error of ACRT(d) for each value of `dose`
+
+- acrt.d_crit.val:
+
+  critical value to produce pointwise or uniform confidence interval for
+  ACRT(d)
+
+- acrt.d_inffunc:
+
+  matrix containing the influence function from estimating ACRT(d)
+
+- pte_params:
+
+  a pte_params object containing other parameters passed to the function
+
+## Value
+
+a `dose_obj` object

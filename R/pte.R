@@ -391,6 +391,8 @@ pte <- function(yname,
 #' @inheritParams pte_attgt
 #' @inheritParams pte
 #' @inheritParams pte_params
+#' @param ... additional arguments passed to \code{pte}, such as \code{min_e},
+#'   \code{max_e}, and \code{balance_e} for controlling the event study range.
 #'
 #' @return `pte_results` object
 #'
@@ -434,7 +436,8 @@ pte_default <- function(yname,
                         alp = 0.05,
                         boot_type = "multiplier",
                         biters = 100,
-                        cl = 1) {
+                        cl = 1,
+                        ...) {
   use_subset_fun <- if (isTRUE(panel)) two_by_two_subset else two_by_two_rcs_subset
   use_attgt_fun <- if (isTRUE(panel)) pte_attgt else did_rcs_attgt
 
@@ -467,7 +470,8 @@ pte_default <- function(yname,
     alp = alp,
     boot_type = boot_type,
     biters = biters,
-    cl = cl
+    cl = cl,
+    ...
   )
 
   res

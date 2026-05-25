@@ -6,15 +6,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Panel Treatment Effects Tools • ptetools</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Panel Treatment Effects Tools">
 <meta name="description" content="Generic code for estimating treatment effects with panel data. The idea is to break into separate steps organizing the data, looping over groups and time periods, computing group-time average treatment effects, and aggregating group-time average treatment effects. Often, one is able to implement a new identification/estimation procedure by simply replacing the step on estimating group-time average treatment effects. See several different examples of this approach in the package documentation.">
@@ -104,50 +103,47 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
-<span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
-<span><span class="co">#&gt;  -0.0305         0.013     -0.056     -0.0049 *</span></span>
+<span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
+<span><span class="co">#&gt;  -0.0305        0.0179    -0.0655      0.0046 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
-<span><span class="co">#&gt;  Event Time Estimate Std. Error   [95%  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0298     0.0143 -0.0048      0.0643  </span></span>
-<span><span class="co">#&gt;          -2  -0.0024     0.0142 -0.0370      0.0321  </span></span>
-<span><span class="co">#&gt;          -1  -0.0243     0.0122 -0.0538      0.0053  </span></span>
-<span><span class="co">#&gt;           0  -0.0189     0.0148 -0.0547      0.0169  </span></span>
-<span><span class="co">#&gt;           1  -0.0536     0.0193 -0.1004     -0.0067 *</span></span>
-<span><span class="co">#&gt;           2  -0.1363     0.0390 -0.2307     -0.0418 *</span></span>
-<span><span class="co">#&gt;           3  -0.1008     0.0331 -0.1809     -0.0207 *</span></span>
+<span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  </span></span>
+<span><span class="co">#&gt;          -3   0.0298     0.0144       -0.0067      0.0662  </span></span>
+<span><span class="co">#&gt;          -2  -0.0024     0.0145       -0.0391      0.0342  </span></span>
+<span><span class="co">#&gt;          -1  -0.0243     0.0142       -0.0601      0.0116  </span></span>
+<span><span class="co">#&gt;           0  -0.0189     0.0108       -0.0463      0.0084  </span></span>
+<span><span class="co">#&gt;           1  -0.0536     0.0169       -0.0963     -0.0109 *</span></span>
+<span><span class="co">#&gt;           2  -0.1363     0.0330       -0.2196     -0.0530 *</span></span>
+<span><span class="co">#&gt;           3  -0.1008     0.0363       -0.1925     -0.0091 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
-<span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-3-1.png"><!-- --></p>
-<p>What’s most interesting here, is that the only “new” code that needs to be write is in <a href="https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R">the <code>did_attgt</code> function</a>. You will see that this is a very small amount of code.</p>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-3-1.png"></p>
+<p>What’s most interesting here, is that the only “new” code that needs to be written is in <a href="https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R">the <code>did_attgt</code> function</a>. You will see that this is a very small amount of code.</p>
 </div>
 <div class="section level2">
 <h2 id="example-2-policy-evaluation-during-a-pandemic">Example 2: Policy Evaluation during a Pandemic<a class="anchor" aria-label="anchor" href="#example-2-policy-evaluation-during-a-pandemic"></a>
 </h2>
 <p>As a next example, consider trying to estimate effects of COVID-19 related policies during a pandemic. The estimates below are for the effects of state-level shelter-in-place orders during the early part of the pandemic.</p>
-<p>The data for this example comes from the <code>ppe</code> package which can be loaded by running</p>
+<p>The data for this example is included in the <code>ptetools</code> package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"bcallaway11/ppe"</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ppe</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">covid_data</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">covid_data</span><span class="op">)</span></span></code></pre></div>
 <p><a href="https://arxiv.org/abs/2105.06927" class="external-link">Callaway and Li (2021)</a> argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of COVID-19 cases being highly nonlinear. However, they still deal with the challenge of variation in treatment timing. Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.</p>
-<p>The <code>ptetools</code> package is particularly useful here.</p>
+<p>The <code>ptetools</code> package handles this through <code>pte_default</code> with <code>lagged_outcome_cov = TRUE</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># formula for covariates</span></span>
 <span><span class="va">xformla</span> <span class="op">&lt;-</span> <span class="op">~</span> <span class="va">current</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">current</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">region</span> <span class="op">+</span> <span class="va">totalTestResults</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">covid_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pte.html">pte</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">covid_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pte_default.html">pte_default</a></span><span class="op">(</span></span>
 <span>  yname <span class="op">=</span> <span class="st">"positive"</span>,</span>
 <span>  gname <span class="op">=</span> <span class="st">"group"</span>,</span>
 <span>  tname <span class="op">=</span> <span class="st">"time.period"</span>,</span>
 <span>  idname <span class="op">=</span> <span class="st">"state_id"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">covid_data2</span>,</span>
-<span>  setup_pte_fun <span class="op">=</span> <span class="va">setup_pte_basic</span>,</span>
-<span>  subset_fun <span class="op">=</span> <span class="va">two_by_two_subset</span>,</span>
-<span>  attgt_fun <span class="op">=</span> <span class="va">covid_attgt</span>,</span>
-<span>  xformla <span class="op">=</span> <span class="va">xformla</span>,</span>
+<span>  xformula <span class="op">=</span> <span class="va">xformla</span>,</span>
+<span>  d_outcome <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  lagged_outcome_cov <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  max_e <span class="op">=</span> <span class="fl">21</span>,</span>
 <span>  min_e <span class="op">=</span> <span class="op">-</span><span class="fl">10</span></span>
 <span><span class="op">)</span></span>
@@ -155,49 +151,49 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">covid_res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
-<span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
-<span><span class="co">#&gt;  14.8882       76.5819  -135.2096    164.9859 </span></span>
+<span><span class="co">#&gt;       ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
+<span><span class="co">#&gt;  -13.2547       68.2125  -146.9487    120.4393 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
-<span><span class="co">#&gt;  Event Time Estimate Std. Error     [95%  Conf. Band] </span></span>
-<span><span class="co">#&gt;         -10  -3.7266     3.7443  -13.6824      6.2291 </span></span>
-<span><span class="co">#&gt;          -9   2.6607     1.3125   -0.8292      6.1505 </span></span>
-<span><span class="co">#&gt;          -8   0.8290     2.4008   -5.5547      7.2126 </span></span>
-<span><span class="co">#&gt;          -7   5.2843     2.0354   -0.1277     10.6964 </span></span>
-<span><span class="co">#&gt;          -6   2.8555     1.9891   -2.4335      8.1445 </span></span>
-<span><span class="co">#&gt;          -5   1.3589     4.3728  -10.2680     12.9859 </span></span>
-<span><span class="co">#&gt;          -4   0.3294     3.9515  -10.1774     10.8361 </span></span>
-<span><span class="co">#&gt;          -3  -4.2227     5.3801  -18.5279     10.0825 </span></span>
-<span><span class="co">#&gt;          -2  -3.8447     2.3510  -10.0960      2.4065 </span></span>
-<span><span class="co">#&gt;          -1  -0.2234     3.8195  -10.3790      9.9323 </span></span>
-<span><span class="co">#&gt;           0 -10.8156     7.8065  -31.5725      9.9412 </span></span>
-<span><span class="co">#&gt;           1 -13.7998    13.2360  -48.9935     21.3939 </span></span>
-<span><span class="co">#&gt;           2  -7.8432    11.1086  -37.3801     21.6938 </span></span>
-<span><span class="co">#&gt;           3  -4.5541    11.5184  -35.1808     26.0725 </span></span>
-<span><span class="co">#&gt;           4  -3.5368    11.4626  -34.0151     26.9415 </span></span>
-<span><span class="co">#&gt;           5   8.5221    12.0109  -23.4141     40.4583 </span></span>
-<span><span class="co">#&gt;           6   1.1140    14.4510  -37.3100     39.5380 </span></span>
-<span><span class="co">#&gt;           7   6.6384    17.7043  -40.4361     53.7130 </span></span>
-<span><span class="co">#&gt;           8   7.1288    31.6224  -76.9530     91.2106 </span></span>
-<span><span class="co">#&gt;           9  10.8758    27.1430  -61.2955     83.0471 </span></span>
-<span><span class="co">#&gt;          10  17.5057    27.3018  -55.0877     90.0991 </span></span>
-<span><span class="co">#&gt;          11  40.8318    36.8285  -57.0926    138.7561 </span></span>
-<span><span class="co">#&gt;          12  48.6134    47.0816  -76.5730    173.7998 </span></span>
-<span><span class="co">#&gt;          13  52.4228    50.6093  -82.1436    186.9892 </span></span>
-<span><span class="co">#&gt;          14  50.2000    53.7874  -92.8168    193.2169 </span></span>
-<span><span class="co">#&gt;          15  68.2960    69.9730 -117.7571    254.3491 </span></span>
-<span><span class="co">#&gt;          16  44.7305    80.1319 -168.3345    257.7955 </span></span>
-<span><span class="co">#&gt;          17  61.4670    86.4689 -168.4476    291.3815 </span></span>
-<span><span class="co">#&gt;          18  50.4635   106.9963 -234.0318    334.9589 </span></span>
-<span><span class="co">#&gt;          19  47.3392   130.2984 -299.1149    393.7933 </span></span>
-<span><span class="co">#&gt;          20  28.6326   108.3420 -259.4409    316.7061 </span></span>
-<span><span class="co">#&gt;          21   4.3445   169.7318 -446.9601    455.6491 </span></span>
+<span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band] </span></span>
+<span><span class="co">#&gt;         -10  -6.3170     5.8206      -20.7487      8.1148 </span></span>
+<span><span class="co">#&gt;          -9   2.1087     1.0787       -0.5659      4.7834 </span></span>
+<span><span class="co">#&gt;          -8  -2.7721     1.1642       -5.6587      0.1144 </span></span>
+<span><span class="co">#&gt;          -7   3.8965     1.7664       -0.4831      8.2761 </span></span>
+<span><span class="co">#&gt;          -6  -1.0588     2.6137       -7.5393      5.4217 </span></span>
+<span><span class="co">#&gt;          -5   2.4337     5.7723      -11.8782     16.7456 </span></span>
+<span><span class="co">#&gt;          -4   0.2436     1.3876       -3.1970      3.6841 </span></span>
+<span><span class="co">#&gt;          -3  -1.3052     4.3062      -11.9821      9.3717 </span></span>
+<span><span class="co">#&gt;          -2   0.4594     1.3834       -2.9705      3.8894 </span></span>
+<span><span class="co">#&gt;          -1   4.0376     2.7897       -2.8794     10.9545 </span></span>
+<span><span class="co">#&gt;           0  -3.2518     3.9590      -13.0678      6.5643 </span></span>
+<span><span class="co">#&gt;           1  -7.4231    10.9962      -34.6873     19.8411 </span></span>
+<span><span class="co">#&gt;           2  -0.3148     8.3794      -21.0910     20.4613 </span></span>
+<span><span class="co">#&gt;           3   2.7880     6.6221      -13.6309     19.2070 </span></span>
+<span><span class="co">#&gt;           4   1.3625    11.4217      -26.9568     29.6818 </span></span>
+<span><span class="co">#&gt;           5  -2.9563    19.7428      -51.9074     45.9947 </span></span>
+<span><span class="co">#&gt;           6 -17.2610    24.4538      -77.8925     43.3705 </span></span>
+<span><span class="co">#&gt;           7 -19.2258    36.7338     -110.3048     71.8531 </span></span>
+<span><span class="co">#&gt;           8 -21.5150    41.6608     -124.8102     81.7803 </span></span>
+<span><span class="co">#&gt;           9 -25.2793    52.8104     -156.2191    105.6605 </span></span>
+<span><span class="co">#&gt;          10 -23.0541    56.4574     -163.0364    116.9282 </span></span>
+<span><span class="co">#&gt;          11  -3.8346    62.5346     -158.8848    151.2156 </span></span>
+<span><span class="co">#&gt;          12  -5.6789    48.9659     -127.0865    115.7287 </span></span>
+<span><span class="co">#&gt;          13 -12.4977    75.7291     -200.2630    175.2675 </span></span>
+<span><span class="co">#&gt;          14 -19.6199    97.6364     -261.7026    222.4629 </span></span>
+<span><span class="co">#&gt;          15 -11.6638   106.8833     -276.6738    253.3462 </span></span>
+<span><span class="co">#&gt;          16 -15.0522   105.6627     -277.0357    246.9313 </span></span>
+<span><span class="co">#&gt;          17  -3.3234   110.5480     -277.4196    270.7728 </span></span>
+<span><span class="co">#&gt;          18 -14.3328   112.3203     -292.8233    264.1577 </span></span>
+<span><span class="co">#&gt;          19 -26.1852   130.2347     -349.0934    296.7230 </span></span>
+<span><span class="co">#&gt;          20 -40.7039   117.1056     -331.0591    249.6514 </span></span>
+<span><span class="co">#&gt;          21 -58.7364   134.7157     -392.7549    275.2821 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
-<span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">covid_res</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylim</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-7-1.png"><!-- --></p>
-<p>What’s most interesting is just how little code needs to be written here. The only new code required is the <code><a href="https://rdrr.io/pkg/ppe/man/covid_attgt.html" class="external-link">ppe::covid_attgt</a></code> function which is <a href="https://github.com/bcallaway11/ppe/blob/master/R/covid_attgt.R" class="external-link">available here</a>, and, as you can see, this is very simple.</p>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">covid_res</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylim</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-7-1.png"></p>
+<p>What’s most interesting is just how little code needs to be written here. The <code>pte_default</code> function handles the unconfoundedness-type identification strategy directly, with no custom <code>attgt_fun</code> required.</p>
 </div>
 <div class="section level2">
 <h2 id="example-3-empirical-bootstrap">Example 3: Empirical Bootstrap<a class="anchor" aria-label="anchor" href="#example-3-empirical-bootstrap"></a>
@@ -234,28 +230,29 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
-<span><span class="co">#&gt;  -0.0323        0.0128    -0.0574     -0.0071 *</span></span>
+<span><span class="co">#&gt;  -0.0323        0.0127    -0.0557     -0.0088 *</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
-<span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Pointwise  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0269     0.0110          0.0053      0.0485 *</span></span>
-<span><span class="co">#&gt;          -2  -0.0050     0.0133         -0.0311      0.0211  </span></span>
-<span><span class="co">#&gt;          -1  -0.0229     0.0152         -0.0526      0.0069  </span></span>
-<span><span class="co">#&gt;           0  -0.0201     0.0124         -0.0445      0.0042  </span></span>
-<span><span class="co">#&gt;           1  -0.0547     0.0166         -0.0872     -0.0222 *</span></span>
-<span><span class="co">#&gt;           2  -0.1382     0.0372         -0.2111     -0.0653 *</span></span>
-<span><span class="co">#&gt;           3  -0.1069     0.0392         -0.1836     -0.0302 *</span></span>
+<span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  </span></span>
+<span><span class="co">#&gt;          -3   0.0269     0.0130        0.0014      0.0524 *</span></span>
+<span><span class="co">#&gt;          -2  -0.0050     0.0122       -0.0290      0.0190  </span></span>
+<span><span class="co">#&gt;          -1  -0.0229     0.0151       -0.0524      0.0067  </span></span>
+<span><span class="co">#&gt;           0  -0.0201     0.0126       -0.0448      0.0045  </span></span>
+<span><span class="co">#&gt;           1  -0.0547     0.0153       -0.0847     -0.0248 *</span></span>
+<span><span class="co">#&gt;           2  -0.1382     0.0318       -0.2005     -0.0759 *</span></span>
+<span><span class="co">#&gt;           3  -0.1069     0.0265       -0.1588     -0.0550 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
-<span><span class="fu"><a href="reference/ggpte.html">ggpte</a></span><span class="op">(</span><span class="va">did_res_noif</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-9-1.png"><!-- --></p>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">did_res_noif</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-9-1.png"></p>
 <p>What’s exciting about this is just how little new code needs to be written.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=ptetools" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/bcallaway11/ptetools/">Browse source code</a></li>
 <li><a href="https://github.com/bcallaway11/ptetools/issues">Report a bug</a></li>
 </ul>
@@ -285,7 +282,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

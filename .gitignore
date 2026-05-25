@@ -4,6 +4,7 @@
 .Ruserdata
 CLAUDE.md
 AGENTS.md
+dev/
 .revdeplite/results
 .revdeplite/github
 .revdeplite/*.rds

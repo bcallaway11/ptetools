@@ -1,6 +1,6 @@
 Package: ptetools
 Title: Panel Treatment Effects Tools
-Version: 1.0.0
+Version: 1.0.1
 Authors@R:
     person(given = "Brantly",
            family = "Callaway",
