@@ -384,6 +384,8 @@ gt_data_frame <- function(data) {
 #' @param group_weights list containing weights on underlying ATT(g,t)
 #'  corresponding to deliver averaged group-specific treatment effects
 #'
+#' @param ptep \code{pte_params} object, stored for reference in the result.
+#'
 #' @inheritParams attgt_if
 #'
 #' @return a `pte_emp_boot` object

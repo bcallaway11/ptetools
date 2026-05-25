@@ -1,17 +1,19 @@
-name: Reverse Dependency Check, Including Tests
+name: Reverse Dependency Check
 
 on:
-  workflow_dispatch: {}
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   revdep_cran:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: 'release'
+          use-public-rspm: true
 
       - name: System libraries
         run: |
@@ -22,19 +24,19 @@ jobs:
             libpng-dev libjpeg-dev libtiff5-dev \
             gfortran libblas-dev liblapack-dev
 
-      - name: Install tools explicitly (no cache)
+      - name: Install tools
         run: |
           Rscript -e 'if (!requireNamespace("pak", quietly=TRUE)) install.packages("pak", repos="https://cloud.r-project.org")'
-          Rscript -e 'pak::pkg_install(c("r-lib/revdepcheck","r-lib/rcmdcheck","r-lib/remotes"))'
+          Rscript -e 'pak::pkg_install(c("r-lib/revdepcheck", "r-lib/rcmdcheck", "r-lib/remotes"))'
 
-      - name: Install ptetools deps
+      - name: Install ptetools dependencies
         run: |
           Rscript -e "options(repos=c(CRAN='https://cloud.r-project.org')); remotes::install_deps(dependencies=TRUE)"
 
-      - name: Run revdepcheck (CRAN/Bioc reverse deps of ptetools)
+      - name: Run revdepcheck (CRAN reverse deps)
         env:
-          _R_CHECK_FORCE_SUGGESTS_: "false"   # keep tests ON, but avoid heavy Suggests
-          WORKERS: "2"                        # parallelism within runner
+          _R_CHECK_FORCE_SUGGESTS_: "false"
+          WORKERS: "2"
           CHECK_ARGS: "--no-manual"
         run: |
           Rscript -e "
@@ -48,23 +50,21 @@ jobs:
             )
           "
 
-      - name: Fail build if any reverse dep has errors
+      - name: Fail if any reverse dep has errors
         if: always()
         run: |
           Rscript -e "
             s <- revdepcheck::revdep_summary()
             if (is.null(s)) quit(status=0)
             print(s)
-            has_err <- any(s$errors > 0, na.rm=TRUE)
-            if (has_err) {
+            if (any(s\$errors > 0, na.rm=TRUE)) {
               message('One or more reverse dependencies have errors.')
               quit(status=1)
             }
           "
 
-      - name: Upload revdepcheck results
+      - uses: actions/upload-artifact@v7
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: revdep-CRAN-results
           path: revdep/
@@ -73,17 +73,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: revdep_cran
     env:
-      # ==== HARD-CODED GitHub reverse dependents ====
       GH_REPOS: |
         bcallaway11/ife
         bcallaway11/qte
       CHECK_ARGS: "--no-manual"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: 'release'
+          use-public-rspm: true
 
       - name: System libraries
         run: |
@@ -94,18 +94,12 @@ jobs:
             libpng-dev libjpeg-dev libtiff5-dev \
             gfortran libblas-dev liblapack-dev
 
-      - name: Install tools (cached)
-        uses: r-lib/actions/setup-r-dependencies@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: any::rcmdcheck
+          extra-packages: any::rcmdcheck
           cache-version: 1
 
-      - name: Check GitHub reverse dependents (sequential)
-        env:
-          GH_REPOS: |
-            owner1/repoA
-            owner2/repoB
-          CHECK_ARGS: --no-manual
+      - name: Check GitHub reverse dependents
         shell: bash
         run: |
           set -euo pipefail
@@ -120,7 +114,6 @@ jobs:
               subprocess.run(["git","clone","--depth","1",f"https://github.com/{repo}",dest], check=False)
               outdir = f"gh_results/{repo.replace('/', '__')}"
               pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)
-              # Run R CMD check with tests; fail on errors
               cmd = [
                   "Rscript","-e",
                   f"res<-rcmdcheck::rcmdcheck('{dest}', build=TRUE, error_on='error', args='{os.environ.get('CHECK_ARGS','')}'); rcmdcheck::save_logs(res, '{outdir}')"
@@ -128,16 +121,14 @@ jobs:
               print(f"== rcmdcheck for {repo} ==")
               rc = subprocess.call(cmd)
               if rc != 0:
-                  print(f\"!! {repo} check failed\")
+                  print(f"!! {repo} check failed")
                   fail = True
           print('GitHub checks done.')
           sys.exit(1 if fail else 0)
           PY
 
-
-      - name: Upload GitHub results
+      - uses: actions/upload-artifact@v7
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: revdep-GitHub-results
           path: gh_results/

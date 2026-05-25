@@ -11,6 +11,12 @@
 
 \item{type}{which aggregation to plot. See \code{\link{autoplot.pte_qtt}}.}
 
+\item{cband}{logical; if \code{TRUE} (default), show uniform confidence band.}
+
+\item{plot_probs}{numeric vector of quantile levels to show. See \code{\link{autoplot.pte_qtt}}.}
+
+\item{plot_ci}{logical or \code{NULL}. See \code{\link{autoplot.pte_qtt}}.}
+
 \item{...}{passed to \code{autoplot.pte_qtt}}
 }
 \value{

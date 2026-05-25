@@ -89,6 +89,10 @@ potential outcomes on covariates.  For ife, this could be something
 like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 
+\item{aggregation_fun}{An optional function for aggregating group-time
+treatment effects.  When \code{NULL} (the default), the function is
+selected automatically based on \code{gt_type}.}
+
 \item{...}{extra arguments that can be passed to create the correct subsets
 of the data (depending on \code{subset_fun}), to estimate group time
 average treatment effects (depending on \code{attgt_fun}), or to

@@ -109,6 +109,11 @@ objects will be computed using the empirical bootstrap.  This is usually
 (perhaps substantially) easier to code, but also will usually be (perhaps
 substantially) computationally slower.}
 
+\item{aggregation_fun}{An optional function for aggregating group-time
+treatment effects in the empirical bootstrap path.  When \code{NULL}
+(the default), the aggregation function is selected automatically based
+on \code{gt_type}.  Providing a custom function overrides the default.}
+
 \item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
 FALSE for repeated cross sections.}
 
@@ -200,7 +205,7 @@ did_res <- pte(
 )
 
 summary(did_res)
-ggpte(did_res)
+ggplot2::autoplot(did_res)
 
 }
 \seealso{

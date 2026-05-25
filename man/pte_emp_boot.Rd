@@ -41,6 +41,8 @@ be something like propensity score estimates, regressions of untreated
 potential outcomes on covariates.  For ife, this could be something
 like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
+
+\item{ptep}{\code{pte_params} object, stored for reference in the result.}
 }
 \value{
 a \code{pte_emp_boot} object

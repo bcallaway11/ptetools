@@ -239,6 +239,11 @@ compute.pte <- function(ptep,
 #' @param probs For `gt_type = "qtt"`, a numeric vector of quantile levels at
 #'  which to evaluate the QTT curve.  Defaults to `seq(0.05, 0.95, 0.05)`.
 #'
+#' @param aggregation_fun An optional function for aggregating group-time
+#'  treatment effects in the empirical bootstrap path.  When \code{NULL}
+#'  (the default), the aggregation function is selected automatically based
+#'  on \code{gt_type}.  Providing a custom function overrides the default.
+#'
 #' @param ... extra arguments that can be passed to create the correct subsets
 #'  of the data (depending on \code{subset_fun}), to estimate group time
 #'  average treatment effects (depending on \code{attgt_fun}), or to
@@ -265,7 +270,7 @@ compute.pte <- function(ptep,
 #' )
 #'
 #' summary(did_res)
-#' ggpte(did_res)
+#' ggplot2::autoplot(did_res)
 #'
 #' @export
 pte <- function(yname,
@@ -407,7 +412,7 @@ pte <- function(yname,
 #' )
 #'
 #' summary(lou_res)
-#' ggpte(lou_res)
+#' ggplot2::autoplot(lou_res)
 #'
 #' @export
 pte_default <- function(yname,

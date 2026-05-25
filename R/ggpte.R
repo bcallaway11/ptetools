@@ -127,6 +127,9 @@ autoplot.pte_qtt <- function(object, type = "overall", cband = TRUE,
 #'
 #' @param x a \code{pte_qtt} object
 #' @param type which aggregation to plot. See \code{\link{autoplot.pte_qtt}}.
+#' @param cband logical; if \code{TRUE} (default), show uniform confidence band.
+#' @param plot_probs numeric vector of quantile levels to show. See \code{\link{autoplot.pte_qtt}}.
+#' @param plot_ci logical or \code{NULL}. See \code{\link{autoplot.pte_qtt}}.
 #' @param ... passed to \code{autoplot.pte_qtt}
 #'
 #' @return invisibly returns the \code{ggplot} object

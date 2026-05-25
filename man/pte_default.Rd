@@ -122,6 +122,6 @@ lou_res <- pte_default(
 )
 
 summary(lou_res)
-ggpte(lou_res)
+ggplot2::autoplot(lou_res)
 
 }

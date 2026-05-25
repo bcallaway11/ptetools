@@ -1,10 +1,11 @@
 ---
-output: github_document
+format: gfm
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.qmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -14,13 +15,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r, echo=FALSE, results="hide", warning=FALSE, message=FALSE}
+```{r}
+#| echo: false
+#| results: hide
 library(ggplot2)
 library(dplyr)
-library(ppe)
 library(ptetools)
 data(covid_data)
 ```
+
 # Panel Treatment Effects Tools (ptetools) Package <img src="man/figures/logo.png" align="right" alt="ptetools" width="155" />
 
 ## Structure of panel data causal inference problems
@@ -81,32 +84,32 @@ did_res <- pte(
 )
 
 summary(did_res)
-ggpte(did_res)
+ggplot2::autoplot(did_res)
 ```
 
-What's most interesting here, is that the only "new" code that needs to be write is in [the `did_attgt` function](https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R).  You will see that this is a very small amount of code.
+What's most interesting here, is that the only "new" code that needs to be written is in [the `did_attgt` function](https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R).  You will see that this is a very small amount of code.
 
 ## Example 2: Policy Evaluation during a Pandemic
 
 As a next example, consider trying to estimate effects of COVID-19 related policies during a pandemic.  The estimates below are for the effects of state-level shelter-in-place orders during the early part of the pandemic.
 
-The data for this example comes from the `ppe` package which can be loaded by running
+The data for this example is included in the `ptetools` package:
 ```{r eval=FALSE}
-devtools::install_github("bcallaway11/ppe")
-library(ppe)
 data(covid_data)
 ```
 
 [Callaway and Li (2021)](https://arxiv.org/abs/2105.06927) argue that a particular unconfoundedness-type strategy is more appropriate in this context than DID-type strategies due to the spread of COVID-19 cases being highly nonlinear.  However, they still deal with the challenge of variation in treatment timing.  Therefore, it is still useful to think about group-time average treatment effects, but the DID strategy should be replaced with their particular unconfoundedness type assumption.
 
-The `ptetools` package is particularly useful here.
+The `ptetools` package handles this through `pte_default` with `lagged_outcome_cov = TRUE`.
 
 ```{r}
 # formula for covariates
 xformla <- ~ current + I(current^2) + region + totalTestResults
 ```
 
-```{r echo=FALSE, results=FALSE, warning=FALSE}
+```{r}
+#| echo: false
+#| results: false
 # drop some data as in paper
 trim_id_list <- lapply(c(10, 15, 20, 25, 30),
   did::trimmer,
@@ -119,32 +122,28 @@ trim_id_list <- lapply(c(10, 15, 20, 25, 30),
   threshold = 0.95
 )
 time_id_list <- unlist(trim_id_list)
-
-# unique(subset(covid_data, state_id %in% time_id_list)$state)
 covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))
 ```
 
-
 ```{r}
-covid_res <- pte(
+covid_res <- pte_default(
   yname = "positive",
   gname = "group",
   tname = "time.period",
   idname = "state_id",
   data = covid_data2,
-  setup_pte_fun = setup_pte_basic,
-  subset_fun = two_by_two_subset,
-  attgt_fun = covid_attgt,
-  xformla = xformla,
+  xformula = xformla,
+  d_outcome = FALSE,
+  lagged_outcome_cov = TRUE,
   max_e = 21,
   min_e = -10
 )
 
 summary(covid_res)
-ggpte(covid_res) + ylim(c(-1000, 1000))
+ggplot2::autoplot(covid_res) + ylim(c(-1000, 1000))
 ```
 
-What's most interesting is just how little code needs to be written here.  The only new code required is the `ppe::covid_attgt` function which is [available here](https://github.com/bcallaway11/ppe/blob/master/R/covid_attgt.R), and, as you can see, this is very simple.
+What's most interesting is just how little code needs to be written here.  The `pte_default` function handles the unconfoundedness-type identification strategy directly, with no custom `attgt_fun` required.
 
 
 ## Example 3: Empirical Bootstrap
@@ -182,7 +181,7 @@ did_res_noif <- pte(
 )
 
 summary(did_res_noif)
-ggpte(did_res_noif)
+ggplot2::autoplot(did_res_noif)
 ```
 
 What's exciting about this is just how little new code needs to be written.

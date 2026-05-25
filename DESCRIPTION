@@ -19,6 +19,7 @@ Imports:
     Matrix,
     ggplot2,
     DRDID,
+    data.table,
     dplyr,
     pbapply,
     splines2

@@ -16,6 +16,9 @@
 #' @inheritParams pte
 #' @inheritParams attgt_if
 #' @param attgt.list list of attgt results from \code{compute.pte}
+#' @param aggregation_fun An optional function for aggregating group-time
+#'  treatment effects.  When \code{NULL} (the default), the function is
+#'  selected automatically based on \code{gt_type}.
 #'
 #' @return \code{pte_emp_boot} object
 #'
