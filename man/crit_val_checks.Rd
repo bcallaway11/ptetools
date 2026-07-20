@@ -7,14 +7,27 @@
 crit_val_checks(crit_val, alp = 0.05)
 }
 \arguments{
-\item{crit_val}{the critical value}
+\item{crit_val}{a simultaneous critical value, possibly NA/Inf/degenerate}
 
-\item{alp}{the significance level}
+\item{alp}{significance level}
 }
 \value{
 a (possibly adjusted) critical value
+
+the (possibly corrected) critical value, with a \code{"cband"}
+logical attribute
 }
 \description{
 A function to perform sanity checks and possibly adjust a
 a critical value to form a uniform confidence band
+
+Validates a bootstrapped simultaneous critical value, falling
+back to the pointwise normal critical value if it is degenerate. Whether
+the fallback happened is signaled through the \code{"cband"} attribute of the
+returned value (\code{TRUE} if the simultaneous critical value is usable,
+\code{FALSE} if we fell back to pointwise) -- callers that need to downgrade
+their own \code{cband} bookkeeping should read that attribute, since this
+function only has access to \code{crit_val} and \code{alp}, not the caller's
+\code{ptep}/\code{cband} state.
 }
+\keyword{internal}

@@ -114,6 +114,7 @@ pte_aggte <- function(attgt,
     # use multiplier bootstrap (across groups) to get critical value
     # for constructing uniform confidence bands
     selective.crit.val <- stats::qnorm(1 - alp / 2)
+    selective.cband <- FALSE
     if (cband == TRUE) {
       if (bstrap == FALSE) {
         warning("Used bootstrap procedure to compute simultaneous confidence band")
@@ -121,6 +122,7 @@ pte_aggte <- function(attgt,
       selective.crit.val <- mboot2(selective.inf.func.g, biters = biters, alp = alp)$crit_val
 
       selective.crit.val <- crit_val_checks(selective.crit.val, alp)
+      selective.cband <- isTRUE(attr(selective.crit.val, "cband"))
     }
 
     # get overall att under selective treatment timing
@@ -168,6 +170,7 @@ pte_aggte <- function(attgt,
         selective.inf.func.g = selective.inf.func.g,
         selective.inf.func = selective.inf.func
       ),
+      cband = selective.cband,
       DIDparams = attgt
     ))
   } else if (type == "dynamic") {
@@ -231,6 +234,7 @@ pte_aggte <- function(attgt,
     dynamic.inf.func.e <- simplify2array(BMisc::get_list_element(dynamic.se.inner, "inf.func"))
 
     dynamic.crit.val <- stats::qnorm(1 - alp / 2)
+    dynamic.cband <- FALSE
     if (cband == TRUE) {
       if (bstrap == FALSE) {
         warning("Used bootstrap procedure to compute simultaneous confidence band")
@@ -238,6 +242,7 @@ pte_aggte <- function(attgt,
       dynamic.crit.val <- mboot2(dynamic.inf.func.e, biters = biters, alp = alp)$crit_val
 
       dynamic.crit.val <- crit_val_checks(dynamic.crit.val, alp)
+      dynamic.cband <- isTRUE(attr(dynamic.crit.val, "cband"))
     }
 
     # get overall average treatment effect
@@ -269,6 +274,7 @@ pte_aggte <- function(attgt,
         dynamic.inf.func.e = dynamic.inf.func.e,
         dynamic.inf.func = dynamic.inf.func
       ),
+      cband = dynamic.cband,
       min_e = min_e,
       max_e = max_e,
       balance_e = balance_e,
@@ -473,23 +479,43 @@ overall_weights <- function(attgt,
 #' @return a (possibly adjusted) critical value
 #'
 #' @export
+#' @title Sanity-Check a Simultaneous Critical Value
+#'
+#' @description Validates a bootstrapped simultaneous critical value, falling
+#'  back to the pointwise normal critical value if it is degenerate. Whether
+#'  the fallback happened is signaled through the `"cband"` attribute of the
+#'  returned value (`TRUE` if the simultaneous critical value is usable,
+#'  `FALSE` if we fell back to pointwise) -- callers that need to downgrade
+#'  their own `cband` bookkeeping should read that attribute, since this
+#'  function only has access to `crit_val` and `alp`, not the caller's
+#'  `ptep`/`cband` state.
+#'
+#' @param crit_val a simultaneous critical value, possibly NA/Inf/degenerate
+#' @param alp significance level
+#'
+#' @return the (possibly corrected) critical value, with a `"cband"`
+#'  logical attribute
+#' @keywords internal
 crit_val_checks <- function(crit_val, alp = 0.05) {
+  cband_ok <- TRUE
+
   if (is.na(crit_val) | is.infinite(crit_val)) {
     warning("Simultaneous critival value is NA. This probably happened because we cannot compute t-statistic (std errors are NA). We then report pointwise conf. intervals.")
     crit_val <- stats::qnorm(1 - alp / 2)
-    dp$cband <- FALSE
+    cband_ok <- FALSE
   }
 
   if (crit_val < stats::qnorm(1 - alp / 2)) {
     warning("Simultaneous conf. band is somehow smaller than pointwise one using normal approximation. Since this is unusual, we are reporting pointwise confidence intervals")
     crit_val <- stats::qnorm(1 - alp / 2)
-    dp$cband <- FALSE
+    cband_ok <- FALSE
   }
 
   if (crit_val >= 7) {
     warning("Simultaneous critical value is arguably `too large' to be realible. This usually happens when number of observations per group is small and/or there is no much variation in outcomes.")
   }
 
+  attr(crit_val, "cband") <- cband_ok
   crit_val
 }
 
@@ -517,6 +543,10 @@ crit_val_checks <- function(crit_val, alp = 0.05) {
 #'  bands for dynamic effects, selective treatment timing, or time period
 #'  effects.
 #' @param inf.function The influence function of the chosen aggregated parameters
+#' @param cband Logical indicating whether `crit.val.egt` is a genuine
+#'  simultaneous critical value (`TRUE`) or whether it fell back to the
+#'  pointwise normal critical value, e.g. because standard errors were NA
+#'  (`FALSE`). See [crit_val_checks()].
 #' @param DIDparams A DIDparams object
 #'
 #' @return an aggte_obj
@@ -529,6 +559,7 @@ aggte_obj <- function(overall.att = NULL,
                       se.egt = NULL,
                       crit.val.egt = NULL,
                       inf.function = NULL,
+                      cband = NULL,
                       min_e = NULL,
                       max_e = NULL,
                       balance_e = NULL,
@@ -542,6 +573,7 @@ aggte_obj <- function(overall.att = NULL,
     se.egt = se.egt,
     crit.val.egt = crit.val.egt,
     inf.function = inf.function,
+    cband = cband,
     min_e = min_e,
     max_e = max_e,
     balance_e = balance_e,

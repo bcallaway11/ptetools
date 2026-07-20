@@ -8,7 +8,7 @@ message: 'To cite package "ptetools" in publications use:'
 type: software
 license: GPL-3.0-only
 title: 'ptetools: Panel Treatment Effects Tools'
-version: 1.0.1
+version: 1.0.2
 abstract: Generic code for estimating treatment effects with panel data. The idea
   is to break into separate steps organizing the data, looping over groups and time
   periods, computing group-time average treatment effects, and aggregating group-time
@@ -27,7 +27,7 @@ preferred-citation:
     given-names: Brantly
     email: brantly.callaway@uga.edu
   year: '2026'
-  notes: R package version 1.0.1
+  notes: R package version 1.0.2
   url: https://github.com/bcallaway11/ptetools
 repository-code: https://github.com/bcallaway11/ptetools
 url: https://github.com/bcallaway11/ptetools

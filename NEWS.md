@@ -1,3 +1,12 @@
+# ptetools 1.0.2
+
+* Fixed a bug in `crit_val_checks()` that threw `object 'dp' not found` when
+  a simultaneous critical value could not be computed (e.g. designs with no
+  pre-treatment periods, where standard errors come back `NA`). The fallback
+  to pointwise critical values now works correctly, and `pte()`/`process_dose_gt()`
+  correctly downgrade their `cband` flag so `summary()` reports "Pointwise"
+  rather than "Simult." whenever this fallback occurs.
+
 # ptetools 1.0.1
 
 * Force time periods to be positive integers in `ptetools::setup_pte()`

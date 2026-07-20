@@ -367,6 +367,13 @@ pte <- function(yname,
 
   event_study <- pte_aggte(att_gt, type = "dynamic", bstrap = TRUE, cband = cband, alp = ptep$alp, min_e = min_e, max_e = max_e, balance_e = balance_e)
 
+  # If either aggregation fell back to pointwise critical values (e.g.
+  # because standard errors were NA), downgrade our own cband flag so that
+  # summary.pte_results reports "Pointwise" instead of "Simult." -- the
+  # crit.val.egt stored on overall_att/event_study is already correct either
+  # way, this only affects the printed label.
+  if (!isTRUE(overall_att$cband) || !isTRUE(event_study$cband)) ptep$cband <- FALSE
+
   # output
   out <- pte_results(
     att_gt = att_gt,

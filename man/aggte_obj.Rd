@@ -13,6 +13,7 @@ aggte_obj(
   se.egt = NULL,
   crit.val.egt = NULL,
   inf.function = NULL,
+  cband = NULL,
   min_e = NULL,
   max_e = NULL,
   balance_e = NULL,
@@ -39,6 +40,11 @@ bands for dynamic effects, selective treatment timing, or time period
 effects.}
 
 \item{inf.function}{The influence function of the chosen aggregated parameters}
+
+\item{cband}{Logical indicating whether \code{crit.val.egt} is a genuine
+simultaneous critical value (\code{TRUE}) or whether it fell back to the
+pointwise normal critical value, e.g. because standard errors were NA
+(\code{FALSE}). See \code{\link[=crit_val_checks]{crit_val_checks()}}.}
 
 \item{min_e}{The minimum event time computed in the event study results.
 This is useful when there are a huge number of pre-treatment periods.}

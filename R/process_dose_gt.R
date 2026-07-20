@@ -126,9 +126,11 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     cband <- ptep$cband
     boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp)
     att.d_se <- boot_res$boot_se
+    att_cband_ok <- FALSE
     if (cband) {
         att.d_crit.val <- boot_res$crit_val
         att.d_crit.val <- crit_val_checks(att.d_crit.val, alp)
+        att_cband_ok <- isTRUE(attr(att.d_crit.val, "cband"))
     } else {
         att.d_crit.val <- qnorm(1 - alp / 2)
     }
@@ -148,12 +150,21 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     acrt.d_inffunc <- BMisc::weighted_combine_list(acrt.d_gt_inffunc, o_weights$overall_weight)
     acrt_boot_res <- mboot2(acrt.d_inffunc, biters = biters, alp = alp)
     acrt.d_se <- acrt_boot_res$boot_se
+    acrt_cband_ok <- FALSE
     if (cband) {
         acrt.d_crit.val <- acrt_boot_res$crit_val
         acrt.d_crit.val <- crit_val_checks(acrt.d_crit.val, alp)
+        acrt_cband_ok <- isTRUE(attr(acrt.d_crit.val, "cband"))
     } else {
         acrt.d_crit.val <- qnorm(1 - alp / 2)
     }
+
+    # If either att.d or acrt.d fell back to pointwise critical values (e.g.
+    # because standard errors were NA), downgrade our own cband flag so
+    # summary.dose_obj reports "Pointwise" instead of "Simult." -- the crit
+    # vals themselves are already correct either way, this only affects the
+    # printed label.
+    if (cband && (!att_cband_ok || !acrt_cband_ok)) ptep$cband <- FALSE
 
     dose_obj(
         dose = dvals,
