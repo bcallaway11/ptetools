@@ -194,7 +194,6 @@ pte_attgt <- function(
   if (lagged_outcome_cov) use_formula <- BMisc::add_cov_to_formula("pre", use_formula)
   covmat <- model.matrix(use_formula, data = gt_dataX)
   covmat2 <- covmat[D == 0, ]
-  # www <- gt_dataX[D==0,]$.w
   n_unt <- sum(1 - D)
   precheck_reg <- qr(t(covmat2) %*% covmat2 / n_unt)
   keep_covs <- precheck_reg$pivot[1:precheck_reg$rank]
@@ -231,35 +230,6 @@ pte_attgt <- function(
       i.weights = (.w / sum(.w)),
       inffunc = TRUE
     )
-    # } else if (est_method == "grf") {
-    #   # sampling weights not supported here
-    #   # code requires custom version of grf package
-    #   tau.forest <- causal_forest(X = covmat, Y = Y, W = D)
-    #   # predict(tau.forest)$predictions[D==1]
-
-    #   grf_res <- average_treatment_effect(tau.forest, method = "AIPW", target.sample = "treated")
-    #   this_n <- nrow(covmat)
-    #   this_if <- as.matrix(grf_res$inf_func * this_n)
-    #   # V <- t(this_if) %*% this_if / this_n
-    #   # sqrt(V) / sqrt(this_n)
-    #   # V <- t(grf_res$inf_func/sqrt(this_n)) %*% grf_res$inf_func/sqrt(this_n)
-    #   attgt <- list(ATT = grf_res$estimate, att.inf.func = this_if)
-    # } else if (est_method == "lasso") {
-    #   # code adapted from: https://thomaswiemann.com/ddml/articles/did.html
-    #   learners <- list(what = ddml::mdl_glmnet)
-    #   learners_DX <- learners
-
-    #   att_fit <- ddml::ddml_att(
-    #     y = Y,
-    #     D = D,
-    #     X = covmat,
-    #     learners = learners,
-    #     learners_DX = learners_DX,
-    #     sample_folds = 10,
-    #     silent = TRUE
-    #   )
-    #   inf.func <- att_fit$psi_b + att_fit$att * att_fit$psi_a
-    #   attgt <- list(ATT = att_fit$att, att.inf.func = inf.func)
   } else {
     stop(paste0("est_method: ", est_method, " is not supported"))
   }

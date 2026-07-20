@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="https://github.com/bcallaway11/ptetools"><span class="fa fa-github"></span></a></li>
+      </ul><ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="https://github.com/bcallaway11/ptetools" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul></div>
 
 
@@ -43,7 +43,7 @@
 <span>  <span class="va">subset_fun</span>,</span>
 <span>  <span class="va">attgt_fun</span>,</span>
 <span>  <span class="va">extra_gt_returns</span>,</span>
-<span>  aggregation_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  aggte_fun <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -133,7 +133,7 @@ like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.</p></dd>
 
 
-<dt id="arg-aggregation-fun">aggregation_fun<a class="anchor" aria-label="anchor" href="#arg-aggregation-fun"></a></dt>
+<dt id="arg-aggte-fun">aggte_fun<a class="anchor" aria-label="anchor" href="#arg-aggte-fun"></a></dt>
 <dd><p>An optional function for aggregating group-time
 treatment effects.  When <code>NULL</code> (the default), the function is
 selected automatically based on <code>gt_type</code>.</p></dd>
@@ -161,7 +161,7 @@ aggregating treatment effects (particularly useful are <code>min_e</code>,
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

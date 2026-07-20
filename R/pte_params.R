@@ -165,8 +165,6 @@ setup_pte <- function(yname,
   data$G <- G
   data$id <- id
   n <- length(unique(data$id))
-  # data$original_period <- period
-  # data$original_group <- G
   data$Y <- data[, yname]
   data$.w <- .w
 

@@ -69,6 +69,7 @@ The [`did` package](https://bcallaway11.github.io/did/), which is based on [Call
 This example reproduces DID estimates of the effect of the minimum wage on employment using data from the `did` package.
 
 ```{r}
+#| fig-alt: "Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the minimum wage example."
 library(did)
 data(mpdta)
 did_res <- pte(
@@ -126,6 +127,7 @@ covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))
 ```
 
 ```{r}
+#| fig-alt: "Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the COVID-19 shelter-in-place example."
 covid_res <- pte_default(
   yname = "positive",
   gname = "group",
@@ -168,6 +170,7 @@ did_attgt_noif <- function(gt_data, xformla, ...) {
 
 Now, we can show the same sorts of results as above
 ```{r}
+#| fig-alt: "Event-study plot of ATT estimates by event time, with pointwise confidence intervals, from the empirical bootstrap version of the minimum wage example."
 did_res_noif <- pte(
   yname = "lemp",
   gname = "first.treat",

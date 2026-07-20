@@ -13,16 +13,6 @@ process_att_gt <- function(att_gt_results, ptep) {
   attgt.list <- att_gt_results$attgt.list
   inffunc <- att_gt_results$inffunc
 
-  # a bit of a hack way to get standard errors
-  # with a universal base period when some ATT(g,t)'s
-  # are 0 by construction and have no s.e.'s / inf. func.
-  # if (isTRUE(ptep$base_period == "universal")) {
-  #  set0cols <- sapply(1:ncol(inffunc), function(i) {
-  #    (all(is.na(inffunc[,i])))
-  #  })
-  #  inffunc[,set0cols] <- 0
-  # }
-
   # process results
   attgt.results <- do.call("rbind.data.frame", attgt.list)
   att <- attgt.results$att
@@ -110,9 +100,6 @@ process_att_gt <- function(att_gt_results, ptep) {
     )
   }
 
-  # set groups to be untreated so that we do not drop them later (would be better to have this in
-  # aggte code, but no changes there.  The only place where I know this is used is for staggered_ife
-  # ptep$data[,ptep$gname] <- ifelse( !(ptep$data[,ptep$gname] %in% ptep$glist), 0, ptep$data[,ptep$gname])
   if (is.null(ptep$weightsname)) {
     ptep$data$.w <- 1
   } else {

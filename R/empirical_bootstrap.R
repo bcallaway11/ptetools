@@ -119,8 +119,6 @@ panel_empirical_bootstrap <- function(attgt.list,
       cl = ptep$cl,
       ...
     )
-    # bptep <- ptep
-    # bptep$data <- bdata
 
     # call our function for estimating attgt on the
     # bootstrapped data

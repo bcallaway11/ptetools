@@ -16,7 +16,7 @@ pte(
   setup_pte_fun,
   subset_fun,
   attgt_fun,
-  aggregation_fun = NULL,
+  aggte_fun = NULL,
   panel = TRUE,
   cband = TRUE,
   alp = 0.05,
@@ -125,12 +125,9 @@ pte(
   usually (perhaps substantially) easier to code, but also will usually
   be (perhaps substantially) computationally slower.
 
-- aggregation_fun:
+- aggte_fun:
 
-  An optional function for aggregating group-time treatment effects in
-  the empirical bootstrap path. When `NULL` (the default), the
-  aggregation function is selected automatically based on `gt_type`.
-  Providing a custom function overrides the default.
+  An optional function for aggregating group-time treatment effects.
 
 - panel:
 

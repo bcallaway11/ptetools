@@ -14,7 +14,7 @@ qtt_empirical_bootstrap(
   subset_fun,
   attgt_fun,
   extra_gt_returns,
-  aggregation_fun = NULL,
+  aggte_fun = NULL,
   ...
 )
 ```
@@ -104,7 +104,7 @@ qtt_empirical_bootstrap(
   first step regression 2sls estimates. This argument is also
   potentially useful for debugging.
 
-- aggregation_fun:
+- aggte_fun:
 
   An optional function for aggregating group-time treatment effects.
   When `NULL` (the default), the function is selected automatically

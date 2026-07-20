@@ -113,9 +113,8 @@ process_dose_gt <- function(gt_results, ptep, ...) {
             out_inffunc[keep_mat[, i], ] <- (n / n1_vec[i]) * this_inffunc
             # add comparison group part of the influence function
             # every d is the same with respect to comparison group
-            # note-to-self: don't rescale the influence function for untreated
-            # because these were already rescaled in the call to pte_default above
-            # out_inffunc[keep_mat2[, i], ] <- -(n / n0_vec[i]) * replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
+            # don't rescale the influence function for untreated because these
+            # were already rescaled in the call to pte_default above
             out_inffunc[keep_mat2[, i], ] <- -replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
             out_inffunc
         }
@@ -354,59 +353,4 @@ print.summary.dose_obj <- function(x, ...) {
     cat("---\n")
     cat("Signif. codes: `*' confidence band does not cover 0")
     cat("\n\n")
-
-    # note to self: commented out code that reported results at each value of the dose
-    # # ATT(d)
-    # cat("ATT(d):\n")
-
-    # cband_text1a <- paste0(100 * (1 - alp), "% ")
-    # cband_text1b <- ifelse(bstrap,
-    #     ifelse(cband, "Simult. ", "Pointwise "),
-    #     "Pointwise "
-    # )
-    # cband_text1 <- paste0("[", cband_text1a, cband_text1b)
-
-    # cband_lower <- x$att.d - x$att.d_crit.val * x$att.d_se
-    # cband_upper <- x$att.d + x$att.d_crit.val * x$att.d_se
-
-    # sig <- (cband_upper < 0) | (cband_lower > 0)
-    # sig[is.na(sig)] <- FALSE
-    # sig_text <- ifelse(sig, "*", "")
-
-    # out <- cbind.data.frame(x$dose, x$att.d, x$att.d_se, cband_lower, cband_upper)
-    # out <- round(out, 4)
-    # out <- cbind.data.frame(out, sig_text)
-
-
-    # colnames(out) <- c("dose", "ATT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
-    # print(out, row.names = FALSE, justify = "centre")
-    # cat("\n\n")
-
-    # # ATT(d)
-    # cat("ACRT(d):\n")
-
-    # cband_text1a <- paste0(100 * (1 - alp), "% ")
-    # cband_text1b <- ifelse(bstrap,
-    #     ifelse(cband, "Simult. ", "Pointwise "),
-    #     "Pointwise "
-    # )
-    # cband_text1 <- paste0("[", cband_text1a, cband_text1b)
-
-    # cband_lower <- x$acrt.d - x$acrt.d_crit.val * x$acrt.d_se
-    # cband_upper <- x$acrt.d + x$acrt.d_crit.val * x$acrt.d_se
-
-    # sig <- (cband_upper < 0) | (cband_lower > 0)
-    # sig[is.na(sig)] <- FALSE
-    # sig_text <- ifelse(sig, "*", "")
-
-    # out <- cbind.data.frame(x$dose, x$acrt.d, x$acrt.d_se, cband_lower, cband_upper)
-    # out <- round(out, 4)
-    # out <- cbind.data.frame(out, sig_text)
-
-
-    # colnames(out) <- c("dose", "ACRT(d)", "Std. Error", cband_text1, "Conf. Band]", "")
-    # print(out, row.names = FALSE, justify = "centre")
-    # cat("---\n")
-    # cat("Signif. codes: `*' confidence band does not cover 0")
-    # cat("\n\n")
 }

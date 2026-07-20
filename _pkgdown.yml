@@ -25,6 +25,7 @@ navbar:
     github:
       icon: fa-github
       href: https://github.com/bcallaway11/ptetools
+      aria-label: GitHub
 
 reference:
   - title: Generic functions for panel data causal inference

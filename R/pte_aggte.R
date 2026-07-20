@@ -53,10 +53,6 @@ pte_aggte <- function(attgt,
   originalglist <- glist
   originaltlist <- tlist
 
-  # In case g's are not part of tlist
-  # originalgtlist <- sort(unique(c(originaltlist, originalglist)))
-  # uniquet <- seq(1, length(unique(originalgtlist)))
-
   time.period <- sapply(originalt, orig2t, originaltlist)
   group <- sapply(originalgroup, orig2t, originaltlist)
   glist <- sapply(originalglist, orig2t, originaltlist)
@@ -179,7 +175,6 @@ pte_aggte <- function(attgt,
     # this looks at all available event times
     # note: event times can be negative here.
     # note: event time = 0 corresponds to "on impact"
-    # eseq <- unique(t-group)
     eseq <- unique(originalt - originalgroup)
     eseq <- eseq[order(eseq)]
 
@@ -419,10 +414,6 @@ overall_weights <- function(attgt,
   originalgroup <- group
   originalglist <- glist
   originaltlist <- tlist
-
-  # In case g's are not part of tlist
-  # originalgtlist <- sort(unique(c(originaltlist, originalglist)))
-  # uniquet <- seq(1, length(unique(originalgtlist)))
 
   time.period <- sapply(originalt, orig2t, originaltlist)
   group <- sapply(originalgroup, orig2t, originaltlist)

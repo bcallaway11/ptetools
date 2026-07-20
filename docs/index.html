@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="nav-link" href="https://github.com/bcallaway11/ptetools"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="https://github.com/bcallaway11/ptetools" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -103,23 +103,23 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
-<span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
-<span><span class="co">#&gt;  -0.0305        0.0179    -0.0655      0.0046 </span></span>
+<span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
+<span><span class="co">#&gt;  -0.0305        0.0119    -0.0539     -0.0071 *</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0298     0.0144       -0.0067      0.0662  </span></span>
-<span><span class="co">#&gt;          -2  -0.0024     0.0145       -0.0391      0.0342  </span></span>
-<span><span class="co">#&gt;          -1  -0.0243     0.0142       -0.0601      0.0116  </span></span>
-<span><span class="co">#&gt;           0  -0.0189     0.0108       -0.0463      0.0084  </span></span>
-<span><span class="co">#&gt;           1  -0.0536     0.0169       -0.0963     -0.0109 *</span></span>
-<span><span class="co">#&gt;           2  -0.1363     0.0330       -0.2196     -0.0530 *</span></span>
-<span><span class="co">#&gt;           3  -0.1008     0.0363       -0.1925     -0.0091 *</span></span>
+<span><span class="co">#&gt;          -3   0.0298     0.0155       -0.0100      0.0695  </span></span>
+<span><span class="co">#&gt;          -2  -0.0024     0.0136       -0.0372      0.0323  </span></span>
+<span><span class="co">#&gt;          -1  -0.0243     0.0172       -0.0683      0.0198  </span></span>
+<span><span class="co">#&gt;           0  -0.0189     0.0127       -0.0514      0.0136  </span></span>
+<span><span class="co">#&gt;           1  -0.0536     0.0156       -0.0936     -0.0136 *</span></span>
+<span><span class="co">#&gt;           2  -0.1363     0.0347       -0.2252     -0.0473 *</span></span>
+<span><span class="co">#&gt;           3  -0.1008     0.0387       -0.1999     -0.0017 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-3-1.png"></p>
+<p><img src="reference/figures/README-unnamed-chunk-3-1.png" data-fig-alt="Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the minimum wage example."></p>
 <p>What’s most interesting here, is that the only “new” code that needs to be written is in <a href="https://github.com/bcallaway11/ptetools/blob/master/R/attgt_functions.R">the <code>did_attgt</code> function</a>. You will see that this is a very small amount of code.</p>
 </div>
 <div class="section level2">
@@ -152,47 +152,47 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;       ATT    Std. Error     [ 95%  Conf. Int.] </span></span>
-<span><span class="co">#&gt;  -13.2547       68.2125  -146.9487    120.4393 </span></span>
+<span><span class="co">#&gt;  -13.2547       88.0238  -185.7783    159.2689 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band] </span></span>
-<span><span class="co">#&gt;         -10  -6.3170     5.8206      -20.7487      8.1148 </span></span>
-<span><span class="co">#&gt;          -9   2.1087     1.0787       -0.5659      4.7834 </span></span>
-<span><span class="co">#&gt;          -8  -2.7721     1.1642       -5.6587      0.1144 </span></span>
-<span><span class="co">#&gt;          -7   3.8965     1.7664       -0.4831      8.2761 </span></span>
-<span><span class="co">#&gt;          -6  -1.0588     2.6137       -7.5393      5.4217 </span></span>
-<span><span class="co">#&gt;          -5   2.4337     5.7723      -11.8782     16.7456 </span></span>
-<span><span class="co">#&gt;          -4   0.2436     1.3876       -3.1970      3.6841 </span></span>
-<span><span class="co">#&gt;          -3  -1.3052     4.3062      -11.9821      9.3717 </span></span>
-<span><span class="co">#&gt;          -2   0.4594     1.3834       -2.9705      3.8894 </span></span>
-<span><span class="co">#&gt;          -1   4.0376     2.7897       -2.8794     10.9545 </span></span>
-<span><span class="co">#&gt;           0  -3.2518     3.9590      -13.0678      6.5643 </span></span>
-<span><span class="co">#&gt;           1  -7.4231    10.9962      -34.6873     19.8411 </span></span>
-<span><span class="co">#&gt;           2  -0.3148     8.3794      -21.0910     20.4613 </span></span>
-<span><span class="co">#&gt;           3   2.7880     6.6221      -13.6309     19.2070 </span></span>
-<span><span class="co">#&gt;           4   1.3625    11.4217      -26.9568     29.6818 </span></span>
-<span><span class="co">#&gt;           5  -2.9563    19.7428      -51.9074     45.9947 </span></span>
-<span><span class="co">#&gt;           6 -17.2610    24.4538      -77.8925     43.3705 </span></span>
-<span><span class="co">#&gt;           7 -19.2258    36.7338     -110.3048     71.8531 </span></span>
-<span><span class="co">#&gt;           8 -21.5150    41.6608     -124.8102     81.7803 </span></span>
-<span><span class="co">#&gt;           9 -25.2793    52.8104     -156.2191    105.6605 </span></span>
-<span><span class="co">#&gt;          10 -23.0541    56.4574     -163.0364    116.9282 </span></span>
-<span><span class="co">#&gt;          11  -3.8346    62.5346     -158.8848    151.2156 </span></span>
-<span><span class="co">#&gt;          12  -5.6789    48.9659     -127.0865    115.7287 </span></span>
-<span><span class="co">#&gt;          13 -12.4977    75.7291     -200.2630    175.2675 </span></span>
-<span><span class="co">#&gt;          14 -19.6199    97.6364     -261.7026    222.4629 </span></span>
-<span><span class="co">#&gt;          15 -11.6638   106.8833     -276.6738    253.3462 </span></span>
-<span><span class="co">#&gt;          16 -15.0522   105.6627     -277.0357    246.9313 </span></span>
-<span><span class="co">#&gt;          17  -3.3234   110.5480     -277.4196    270.7728 </span></span>
-<span><span class="co">#&gt;          18 -14.3328   112.3203     -292.8233    264.1577 </span></span>
-<span><span class="co">#&gt;          19 -26.1852   130.2347     -349.0934    296.7230 </span></span>
-<span><span class="co">#&gt;          20 -40.7039   117.1056     -331.0591    249.6514 </span></span>
-<span><span class="co">#&gt;          21 -58.7364   134.7157     -392.7549    275.2821 </span></span>
+<span><span class="co">#&gt;         -10  -6.3170     6.2253      -21.9441      9.3101 </span></span>
+<span><span class="co">#&gt;          -9   2.1087     1.0403       -0.5026      4.7200 </span></span>
+<span><span class="co">#&gt;          -8  -2.7721     1.3161       -6.0759      0.5316 </span></span>
+<span><span class="co">#&gt;          -7   3.8965     2.2331       -1.7091      9.5021 </span></span>
+<span><span class="co">#&gt;          -6  -1.0588     2.6737       -7.7703      5.6527 </span></span>
+<span><span class="co">#&gt;          -5   2.4337     5.8718      -12.3058     17.1732 </span></span>
+<span><span class="co">#&gt;          -4   0.2436     1.6735       -3.9574      4.4446 </span></span>
+<span><span class="co">#&gt;          -3  -1.3052     4.2679      -12.0187      9.4083 </span></span>
+<span><span class="co">#&gt;          -2   0.4594     2.1419       -4.9173      5.8362 </span></span>
+<span><span class="co">#&gt;          -1   4.0376     2.6016       -2.4931     10.5682 </span></span>
+<span><span class="co">#&gt;           0  -3.2518     3.0698      -10.9577      4.4542 </span></span>
+<span><span class="co">#&gt;           1  -7.4231     9.9500      -32.3999     17.5537 </span></span>
+<span><span class="co">#&gt;           2  -0.3148     8.5038      -21.6614     21.0318 </span></span>
+<span><span class="co">#&gt;           3   2.7880     8.3010      -18.0496     23.6256 </span></span>
+<span><span class="co">#&gt;           4   1.3625    11.3570      -27.1462     29.8713 </span></span>
+<span><span class="co">#&gt;           5  -2.9563    19.9698      -53.0854     47.1727 </span></span>
+<span><span class="co">#&gt;           6 -17.2610    28.2230      -88.1075     53.5855 </span></span>
+<span><span class="co">#&gt;           7 -19.2258    36.3255     -110.4116     71.9599 </span></span>
+<span><span class="co">#&gt;           8 -21.5150    40.3927     -122.9103     79.8804 </span></span>
+<span><span class="co">#&gt;           9 -25.2793    37.7454     -120.0294     69.4707 </span></span>
+<span><span class="co">#&gt;          10 -23.0541    49.5949     -147.5491    101.4409 </span></span>
+<span><span class="co">#&gt;          11  -3.8346    47.0793     -122.0149    114.3456 </span></span>
+<span><span class="co">#&gt;          12  -5.6789    61.7977     -160.8060    149.4482 </span></span>
+<span><span class="co">#&gt;          13 -12.4977    93.6276     -247.5254    222.5299 </span></span>
+<span><span class="co">#&gt;          14 -19.6199    91.2854     -248.7680    209.5283 </span></span>
+<span><span class="co">#&gt;          15 -11.6638    87.2393     -230.6552    207.3275 </span></span>
+<span><span class="co">#&gt;          16 -15.0522   101.3735     -269.5237    239.4193 </span></span>
+<span><span class="co">#&gt;          17  -3.3234   122.7752     -311.5184    304.8716 </span></span>
+<span><span class="co">#&gt;          18 -14.3328   110.3989     -291.4603    262.7947 </span></span>
+<span><span class="co">#&gt;          19 -26.1852   145.9644     -392.5905    340.2201 </span></span>
+<span><span class="co">#&gt;          20 -40.7039   139.8987     -391.8830    310.4753 </span></span>
+<span><span class="co">#&gt;          21 -58.7364   154.9435     -447.6815    330.2087 </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">covid_res</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ylim</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-7-1.png"></p>
+<p><img src="reference/figures/README-unnamed-chunk-7-1.png" data-fig-alt="Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the COVID-19 shelter-in-place example."></p>
 <p>What’s most interesting is just how little code needs to be written here. The <code>pte_default</code> function handles the unconfoundedness-type identification strategy directly, with no custom <code>attgt_fun</code> required.</p>
 </div>
 <div class="section level2">
@@ -230,22 +230,22 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Overall ATT:  </span></span>
 <span><span class="co">#&gt;      ATT    Std. Error     [ 95%  Conf. Int.]  </span></span>
-<span><span class="co">#&gt;  -0.0323        0.0127    -0.0557     -0.0088 *</span></span>
+<span><span class="co">#&gt;  -0.0323        0.0129    -0.0582     -0.0063 *</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Dynamic Effects:</span></span>
 <span><span class="co">#&gt;  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  </span></span>
-<span><span class="co">#&gt;          -3   0.0269     0.0130        0.0014      0.0524 *</span></span>
-<span><span class="co">#&gt;          -2  -0.0050     0.0122       -0.0290      0.0190  </span></span>
-<span><span class="co">#&gt;          -1  -0.0229     0.0151       -0.0524      0.0067  </span></span>
-<span><span class="co">#&gt;           0  -0.0201     0.0126       -0.0448      0.0045  </span></span>
-<span><span class="co">#&gt;           1  -0.0547     0.0153       -0.0847     -0.0248 *</span></span>
-<span><span class="co">#&gt;           2  -0.1382     0.0318       -0.2005     -0.0759 *</span></span>
-<span><span class="co">#&gt;           3  -0.1069     0.0265       -0.1588     -0.0550 *</span></span>
+<span><span class="co">#&gt;          -3   0.0269     0.0139       -0.0003      0.0541  </span></span>
+<span><span class="co">#&gt;          -2  -0.0050     0.0123       -0.0290      0.0191  </span></span>
+<span><span class="co">#&gt;          -1  -0.0229     0.0144       -0.0511      0.0054  </span></span>
+<span><span class="co">#&gt;           0  -0.0201     0.0123       -0.0443      0.0040  </span></span>
+<span><span class="co">#&gt;           1  -0.0547     0.0176       -0.0892     -0.0203 *</span></span>
+<span><span class="co">#&gt;           2  -0.1382     0.0403       -0.2172     -0.0592 *</span></span>
+<span><span class="co">#&gt;           3  -0.1069     0.0357       -0.1769     -0.0369 *</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes: `*' confidence band does not cover 0</span></span>
 <span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">did_res_noif</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-9-1.png"></p>
+<p><img src="reference/figures/README-unnamed-chunk-9-1.png" data-fig-alt="Event-study plot of ATT estimates by event time, with pointwise confidence intervals, from the empirical bootstrap version of the minimum wage example."></p>
 <p>What’s exciting about this is just how little new code needs to be written.</p>
 </div>
 </div>
@@ -282,7 +282,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
