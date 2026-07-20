@@ -16,7 +16,7 @@
 #' @inheritParams pte
 #' @inheritParams attgt_if
 #' @param attgt.list list of attgt results from \code{compute.pte}
-#' @param aggregation_fun An optional function for aggregating group-time
+#' @param aggte_fun An optional function for aggregating group-time
 #'  treatment effects.  When \code{NULL} (the default), the function is
 #'  selected automatically based on \code{gt_type}.
 #'
@@ -29,18 +29,18 @@ panel_empirical_bootstrap <- function(attgt.list,
                                       subset_fun,
                                       attgt_fun,
                                       extra_gt_returns,
-                                      aggregation_fun = NULL,
+                                      aggte_fun = NULL,
                                       ...) {
-  # Resolve aggregation_fun; warn if caller did not supply one (deprecated path).
+  # Resolve aggte_fun; warn if caller did not supply one (deprecated path).
   # Resolution happens before the QTT dispatch so the resolved value flows through.
-  if (is.null(aggregation_fun)) {
+  if (is.null(aggte_fun)) {
     warning(
-      "aggregation_fun not specified; defaulting based on gt_type. ",
+      "aggte_fun not specified; defaulting based on gt_type. ",
       "This default will be removed in a future version of ptetools.",
       call. = FALSE
     )
     gt_type_inner <- ptep$gt_type
-    aggregation_fun <- switch(gt_type_inner,
+    aggte_fun <- switch(gt_type_inner,
       qtt  = qtt_pte_aggregations,
       qott = qott_pte_aggregations,
       function(al, p, eg) attgt_pte_aggregations(al, p)
@@ -56,7 +56,7 @@ panel_empirical_bootstrap <- function(attgt.list,
       subset_fun       = subset_fun,
       attgt_fun        = attgt_fun,
       extra_gt_returns = extra_gt_returns,
-      aggregation_fun  = aggregation_fun,
+      aggte_fun        = aggte_fun,
       ...
     ))
   }
@@ -74,7 +74,7 @@ panel_empirical_bootstrap <- function(attgt.list,
   # compute aggregations
   #-----------------------------------------------------------------------------
 
-  aggte <- aggregation_fun(attgt.list, ptep, extra_gt_returns)
+  aggte <- aggte_fun(attgt.list, ptep, extra_gt_returns)
 
   # kind of hack...calls and returns of emprical and multiplier bootstrap
   # not matching exactly
@@ -131,7 +131,7 @@ panel_empirical_bootstrap <- function(attgt.list,
       ...
     )[c("attgt.list", "extra_gt_returns")] # don't need to carry around ptep
 
-    bres <- aggregation_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
+    bres <- aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
     bres
   }, cl = cl)
 
@@ -441,16 +441,16 @@ qtt_empirical_bootstrap <- function(attgt.list,
                                     subset_fun,
                                     attgt_fun,
                                     extra_gt_returns,
-                                    aggregation_fun = NULL,
+                                    aggte_fun = NULL,
                                     ...) {
   # When called directly (not via panel_empirical_bootstrap), resolve NULL.
-  if (is.null(aggregation_fun)) {
+  if (is.null(aggte_fun)) {
     warning(
-      "aggregation_fun not specified; defaulting to qtt_pte_aggregations. ",
+      "aggte_fun not specified; defaulting to qtt_pte_aggregations. ",
       "This default will be removed in a future version of ptetools.",
       call. = FALSE
     )
-    aggregation_fun <- qtt_pte_aggregations
+    aggte_fun <- qtt_pte_aggregations
   }
 
   probs  <- if (is.null(ptep$probs)) seq(0.05, 0.95, 0.05) else ptep$probs
@@ -458,7 +458,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
   biters <- ptep$biters
 
   # point estimates
-  aggte <- aggregation_fun(attgt.list, ptep, extra_gt_returns)
+  aggte <- aggte_fun(attgt.list, ptep, extra_gt_returns)
 
   # bootstrap
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
@@ -493,7 +493,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
       ...
     )[c("attgt.list", "extra_gt_returns")]
 
-    aggregation_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
+    aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
   }, cl = ptep$cl)
 
   alp <- ptep$alp

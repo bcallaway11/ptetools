@@ -11,3 +11,8 @@
 ^CRAN-SUBMISSION$
 ^dev$
 ^\.revdeplite$
+^\.claude$
+^\.agents$
+^\.codex$
+^CLAUDE\.md$
+^AGENTS\.md$

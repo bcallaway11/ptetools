@@ -16,7 +16,7 @@ pte(
   setup_pte_fun,
   subset_fun,
   attgt_fun,
-  aggregation_fun = NULL,
+  aggte_fun = NULL,
   panel = TRUE,
   cband = TRUE,
   alp = 0.05,
@@ -109,10 +109,8 @@ objects will be computed using the empirical bootstrap.  This is usually
 (perhaps substantially) easier to code, but also will usually be (perhaps
 substantially) computationally slower.}
 
-\item{aggregation_fun}{An optional function for aggregating group-time
-treatment effects in the empirical bootstrap path.  When \code{NULL}
-(the default), the aggregation function is selected automatically based
-on \code{gt_type}.  Providing a custom function overrides the default.}
+\item{aggte_fun}{An optional function for aggregating group-time
+treatment effects.}
 
 \item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
 FALSE for repeated cross sections.}

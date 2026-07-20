@@ -9,8 +9,7 @@
 revdeplite::revdeplite(
   github_deps = c(
     "bcallaway11/contdid",
-    "bcallaway11/qte",
-    "bcallaway11/ife"
+    "bcallaway11/qte"
   ),
   check_dir = ".revdeplite"
 )

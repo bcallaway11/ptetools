@@ -11,7 +11,7 @@ panel_empirical_bootstrap(
   subset_fun,
   attgt_fun,
   extra_gt_returns,
-  aggregation_fun = NULL,
+  aggte_fun = NULL,
   ...
 )
 }
@@ -89,7 +89,7 @@ potential outcomes on covariates.  For ife, this could be something
 like the first step regression 2sls estimates.  This argument is also
 potentially useful for debugging.}
 
-\item{aggregation_fun}{An optional function for aggregating group-time
+\item{aggte_fun}{An optional function for aggregating group-time
 treatment effects.  When \code{NULL} (the default), the function is
 selected automatically based on \code{gt_type}.}
 
