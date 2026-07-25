@@ -1,5 +1,15 @@
 # ptetools 1.0.2
 
+* Added `bstrap` argument to `pte()`, `pte_default()`, `setup_pte()`, and
+  `setup_pte_basic()` to request purely analytical (non-bootstrap) standard
+  errors (`bstrap = FALSE`) instead of the multiplier bootstrap, wherever
+  `attgt_fun` returns an influence function. This skips the (often
+  expensive) multiplier bootstrap entirely and is much faster for large
+  panels. `bstrap = FALSE` only supports pointwise confidence intervals
+  (falls back from `cband = TRUE` with a warning), overrides
+  `boot_type = "empirical"`, and is not currently supported for continuous
+  treatment (`gt_type = "dose"`).
+
 * Fixed a bug in `crit_val_checks()` that threw `object 'dp' not found` when
   a simultaneous critical value could not be computed (e.g. designs with no
   pre-treatment periods, where standard errors come back `NA`). The fallback

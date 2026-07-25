@@ -14,6 +14,7 @@ setup_pte_basic(
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
+  bstrap = TRUE,
   gt_type = "att",
   ret_quantile = 0.5,
   probs = NULL,
@@ -43,6 +44,15 @@ confidence band (default is TRUE)}
 \item{alp}{significance level; default is 0.05}
 
 \item{boot_type}{which type of bootstrap to use}
+
+\item{bstrap}{whether to use the multiplier bootstrap (\code{TRUE}, the default)
+or purely analytical standard errors (\code{FALSE}) when the group-time
+estimator returns an influence function.  \code{bstrap = FALSE} overrides
+\code{boot_type} (i.e., \code{boot_type = "empirical"} is ignored) and only
+supports pointwise confidence intervals -- if \code{cband = TRUE} is also
+requested, \code{ptetools} falls back to pointwise intervals with a warning.
+Analytical standard errors are not currently supported for continuous
+treatment (\code{gt_type = "dose"}); see \code{dev/NOTES.md}.}
 
 \item{gt_type}{which type of group-time effects are computed.
 The default is "att".  Different estimation strategies can implement

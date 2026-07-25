@@ -3,7 +3,7 @@
 # Description: compute.pte (inner loop over groups/time periods) and pte
 #   (main user-facing function) for computing panel treatment effects.
 # Author: Brant Callaway
-# Last update: 2026-05-18
+# Last update: 2026-07-25
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -221,7 +221,9 @@ compute.pte <- function(ptep,
 #'  to provide an expression for the influence function (which could be challenging
 #'  to figure out).  If no influence function is provided, then the \code{pte}
 #'  package will use the empirical bootstrap no matter what the value of this
-#'  parameter.
+#'  parameter.  \code{bstrap = FALSE} (purely analytical standard errors) takes
+#'  priority over \code{boot_type}: it is only available when \code{attgt_fun}
+#'  returns an influence function, and it overrides \code{boot_type = "empirical"}.
 #'
 #' @param process_dtt_gt_fun An optional function to customize results when
 #'  the gt-specific function returns the distribution of treated and untreated
@@ -284,6 +286,7 @@ pte <- function(yname,
                 cband = TRUE,
                 alp = 0.05,
                 boot_type = "multiplier",
+                bstrap = TRUE,
                 weightsname = NULL,
                 gt_type = "att",
                 ret_quantile = NULL,
@@ -297,6 +300,21 @@ pte <- function(yname,
                 cl = 1,
                 call = NULL,
                 ...) {
+  # analytical standard errors are not yet supported for continuous
+  # treatment; fall back to the multiplier bootstrap rather than silently
+  # ignoring the user's request (see dev/NOTES.md)
+  if (gt_type == "dose" && isFALSE(bstrap)) {
+    warning("Analytical standard errors are not currently supported for continuous treatment (gt_type = \"dose\"); using the multiplier bootstrap instead.")
+    bstrap <- TRUE
+  }
+
+  # simultaneous (uniform) confidence bands require the multiplier bootstrap;
+  # analytical standard errors only support pointwise confidence intervals
+  if (isFALSE(bstrap) && isTRUE(cband)) {
+    warning("Analytical standard errors only support pointwise confidence intervals; using cband = FALSE.")
+    cband <- FALSE
+  }
+
   ptep <- setup_pte_fun(
     yname = yname,
     gname = gname,
@@ -307,6 +325,7 @@ pte <- function(yname,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
+    bstrap = bstrap,
     gt_type = gt_type,
     weightsname = weightsname,
     ret_quantile = ret_quantile,
@@ -335,9 +354,18 @@ pte <- function(yname,
   # otherwise, we are in the main case where the target is an ATT
 
   # check if no influence function provided,
-  # if yes, go to alternate code for empirical
-  # bootstrap
-  if (all(is.na(res$inffunc)) | ptep$boot_type == "empirical") {
+  # if yes, go to alternate code for empirical bootstrap;
+  # bstrap = FALSE (analytical standard errors) overrides
+  # boot_type = "empirical", but cannot override the lack of an
+  # influence function -- if the attgt_fun did not return one, analytical
+  # standard errors are exactly as infeasible as the multiplier bootstrap,
+  # so we fall back to the empirical bootstrap here too (with a warning if
+  # the user explicitly asked for analytical standard errors).
+  no_inffunc <- all(is.na(res$inffunc))
+  if (no_inffunc | (ptep$boot_type == "empirical" & isTRUE(ptep$bstrap))) {
+    if (no_inffunc && isFALSE(ptep$bstrap)) {
+      warning("attgt_fun did not return an influence function, so analytical standard errors (bstrap = FALSE) are not available; falling back to the empirical bootstrap.")
+    }
     return(panel_empirical_bootstrap(res$attgt.list,
       ptep,
       setup_pte_fun,
@@ -356,7 +384,10 @@ pte <- function(yname,
   #-----------------------------------------------------------------------------
 
   # overall
-  overall_att <- pte_aggte(att_gt, type = "group", bstrap = TRUE, cband = cband, alp = ptep$alp)
+  # note: pte_aggte() reads bstrap from att_gt$ptep$bstrap, not from an
+  # argument here -- pte_aggte() has no `bstrap` formal, so passing it here
+  # would silently do nothing (it would land in `...`)
+  overall_att <- pte_aggte(att_gt, type = "group", cband = cband, alp = ptep$alp)
 
   # event study
   # ... for max_e and min_e
@@ -365,7 +396,7 @@ pte <- function(yname,
   max_e <- ifelse(is.null(dots$max_e), Inf, dots$max_e)
   balance_e <- dots$balance_e
 
-  event_study <- pte_aggte(att_gt, type = "dynamic", bstrap = TRUE, cband = cband, alp = ptep$alp, min_e = min_e, max_e = max_e, balance_e = balance_e)
+  event_study <- pte_aggte(att_gt, type = "dynamic", cband = cband, alp = ptep$alp, min_e = min_e, max_e = max_e, balance_e = balance_e)
 
   # If either aggregation fell back to pointwise critical values (e.g.
   # because standard errors were NA), downgrade our own cband flag so that
@@ -440,6 +471,7 @@ pte_default <- function(yname,
                         cband = TRUE,
                         alp = 0.05,
                         boot_type = "multiplier",
+                        bstrap = TRUE,
                         biters = 100,
                         cl = 1,
                         ...) {
@@ -474,6 +506,7 @@ pte_default <- function(yname,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
+    bstrap = bstrap,
     biters = biters,
     cl = cl,
     ...

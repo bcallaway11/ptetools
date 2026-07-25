@@ -1,3 +1,13 @@
+# =============================================================================
+# Title: Aggregation of ATT(g,t) Results
+# Description: pte_aggte() and helpers for aggregating group-time average
+#   treatment effects into overall, group, and dynamic (event-study)
+#   parameters, with multiplier-bootstrap or analytical inference.
+# Author: Brant Callaway
+# Last update: 2026-07-25
+# Date created: 2023-02-14
+# =============================================================================
+
 #' @title Aggregates (g,t)-Specific Results
 #'
 #' @description This is a slight edit of the aggte function from the `did` package.
@@ -100,7 +110,7 @@ pte_aggte <- function(attgt,
         weights.agg = pg[whichg] / sum(pg[whichg]),
         wif = NULL
       ))
-      se.g <- getSE(as.matrix(inf.func.g), bstrap = TRUE, biters = biters, alp = alp)
+      se.g <- getSE(as.matrix(inf.func.g), bstrap = bstrap, biters = biters, alp = alp)
       list(inf.func = inf.func.g, se = se.g)
     })
 

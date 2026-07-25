@@ -3,7 +3,7 @@
 # Description: Functions for setting up pte_params objects used throughout
 #   the ptetools pipeline: setup_pte_basic, setup_pte, and pte_params.
 # Author: Brant Callaway
-# Last update: 2026-05-18
+# Last update: 2026-07-25
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -43,6 +43,7 @@ setup_pte_basic <- function(yname,
                             cband = TRUE,
                             alp = 0.05,
                             boot_type = "multiplier",
+                            bstrap = TRUE,
                             gt_type = "att",
                             ret_quantile = 0.5,
                             probs = NULL,
@@ -93,6 +94,7 @@ setup_pte_basic <- function(yname,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
+    bstrap = bstrap,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     probs = probs,
@@ -135,6 +137,7 @@ setup_pte <- function(yname,
                       cband = TRUE,
                       alp = 0.05,
                       boot_type = "multiplier",
+                      bstrap = TRUE,
                       weightsname = NULL,
                       gt_type = "att",
                       ret_quantile = 0.5,
@@ -242,6 +245,7 @@ setup_pte <- function(yname,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
+    bstrap = bstrap,
     anticipation = anticipation,
     base_period = base_period,
     weightsname = weightsname,
@@ -276,6 +280,14 @@ setup_pte <- function(yname,
 #'  confidence band (default is TRUE)
 #' @param alp significance level; default is 0.05
 #' @param boot_type which type of bootstrap to use
+#' @param bstrap whether to use the multiplier bootstrap (`TRUE`, the default)
+#'  or purely analytical standard errors (`FALSE`) when the group-time
+#'  estimator returns an influence function.  `bstrap = FALSE` overrides
+#'  `boot_type` (i.e., `boot_type = "empirical"` is ignored) and only
+#'  supports pointwise confidence intervals -- if `cband = TRUE` is also
+#'  requested, `ptetools` falls back to pointwise intervals with a warning.
+#'  Analytical standard errors are not currently supported for continuous
+#'  treatment (`gt_type = "dose"`); see `dev/NOTES.md`.
 #' @param anticipation how many periods before the treatment actually takes
 #'  place that it can have an effect on outcomes
 #' @param base_period The type of base period to use.  This only affects
@@ -328,6 +340,7 @@ pte_params <- function(yname,
                        cband,
                        alp,
                        boot_type,
+                       bstrap = TRUE,
                        anticipation = NULL,
                        base_period = NULL,
                        weightsname = NULL,
@@ -353,6 +366,7 @@ pte_params <- function(yname,
     cband = cband,
     alp = alp,
     boot_type = boot_type,
+    bstrap = bstrap,
     anticipation = anticipation,
     control_group = control_group,
     base_period = base_period,

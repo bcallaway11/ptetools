@@ -1,3 +1,14 @@
+# =============================================================================
+# Title: Process Continuous-Treatment (Dose) Results
+# Description: process_dose_gt() and dose_obj summary/print methods for
+#   continuous-treatment (dose) results. Standard errors and critical values
+#   for the dose case are always computed via the multiplier bootstrap;
+#   analytical standard errors are not yet supported here (see dev/NOTES.md).
+# Author: Brant Callaway
+# Last update: 2026-07-25
+# Date created: 2025-01-11
+# =============================================================================
+
 #' @title Process Results with a Continuous Treatment
 #'
 #' @description After computing results for each group and time period,
@@ -317,7 +328,7 @@ print.summary.dose_obj <- function(x, ...) {
     alp <- x$alp
     cband <- x$cband
     bstrap <- x$bstrap
-    if (is.null(bstrap)) bstrap <- TRUE # TODO: hardcoded because this only option
+    if (is.null(bstrap)) bstrap <- TRUE # continuous treatment (dose) always uses the multiplier bootstrap; see dev/NOTES.md
 
     z <- qnorm(1 - alp / 2)
     att_cband_lower <- x$overall_att - z * x$overall_att_se

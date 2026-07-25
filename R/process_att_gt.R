@@ -1,3 +1,13 @@
+# =============================================================================
+# Title: Process ATT(g,t) Results
+# Description: Processes ATT(g,t) results when an influence function is
+#   available: analytical variance, multiplier bootstrap or analytical
+#   standard errors, and the pre-treatment Wald test.
+# Author: Brant Callaway
+# Last update: 2026-07-25
+# Date created: 2021-05-14
+# =============================================================================
+
 #' @title Process ATT(g,t) Results
 #'
 #' @description Process ATT(g,t) results when influence function is available
@@ -28,17 +38,25 @@ process_att_gt <- function(att_gt_results, ptep) {
   #-----------------------------------------------------------------------------
   n <- nrow(inffunc)
   V <- Matrix::t(inffunc) %*% inffunc / n
-  se <- sqrt(Matrix::diag(V) / n)
+  se_analytical <- sqrt(Matrix::diag(V) / n)
   cband <- ptep$cband
   alp <- ptep$alp
+  bstrap <- ptep$bstrap
+  if (is.null(bstrap)) bstrap <- TRUE
 
   # critical value from N(0,1), for pointwise
   cval <- qnorm(1 - alp / 2)
 
-  # multiplier bootstrap results
-  bout <- mboot2(inffunc, alp = alp)
-
-  if (cband) cval <- bout$crit_val
+  if (isTRUE(bstrap)) {
+    # multiplier bootstrap results
+    bout <- mboot2(inffunc, alp = alp)
+    se <- bout$boot_se
+    if (cband) cval <- bout$crit_val
+  } else {
+    # purely analytical standard errors (clustered at the unit level);
+    # only pointwise confidence intervals are supported for this option
+    se <- se_analytical
+  }
 
   #-----------------------------------------------------------------------------
   # compute Wald pre-test
@@ -107,7 +125,7 @@ process_att_gt <- function(att_gt_results, ptep) {
   }
 
   # Return list for ATT(g,t)
-  return(group_time_att(group = group, time.period = time.period, att = att, V_analytical = V, se = bout$boot_se, crit_val = cval, inf_func = inffunc, n = n, W = W, Wpval = Wpval, cband = cband, alp = alp, ptep = ptep, extra_gt_returns = extra_gt_returns))
+  return(group_time_att(group = group, time.period = time.period, att = att, V_analytical = V, se = se, crit_val = cval, inf_func = inffunc, n = n, W = W, Wpval = Wpval, cband = cband, alp = alp, ptep = ptep, extra_gt_returns = extra_gt_returns))
 }
 
 #' @title Multiplier Bootstrap
