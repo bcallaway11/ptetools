@@ -17,6 +17,11 @@
   correctly downgrade their `cband` flag so `summary()` reports "Pointwise"
   rather than "Simult." whenever this fallback occurs.
 
+* Fixed a bug where `autoplot.dose_obj()` (used by `contdid::ggcont_did()`)
+  crashed with `arguments imply differing number of rows` because the
+  critical value stored on `dose_obj` carried a stray `"cband"` attribute
+  left over from `crit_val_checks()`, which broke `data.frame()` recycling.
+
 # ptetools 1.0.1
 
 * Force time periods to be positive integers in `ptetools::setup_pte()`

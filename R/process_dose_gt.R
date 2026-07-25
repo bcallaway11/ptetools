@@ -142,6 +142,10 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         att.d_crit.val <- boot_res$crit_val
         att.d_crit.val <- crit_val_checks(att.d_crit.val, alp)
         att_cband_ok <- isTRUE(attr(att.d_crit.val, "cband"))
+        # strip the "cband"/quantile-name attributes now that we've read
+        # them -- a length-1 value carrying extra attributes breaks
+        # data.frame()/cbind.data.frame() recycling in autoplot.dose_obj()
+        att.d_crit.val <- as.numeric(att.d_crit.val)
     } else {
         att.d_crit.val <- qnorm(1 - alp / 2)
     }
@@ -166,6 +170,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         acrt.d_crit.val <- acrt_boot_res$crit_val
         acrt.d_crit.val <- crit_val_checks(acrt.d_crit.val, alp)
         acrt_cband_ok <- isTRUE(attr(acrt.d_crit.val, "cband"))
+        acrt.d_crit.val <- as.numeric(acrt.d_crit.val)
     } else {
         acrt.d_crit.val <- qnorm(1 - alp / 2)
     }

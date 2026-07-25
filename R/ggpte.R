@@ -4,7 +4,7 @@
 #   autoplot returns a ggplot object the caller can modify with +.
 #   plot is a convenience wrapper that prints the autoplot result.
 # Author: Brant Callaway
-# Last update: 2026-05-22
+# Last update: 2026-07-25
 # Date created: 2026-05-22
 # =============================================================================
 
@@ -251,11 +251,15 @@ ggpte <- function(pte_results) {
 autoplot.dose_obj <- function(object, type = "att", ...) {
   dose <- object$dose
   if (type == "acrt") {
+    # as.numeric() strips any stray attributes (e.g. the "cband" attribute
+    # left by crit_val_checks(), or quantile()'s "95%"-style names) -- a
+    # length-1 value carrying extra attributes does not recycle correctly
+    # in data.frame()/cbind.data.frame() alongside the length(dose) columns
     plot_df <- cbind.data.frame(
       dose,
       est     = object$acrt.d,
       se      = object$acrt.d_se,
-      crit    = object$acrt.d_crit.val
+      crit    = as.numeric(object$acrt.d_crit.val)
     )
     ggplot(plot_df, aes(x = dose, y = est)) +
       geom_ribbon(aes(ymin = est - crit * se, ymax = est + crit * se),
@@ -269,7 +273,7 @@ autoplot.dose_obj <- function(object, type = "att", ...) {
       dose,
       est     = object$att.d,
       se      = object$att.d_se,
-      crit    = object$att.d_crit.val
+      crit    = as.numeric(object$att.d_crit.val)
     )
     ggplot(plot_df, aes(x = dose, y = est)) +
       geom_ribbon(aes(ymin = est - crit * se, ymax = est + crit * se),
