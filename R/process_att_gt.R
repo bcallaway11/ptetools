@@ -4,7 +4,7 @@
 #   available: analytical variance, multiplier bootstrap or analytical
 #   standard errors, and the pre-treatment Wald test.
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-07-27
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -74,7 +74,9 @@ process_att_gt <- function(att_gt_results, ptep) {
   W <- NULL
   Wpval <- NULL
   if (length(preV) == 0) {
-    message("No pre-treatment periods to test")
+    # No pre-treatment periods available (e.g. a two-period design); W and
+    # Wpval stay NULL, which already communicates this through the return
+    # value without printing a message on every call.
   } else if (sum(is.na(preV))) {
     warning("Not returning pre-test Wald statistic due to NA pre-treatment values")
   } else if (rcond(preV) <= .Machine$double.eps) {
