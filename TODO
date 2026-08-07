@@ -1,5 +1,10 @@
 TODO:
 
+* Add an explicit `bstrap = FALSE` option to `pte_default` and review the
+  other `ptetools` entry points used by downstream packages for the same
+  option. Document which estimators or inference procedures are exceptions
+  where disabling the bootstrap does not make sense.
+
 * I am just going to ignore the untreated group for conducting inference
   * it is difficult to operationalize in code
   * It doesn't matter for ACRT(d) at all; for ATT(d), it doesn't matter if we interpret estimates as being nonparametric.
