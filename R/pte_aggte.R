@@ -4,7 +4,7 @@
 #   treatment effects into overall, group, and dynamic (event-study)
 #   parameters, with multiplier-bootstrap or analytical inference.
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-11-14
 # Date created: 2023-02-14
 # =============================================================================
 
@@ -69,7 +69,11 @@ pte_aggte <- function(attgt,
   tlist <- unique(time.period)
   maxT <- max(time.period)
 
-  weights.ind <- group_weight_data$.w
+  # Normalize sampling weights to mean 1 across units (as `did` does). wif()
+  # combines these weights with pg, which is normalized below; with
+  # unnormalized weights (e.g. population counts) that term scales with the
+  # weight level and the standard errors blow up.
+  weights.ind <- group_weight_data$.w / mean(group_weight_data$.w)
 
   # relative group sizes for all ever-treated groups
   pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))
@@ -437,7 +441,11 @@ overall_weights <- function(attgt,
   tlist <- unique(time.period)
   maxT <- max(time.period)
 
-  weights.ind <- group_weight_data$.w
+  # Normalize sampling weights to mean 1 across units (as `did` does). wif()
+  # combines these weights with pg, which is normalized below; with
+  # unnormalized weights (e.g. population counts) that term scales with the
+  # weight level and the standard errors blow up.
+  weights.ind <- group_weight_data$.w / mean(group_weight_data$.w)
 
   # relative group sizes for all ever-treated groups
   pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))

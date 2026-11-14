@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* Fixed standard errors for aggregated parameters (overall ATT, event study)
+  when `weightsname` is used: they depended on the scale of the weights and
+  were far too large for weights not near 1, such as population counts (#8).
+  Weights are now normalized to mean 1 before aggregation, as in `did`.
+  Point estimates are unchanged.
+
 * Added `bstrap` argument to `pte()`, `pte_default()`, `setup_pte()`, and
   `setup_pte_basic()` to request purely analytical (non-bootstrap) standard
   errors (`bstrap = FALSE`) instead of the multiplier bootstrap, wherever
