@@ -1,3 +1,13 @@
+# =============================================================================
+# Title: Subset Functions
+# Description: Functions that build the data for a single (g,t) cell:
+#   two_by_two_subset (panel), two_by_two_rcs_subset (repeated cross
+#   sections), keep_all_untreated_subset and keep_all_pretreatment_subset.
+# Author: Brant Callaway
+# Last update: 2026-11-14
+# Date created: 2021-05-17
+# =============================================================================
+
 #' @title Two Period Two Group Subset
 #'
 #' @description A function for computing a 2x2 subset of original data.
@@ -54,18 +64,9 @@ two_by_two_subset <- function(data,
   #----------------------------------------------------
 
   #----------------------------------------------------
-  # collect the right subset of the data
-
-  # get group g and not-yet-treated group
-  if (control_group == "notyettreated") {
-    this.data <- subset(data, G == g | G > tp | G == 0)
-  } else {
-    # use never treated group
-    this.data <- subset(data, G == g | G == 0)
-  }
-
-  # get current period and base period data
-  this.data <- subset(this.data, period == tp | period == base.period)
+  # collect the right subset of the data: group g plus the comparison group
+  # (not-yet-treated or never-treated), in the current and base periods
+  this.data <- gt_cell_data(data, g, tp, base.period, control_group)
 
   # variable to keep track of pre/post periods
   this.data$name <- ifelse(this.data$period == tp, "post", "pre")
@@ -78,9 +79,43 @@ two_by_two_subset <- function(data,
 
   # number of observations used for this (g,t)
   n1 <- length(unique(this.data$id))
-  disidx <- unique(data$id) %in% unique(this.data$id)
+  all_ids <- attr(data, "pte_ids")
+  if (is.null(all_ids)) all_ids <- unique(data$id)
+  disidx <- all_ids %in% unique(this.data$id)
 
   list(gt_data = this.data, n1 = n1, disidx = disidx)
+}
+
+# --- Internal: rows of a 2x2 cell ----------------------------------------
+# Returns the rows of `data` for group g and its comparison group in periods
+# tp and base.period, in their original order (the same rows as
+# subset(data, <group condition> & <period condition>)).
+#
+# When `data` comes from setup_pte(), it carries the row indices of each
+# period ("pte_period_rows"), so only the rows of the two periods are
+# examined and copied; otherwise this falls back to scanning all rows.
+gt_cell_data <- function(data, g, tp, base.period, control_group) {
+  period_rows <- attr(data, "pte_period_rows")
+  if (!is.null(period_rows) && sum(lengths(period_rows)) == nrow(data)) {
+    rows <- sort(c(period_rows[[as.character(tp)]],
+                   period_rows[[as.character(base.period)]]))
+    G <- data$G[rows]
+    in_cell <- if (control_group == "notyettreated") {
+      G == g | G > tp | G == 0
+    } else {
+      G == g | G == 0
+    }
+    # which() drops NA, as subset() does
+    return(data[rows[which(in_cell)], , drop = FALSE])
+  }
+
+  if (control_group == "notyettreated") {
+    this.data <- subset(data, G == g | G > tp | G == 0)
+  } else {
+    # use never treated group
+    this.data <- subset(data, G == g | G == 0)
+  }
+  subset(this.data, period == tp | period == base.period)
 }
 
 #' @title Two Period Two Group Repeated Cross Sections Subset
@@ -118,13 +153,7 @@ two_by_two_rcs_subset <- function(data,
     base.period <- main.base.period
   }
 
-  if (control_group == "notyettreated") {
-    this.data <- subset(data, G == g | G > tp | G == 0)
-  } else {
-    this.data <- subset(data, G == g | G == 0)
-  }
-
-  this.data <- subset(this.data, period == tp | period == base.period)
+  this.data <- gt_cell_data(data, g, tp, base.period, control_group)
   this.data$name <- ifelse(this.data$period == tp, "post", "pre")
   this.data$D <- 1 * (this.data$G == g)
   this.data <- gt_data_frame(this.data)

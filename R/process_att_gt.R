@@ -4,7 +4,7 @@
 #   available: analytical variance, multiplier bootstrap or analytical
 #   standard errors, and the pre-treatment Wald test.
 # Author: Brant Callaway
-# Last update: 2026-07-27
+# Last update: 2026-11-14
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -48,8 +48,10 @@ process_att_gt <- function(att_gt_results, ptep) {
   cval <- qnorm(1 - alp / 2)
 
   if (isTRUE(bstrap)) {
-    # multiplier bootstrap results
-    bout <- mboot2(inffunc, alp = alp)
+    # multiplier bootstrap results (biters was previously not passed, so
+    # ATT(g,t) standard errors always used 1000 draws)
+    biters <- if (is.null(ptep$biters)) 1000 else ptep$biters
+    bout <- mboot2(inffunc, biters = biters, alp = alp)
     se <- bout$boot_se
     if (cband) cval <- bout$crit_val
   } else {
@@ -94,22 +96,10 @@ process_att_gt <- function(att_gt_results, ptep) {
   # from "new" time to "original" time
   original_time.periods <- sort(unique(ptep$data[, ptep$tname]))
   if (!all(ptep$tlist %in% original_time.periods)) {
-    ptep$tlist <- sapply(ptep$tlist,
-      BMisc::t2orig,
-      original_time.periods = original_time.periods
-    )
-    ptep$glist <- sapply(ptep$glist,
-      BMisc::t2orig,
-      original_time.periods = original_time.periods
-    )
-    group <- sapply(group,
-      BMisc::t2orig,
-      original_time.periods = original_time.periods
-    )
-    time.period <- sapply(time.period,
-      BMisc::t2orig,
-      original_time.periods = original_time.periods
-    )
+    ptep$tlist <- BMisc::t2orig(ptep$tlist, original_time.periods)
+    ptep$glist <- BMisc::t2orig(ptep$glist, original_time.periods)
+    group <- BMisc::t2orig(group, original_time.periods)
+    time.period <- BMisc::t2orig(time.period, original_time.periods)
     extra_gt_returns <- lapply(
       extra_gt_returns,
       function(egr) {
@@ -144,16 +134,23 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'
 #' @export
 mboot2 <- function(inffunc, biters = 1000, alp = .05) {
-  n <- nrow(as.matrix(inffunc))
+  inffunc <- as.matrix(inffunc)
+  n <- nrow(inffunc)
 
-  # run the multiplier bootstrap
-  bout <- lapply(1:biters, function(b) {
-    # draw from -1,1 each with p=1/2
-    Ub <- sample(c(-1, 1), size = n, replace = TRUE)
-    Rb <- sqrt(n) * (apply(Ub * inffunc, 2, mean))
-    Rb
-  })
-  bres <- do.call("rbind", bout)
+  # run the multiplier bootstrap: draw b uses Rademacher weights U_b
+  # (-1 or 1, each with p = 1/2) and gives R_b = sqrt(n) * colMeans(U_b * inffunc).
+  # All draws in a block are one sample() call and one matrix product,
+  # rather than an R loop over draws. One sample() call of size n * k
+  # produces the same stream as k calls of size n, so the draws (and results)
+  # match the draw-by-draw loop. Blocks keep the n x k weight matrix to
+  # roughly 10 million entries.
+  block <- max(1L, min(biters, floor(1e7 / n)))
+  starts <- seq.int(1L, biters, by = block)
+  bres <- do.call("rbind", lapply(starts, function(s) {
+    k <- min(block, biters - s + 1L)
+    U <- matrix(sample(c(-1, 1), size = n * k, replace = TRUE), nrow = n, ncol = k)
+    sqrt(n) * crossprod(U, inffunc) / n
+  }))
 
   # bootstrap compatible standard errors
   boot_se <- apply(

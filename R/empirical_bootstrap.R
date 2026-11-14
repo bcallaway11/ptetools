@@ -4,9 +4,37 @@
 #   SE routines), plus aggregation functions attgt_pte_aggregations,
 #   qtt_pte_aggregations, and qott_pte_aggregations.
 # Author: Brant Callaway
-# Last update: 2026-05-18
+# Last update: 2026-11-14
 # Date created: 2021-05-19
 # =============================================================================
+
+# --- Internal: bootstrap resampling ----------------------------------------
+# Returns a function that draws one bootstrap sample of `data`. Panel data
+# are resampled by unit (block bootstrap): the rows of each unit are indexed
+# once here, so each draw only stacks the sampled units' rows, instead of
+# scanning all rows for every sampled unit. Sampled units get new ids
+# 1, ..., n in the id column, as in BMisc::block_boot_sample(), and the same
+# random draws are used: sample(uid, replace = TRUE) is uid[sample.int(...)].
+# Repeated cross sections are resampled by row.
+make_boot_sampler <- function(data, idname, panel) {
+  if (!isTRUE(panel)) {
+    return(function() {
+      bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+      bdata$.rowid <- seq_len(nrow(bdata))
+      bdata$id <- bdata$.rowid
+      bdata
+    })
+  }
+  uid <- unique(data[, idname])
+  rows <- split(seq_len(nrow(data)), factor(data[, idname], levels = uid))
+  n_rows <- lengths(rows)
+  function() {
+    pos <- sample.int(length(uid), length(uid), replace = TRUE)
+    bdata <- data[unlist(rows[pos], use.names = FALSE), , drop = FALSE]
+    bdata[, idname] <- rep(seq_along(pos), n_rows[pos])
+    bdata
+  }
+}
 
 #' @title Panel Empirical Bootstrap
 #'
@@ -89,20 +117,13 @@ panel_empirical_bootstrap <- function(attgt.list,
   )
 
   # bootstrap
-  # list to store bootstrap results
-  boot.res <- list()
+  # draws bootstrap samples; panel data are resampled by unit while repeated
+  # cross sections are resampled at the observation level
+  draw_sample <- make_boot_sampler(data, idname, ptep$panel)
 
   # loop for each nonparametric bootstrap iteration
   boot.res <- pbapply::pblapply(1:biters, function(b) {
-    # draw a bootstrap sample; panel data are resampled by unit while repeated
-    # cross sections are resampled at the observation level
-    if (isTRUE(ptep$panel)) {
-      bdata <- BMisc::blockBootSample(data, idname)
-    } else {
-      bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
-      bdata$.rowid <- seq_len(nrow(bdata))
-      bdata$id <- bdata$.rowid
-    }
+    bdata <- draw_sample()
 
     bptep <- setup_pte_fun(
       yname = ptep$yname,
@@ -232,37 +253,19 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 
   # handle unequally spaced periods
   if (!(all(time.periods %in% original_time.periods))) {
-    time.periods <- sapply(
-      time.periods,
-      BMisc::t2orig,
-      original_time.periods
-    )
-    groups <- sapply(
-      groups,
-      BMisc::t2orig,
-      original_time.periods
-    )
-
-    attgt.results$time.period <- sapply(
-      attgt.results$time.period,
-      BMisc::t2orig,
-      original_time.periods
-    )
-    attgt.results$group <- sapply(
-      attgt.results$group,
-      BMisc::t2orig,
-      original_time.periods
-    )
+    time.periods <- BMisc::t2orig(time.periods, original_time.periods)
+    groups <- BMisc::t2orig(groups, original_time.periods)
+    attgt.results$time.period <- BMisc::t2orig(attgt.results$time.period, original_time.periods)
+    attgt.results$group <- BMisc::t2orig(attgt.results$group, original_time.periods)
   }
 
   # add event time to the results
   attgt.results$e <- attgt.results$time.period - attgt.results$group
 
-  # calculate relative sizes of each group
-  # (will be used as weights)
-  n.group <- sapply(groups, function(gg) {
-    nrow(subset(data, data[, ptep$gname] == gg & data[, ptep$tname] == time.periods[1]))
-  })
+  # calculate relative sizes of each group (will be used as weights):
+  # number of rows of each group in the first period
+  first_G <- data[which(data[, ptep$tname] == time.periods[1]), ptep$gname]
+  n.group <- vapply(groups, function(gg) sum(first_G == gg, na.rm = TRUE), integer(1))
   # merge in group sizes
   ngroup.mat <- cbind(groups, n.group)
   attgt.results <- merge(attgt.results, ngroup.mat, by.x = "group", by.y = "groups")
@@ -459,14 +462,9 @@ qtt_empirical_bootstrap <- function(attgt.list,
   aggte <- aggte_fun(attgt.list, ptep, extra_gt_returns)
 
   # bootstrap
+  draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel)
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
-    if (isTRUE(ptep$panel)) {
-      bdata <- BMisc::blockBootSample(data, ptep$idname)
-    } else {
-      bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
-      bdata$.rowid <- seq_len(nrow(bdata))
-      bdata$id     <- bdata$.rowid
-    }
+    bdata <- draw_sample()
 
     bptep <- setup_pte_fun(
       yname     = ptep$yname,

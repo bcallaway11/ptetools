@@ -1,5 +1,29 @@
 # ptetools 1.0.2
 
+* Fixed `pte_attgt()`, `did_attgt()` and `covid_attgt()` (and so
+  `pte_default()`) giving wrong estimates with covariates or sampling weights
+  when the data were not sorted by id within each period: covariates and
+  weights were paired with other units' outcomes (#9). `setup_pte()` now sorts
+  panel data by id and period, and the 2x2 cells are matched by id. Results
+  for data already sorted this way are unchanged.
+
+* `pte()` and `pte_default()` are faster, with the same results; the empirical
+  bootstrap (used by the `qte` estimators) is often more than 10x faster.
+  Speedups:
+  * The bootstrap resamples units by index.
+  * Each (g,t) cell is built from row indices computed once.
+  * `pte_default()` keeps only the columns it uses.
+  * The multiplier bootstrap is vectorized and uses the same random draws as
+    before.
+  * `data.table` is no longer a dependency.
+
+* The multiplier-bootstrap standard errors for ATT(g,t) now use `biters`
+  draws. Previously they always used 1000 draws, whatever `biters` was set to.
+  Aggregated parameters already used `biters`.
+
+* `setup_pte()` now gives a clear error when a value of `gname` is neither 0
+  nor one of the time periods.
+
 * Fixed standard errors for aggregated parameters (overall ATT, event study)
   when `weightsname` is used: they depended on the scale of the weights and
   were far too large for weights not near 1, such as population counts (#8).

@@ -3,7 +3,7 @@
 # Description: Unconfoundedness-based ATT(g,t) estimator for pandemic policy
 #   evaluation (Callaway and Li 2021). Moved here from the ppe package.
 # Author: Brant Callaway
-# Last update: 2026-05-25
+# Last update: 2026-11-14
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -40,22 +40,19 @@ covid_attgt <- function(gt_data, xformla, d_outcome = FALSE,
   # handle covariates
   #-----------------------------------------------------------------------------
 
+  # pre and post rows, matched by unit
+  pp <- gt_pre_post(gt_data)
+
   # pre-treatment covariates
-  Xpre <- model.frame(xformla, data = subset(gt_data, name == "pre"))
+  Xpre <- model.frame(xformla, data = pp$pre)
 
   # change in covariates
-  dX <- model.frame(d_covs_formula, data = subset(gt_data, name == "post")) -
-    model.frame(d_covs_formula, data = subset(gt_data, name == "pre"))
+  dX <- model.frame(d_covs_formula, data = pp$post) -
+    model.frame(d_covs_formula, data = pp$pre)
   if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
 
-  # convert two-period panel into one period (wide format)
-  gt_data_outcomes <- data.table::dcast(
-    data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
-    id + D ~ name, value.var = "Y"
-  )
-
-  # merge outcome and covariate data
-  gt_dataX <- cbind.data.frame(gt_data_outcomes, Xpre, dX)
+  # merge outcome and covariate data (one row per unit)
+  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre, dX)
 
   # treatment dummy variable
   D <- gt_dataX$D

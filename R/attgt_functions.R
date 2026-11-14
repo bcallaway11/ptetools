@@ -1,3 +1,31 @@
+# =============================================================================
+# Title: ATT(g,t) Functions
+# Description: Estimators for a single (g,t) cell (did_attgt, did_rcs_attgt,
+#   pte_attgt) and internal helpers that put a 2x2 panel cell in wide form.
+# Author: Brant Callaway
+# Last update: 2026-11-14
+# Date created: 2021-05-18
+# =============================================================================
+
+# --- Internal: 2x2 panel cell in wide form -------------------------------
+# Splits a panel gt_data_frame into its "pre" and "post" rows, with the post
+# rows reordered to match the pre rows by id. Everything per-unit (outcomes,
+# covariates, weights, D) is then taken from rows in the same order, whatever
+# the order of gt_data (#9). Units are in the order of the pre rows, which
+# for data from setup_pte() is the order of unique(data$id), as compute.pte()
+# expects for the influence function.
+gt_pre_post <- function(gt_data) {
+  pre <- gt_data[gt_data$name == "pre", , drop = FALSE]
+  post <- gt_data[gt_data$name == "post", , drop = FALSE]
+  list(pre = pre, post = post[match(pre$id, post$id), , drop = FALSE])
+}
+
+# Outcomes in wide form: one row per unit with columns id, D, post, pre
+# (the layout previously produced by dcast(id + D ~ name)).
+gt_wide_outcomes <- function(pp) {
+  data.frame(id = pp$pre$id, D = pp$pre$D, post = pp$post$Y, pre = pp$pre$Y)
+}
+
 #' @title Difference-in-differences for ATT(g,t)
 #'
 #' @description Takes a data.frame and computes for a particular group g
@@ -28,17 +56,14 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
+  # pre and post rows, matched by unit
+  pp <- gt_pre_post(gt_data)
+
   # for outcome regression, get pre-treatment values
-  Xpre <- model.frame(xformula, data = subset(gt_data, name == "pre"))
+  Xpre <- model.frame(xformula, data = pp$pre)
 
-  # convert two period panel into one period
-  gt_data_outcomes <- data.table::dcast(
-    data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
-    id + D ~ name, value.var = "Y"
-  )
-
-  # merge outcome and covariate data
-  gt_dataX <- cbind.data.frame(gt_data_outcomes, Xpre)
+  # merge outcome and covariate data (one row per unit)
+  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre)
 
   # treatment dummy variable
   D <- gt_dataX$D
@@ -153,29 +178,26 @@ pte_attgt <- function(
     d_covs_formula = ~ -1, lagged_outcome_cov = FALSE,
     est_method = "dr",
     ...) {
-  this.g <- subset(gt_data, name == "post" & D == 1)$G
-  this.tp <- unique(subset(gt_data, name == "post")$period)
+  # pre and post rows, matched by unit
+  pp <- gt_pre_post(gt_data)
+
+  this.g <- pp$post$G[pp$post$D == 1]
+  this.tp <- unique(pp$post$period)
 
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
 
   # pre-treatment covariates
-  Xpre <- model.frame(xformula, data = subset(gt_data, name == "pre"))
-  .w <- subset(gt_data, name == "pre")$.w
+  Xpre <- model.frame(xformula, data = pp$pre)
+  .w <- pp$pre$.w
 
   # change in covariates
-  dX <- model.frame(d_covs_formula, data = subset(gt_data, name == "post")) - model.frame(d_covs_formula, data = subset(gt_data, name == "pre"))
+  dX <- model.frame(d_covs_formula, data = pp$post) - model.frame(d_covs_formula, data = pp$pre)
   if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
 
-  # convert two period panel into one period
-  gt_data_outcomes <- data.table::dcast(
-    data.table::as.data.table(gt_data[, c("D", "id", "period", "name", "Y")]),
-    id + D ~ name, value.var = "Y"
-  )
-
-  # merge outcome and covariate data
-  gt_dataX <- cbind.data.frame(gt_data_outcomes, Xpre, dX, .w)
+  # merge outcome and covariate data (one row per unit)
+  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre, dX, .w)
 
   # treatment dummy variable
   D <- gt_dataX$D

@@ -3,7 +3,7 @@
 # Description: compute.pte (inner loop over groups/time periods) and pte
 #   (main user-facing function) for computing panel treatment effects.
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-11-14
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -477,6 +477,15 @@ pte_default <- function(yname,
                         ...) {
   use_subset_fun <- if (isTRUE(panel)) two_by_two_subset else two_by_two_rcs_subset
   use_attgt_fun <- if (isTRUE(panel)) pte_attgt else did_rcs_attgt
+
+  # Keep only the columns these estimators use. Every (g,t) cell and every
+  # bootstrap sample copies the data, so unused columns are pure overhead.
+  data <- as.data.frame(data)
+  used_cols <- unique(c(
+    yname, gname, tname, idname, weightsname,
+    all.vars(xformula), all.vars(d_covs_formula)
+  ))
+  data <- data[, intersect(used_cols, names(data)), drop = FALSE]
 
   if (!isTRUE(panel) && (isTRUE(d_outcome) ||
     !identical(d_covs_formula, ~ -1) ||

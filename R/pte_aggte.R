@@ -63,9 +63,9 @@ pte_aggte <- function(attgt,
   originalglist <- glist
   originaltlist <- tlist
 
-  time.period <- sapply(originalt, orig2t, originaltlist)
-  group <- sapply(originalgroup, orig2t, originaltlist)
-  glist <- sapply(originalglist, orig2t, originaltlist)
+  time.period <- orig2t(originalt, originaltlist)
+  group <- orig2t(originalgroup, originaltlist)
+  glist <- orig2t(originalglist, originaltlist)
   tlist <- unique(time.period)
   maxT <- max(time.period)
 
@@ -90,7 +90,7 @@ pte_aggte <- function(attgt,
   keepers <- which(group <= time.period & time.period <= (group + max_e)) ### added second condition to allow for limit on longest period included in att
 
   # n x 1 vector of group variable
-  G <- unlist(lapply(group_weight_data[, gname], orig2t, originaltlist))
+  G <- orig2t(group_weight_data[, gname], originaltlist)
 
   if (type == "group") {
     # get group specific ATTs
@@ -318,15 +318,17 @@ wif <- function(keepers, pg, weights.ind, G, group) {
   # note: weights are all of the form P(G=g|cond)/sum_cond(P(G=g|cond))
   # this is equal to P(G=g)/sum_cond(P(G=g)) which simplifies things here
 
+  # n x length(keepers) matrix with column k equal to
+  # weights.ind * 1{G == group[k]} - pg[k]; built once and used for both
+  # terms (same arithmetic as computing it column by column)
+  in_group <- outer(G, group[keepers], "==")
+  in_group[is.na(in_group)] <- FALSE
+  centered <- sweep(weights.ind * in_group, 2, pg[keepers])
+
   # effect of estimating weights in the numerator
-  if1 <- sapply(keepers, function(k) {
-    (weights.ind * 1 * BMisc::TorF(G == group[k]) - pg[k]) /
-      sum(pg[keepers])
-  })
+  if1 <- centered / sum(pg[keepers])
   # effect of estimating weights in the denominator
-  if2 <- base::rowSums(sapply(keepers, function(k) {
-    weights.ind * 1 * BMisc::TorF(G == group[k]) - pg[k]
-  })) %*%
+  if2 <- base::rowSums(centered) %*%
     t(pg[keepers] / (sum(pg[keepers])^2))
 
   # return the influence function for the weights
@@ -435,9 +437,9 @@ overall_weights <- function(attgt,
   originalglist <- glist
   originaltlist <- tlist
 
-  time.period <- sapply(originalt, orig2t, originaltlist)
-  group <- sapply(originalgroup, orig2t, originaltlist)
-  glist <- sapply(originalglist, orig2t, originaltlist)
+  time.period <- orig2t(originalt, originaltlist)
+  group <- orig2t(originalgroup, originaltlist)
+  glist <- orig2t(originalglist, originaltlist)
   tlist <- unique(time.period)
   maxT <- max(time.period)
 

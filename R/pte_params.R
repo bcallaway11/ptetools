@@ -3,7 +3,7 @@
 # Description: Functions for setting up pte_params objects used throughout
 #   the ptetools pipeline: setup_pte_basic, setup_pte, and pte_params.
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-11-14
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -190,25 +190,17 @@ setup_pte <- function(yname,
   original_time.periods <- time.periods
   original_groups <- groups
 
-  # get new time periods / groups
-  time.periods <- sapply(original_time.periods,
-    BMisc::orig2t,
-    original_time.periods = original_time.periods
-  )
-  groups <- sapply(original_groups,
-    BMisc::orig2t,
-    original_time.periods = original_time.periods
-  )
+  # get new time periods / groups (orig2t() is vectorized; one call per
+  # vector rather than one per row)
+  time.periods <- BMisc::orig2t(original_time.periods, original_time.periods)
+  groups <- BMisc::orig2t(original_groups, original_time.periods)
 
   # put the period in new time scale
-  data$period <- sapply(period,
-    BMisc::orig2t,
-    original_time.periods = original_time.periods
-  )
-  data$G <- sapply(G,
-    BMisc::orig2t,
-    original_time.periods = original_time.periods
-  )
+  data$period <- BMisc::orig2t(period, original_time.periods)
+  data$G <- BMisc::orig2t(G, original_time.periods)
+  if (is.list(data$G) || anyNA(data$G)) {
+    stop("Every value of gname must be 0 (never treated) or one of the time periods in tname.")
+  }
 
   t_adjust <- 0
   # sort the time periods and drop the first
@@ -230,7 +222,21 @@ setup_pte <- function(yname,
     data <- data[!(data$G %in% seq(1, required_pre_periods + anticipation)), ]
   }
 
+  # Sort panel data by (id, period). Downstream code lines up unit-level
+  # vectors by position: the influence-function rows follow unique(data$id),
+  # and the 2x2 cells and first-period group weights follow row order. With
+  # this order they all agree regardless of how the input was sorted (#9).
+  if (isTRUE(panel)) {
+    data <- data[order(data$id, data$period), , drop = FALSE]
+  }
+
   data$.rowid <- seq_len(nrow(data))
+
+  # Row indices by period and the unit ids, computed once here so that
+  # two_by_two_subset() can build each (g,t) cell by position instead of
+  # scanning the full data for every cell.
+  attr(data, "pte_period_rows") <- split(seq_len(nrow(data)), data$period)
+  attr(data, "pte_ids") <- unique(data$id)
 
 
   params <- pte_params(
