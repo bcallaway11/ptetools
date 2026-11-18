@@ -93,9 +93,14 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     dvals <- ptep$dvals
     degree <- ptep$degree
     knots <- ptep$knots
-    bs_grid <- splines2::bSpline(dvals, degree = degree, knots = knots)
+    # the boundary knots of the basis the dose regressions were fitted with
+    # (the range of the positive doses); without them bSpline() and dbs() use
+    # the range of dvals, which gives a different basis
+    boundary_knots <- ptep$boundary_knots
+    if (is.null(boundary_knots)) boundary_knots <- range(dvals)
+    bs_grid <- splines2::bSpline(dvals, degree = degree, knots = knots, Boundary.knots = boundary_knots)
     bs_grid <- cbind(1, bs_grid) # add intercept
-    bs_deriv <- splines2::dbs(dvals, degree = degree, knots = knots)
+    bs_deriv <- splines2::dbs(dvals, degree = degree, knots = knots, Boundary.knots = boundary_knots)
     bs_deriv <- cbind(0, bs_deriv) # intercept doesn't matter here, just placeholder to get dimensions right
 
     # since we are picking dvals over a grid, the only randomness comes from
