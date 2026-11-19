@@ -311,7 +311,8 @@ setup_pte <- function(yname,
 #'  supports pointwise confidence intervals -- if `cband = TRUE` is also
 #'  requested, `ptetools` falls back to pointwise intervals with a warning.
 #'  Analytical standard errors are not currently supported for continuous
-#'  treatment (`gt_type = "dose"`); see `dev/NOTES.md`.
+#'  treatment (`gt_type = "dose"`): with `bstrap = FALSE`, the multiplier
+#'  bootstrap is used instead, with a warning.
 #' @param anticipation how long before the treatment actually takes place it
 #'  can already affect outcomes, in units of the time variable \code{tname}
 #'  (e.g., years), as in \code{did::att_gt()}. With unequally spaced periods

@@ -52,7 +52,8 @@ estimator returns an influence function.  \code{bstrap = FALSE} overrides
 supports pointwise confidence intervals -- if \code{cband = TRUE} is also
 requested, \code{ptetools} falls back to pointwise intervals with a warning.
 Analytical standard errors are not currently supported for continuous
-treatment (\code{gt_type = "dose"}); see \code{dev/NOTES.md}.}
+treatment (\code{gt_type = "dose"}): with \code{bstrap = FALSE}, the multiplier
+bootstrap is used instead, with a warning.}
 
 \item{gt_type}{which type of group-time effects are computed.
 The default is "att".  Different estimation strategies can implement

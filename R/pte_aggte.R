@@ -486,8 +486,13 @@ overall_weights <- function(attgt,
 
   out_weight <- g_weight[match(group, glist)] * keeper
 
-  # quick sanity check
-  if (sum(out_weight) != 1) stop("something's going wrong calculating overall weights")
+  # sanity check: the weights should sum to 1, up to floating-point rounding
+  # (exact equality rejected valid weights, e.g. off by 4e-16 with many
+  # timing groups, #1)
+  if (!isTRUE(all.equal(sum(out_weight), 1))) {
+    stop("overall weights on ATT(g,t) sum to ", format(sum(out_weight)),
+         ", not 1.", call. = FALSE)
+  }
 
   # following convention of package, return groups and time periods in their original scale
   data.frame(

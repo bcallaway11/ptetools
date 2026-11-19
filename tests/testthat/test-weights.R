@@ -3,7 +3,7 @@
 # Description: Aggregated standard errors must not depend on the scale of the
 #   sampling weights (issue #8) and should match did::att_gt().
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2026-11-14
 # =============================================================================
 
@@ -38,4 +38,26 @@ test_that("weighted SEs are invariant to weight scale and match did", {
   expect_equal(big$overall.att, cs_agg$overall.att, tolerance = 1e-8)
   # bootstrap SEs: allow for simulation noise
   expect_equal(big$overall.se, cs_agg$overall.se, tolerance = 0.1)
+})
+
+# overall_weights() checked sum(weights) == 1 with exact equality, which
+# rejected valid weights off by floating-point rounding (~4e-16) with many
+# timing groups (#1). This panel (13 timing groups, 14 periods, 147 units)
+# triggered the error.
+test_that("overall weights tolerate floating-point rounding", {
+  set.seed(1)
+  n <- 147
+  n_periods <- 14
+  grp <- sample(c(0, 2:14), n, replace = TRUE)
+  d <- data.frame(id = rep(seq_len(n), each = n_periods),
+                  period = rep(seq_len(n_periods), n),
+                  grp = rep(grp, each = n_periods))
+  d$y <- rnorm(nrow(d))
+  res <- suppressWarnings(pte_default(
+    yname = "y", gname = "grp", tname = "period", idname = "id", data = d,
+    d_outcome = TRUE, est_method = "reg", biters = 0
+  ))
+  w <- overall_weights(res$att_gt)
+  expect_equal(sum(w$overall_weight), 1)
+  expect_true(all(w$overall_weight >= 0))
 })

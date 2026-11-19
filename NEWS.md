@@ -1,5 +1,14 @@
 # ptetools 1.0.2
 
+* `overall_weights()` (used for continuous treatments) no longer stops with
+  "something's going wrong calculating overall weights" when the weights
+  sum to 1 only up to floating-point rounding, which happened with many
+  timing groups (#1).
+
+* The `bstrap` documentation no longer refers to `dev/NOTES.md`, which is
+  not part of the package; it now says what happens with a continuous
+  treatment (#4).
+
 * `anticipation` now follows `did::att_gt()`: it is measured in units of the
   time variable (e.g., years), not in number of periods, which matters when
   periods are not one unit apart. Specifically:
