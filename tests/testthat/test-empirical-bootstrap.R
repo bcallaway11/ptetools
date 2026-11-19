@@ -85,3 +85,43 @@ test_that("group-time SEs are matched to the right cells", {
   cell <- att$group == 3 & att$time.period == 5
   expect_equal(att$se[cell], res$dyn_results$se[res$dyn_results$e == 2])
 })
+
+# pte_qtt output (#26): summary() returns an object without printing,
+# print() shows the overall, dynamic and group tables once, and autoplot()
+# draws the group QTTs.
+test_that("pte_qtt summary, print and group plot", {
+  # a minimal pte_qtt object: two quantiles, two event times, two groups
+  mk <- function(keys) {
+    df <- expand.grid(k = keys, probs = c(0.25, 0.5))
+    df$qtt <- seq_len(nrow(df)) / 10
+    df$se <- 0.05
+    df$lower_pw <- df$qtt - 0.1
+    df$upper_pw <- df$qtt + 0.1
+    df$lower_ub <- df$qtt - 0.15
+    df$upper_ub <- df$qtt + 0.15
+    df
+  }
+  dyn <- mk(c(1, 0, -1))
+  names(dyn)[1] <- "e"
+  grp <- mk(c(2004, 2006))
+  names(grp)[1] <- "group"
+  ovl <- mk(1)[, -1]
+  q <- pte_qtt(overall = ovl, dynamic = dyn, group = grp,
+               ptep = list(alp = 0.05, cband = TRUE))
+
+  expect_silent(s <- summary(q))
+  expect_s3_class(s, "summary.pte_qtt")
+  expect_equal(s$dynamic$`Event Time`, c(-1, 0, 1))
+  out <- capture.output(print(q))
+  expect_equal(sum(grepl("Overall QTT curve", out)), 1)
+  expect_true(any(grepl("Group effects \\(quantile 0.5\\)", out)))
+  expect_true(any(grepl("Simult.", out)))
+  expect_equal(nrow(summary(q, probs = c(0.25, 0.5))$group), 4)
+  expect_error(summary(q, probs = 0.42), "not among the estimated quantiles")
+
+  for (pp in list(0.5, c(0.25, 0.5))) {
+    expect_no_error(ggplot2::ggplot_build(
+      autoplot(q, type = "group", plot_probs = pp)
+    ))
+  }
+})

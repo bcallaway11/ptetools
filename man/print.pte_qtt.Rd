@@ -9,10 +9,10 @@
 \arguments{
 \item{x}{a \code{pte_qtt} object}
 
-\item{...}{extra arguments}
+\item{...}{extra arguments passed to \code{summary.pte_qtt()}}
 }
 \value{
-None. Prints the overall QTT curve.
+\code{x}, invisibly
 }
 \description{
 Prints a \code{pte_qtt} object.

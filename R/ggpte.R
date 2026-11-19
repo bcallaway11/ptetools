@@ -4,7 +4,7 @@
 #   autoplot returns a ggplot object the caller can modify with +.
 #   plot is a convenience wrapper that prints the autoplot result.
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-11-19
 # Date created: 2026-05-22
 # =============================================================================
 
@@ -21,14 +21,18 @@
 #'   when a single quantile is plotted, and suppressed by default when multiple
 #'   quantiles are plotted.
 #'
+#' For \code{type = "group"}: each cohort's QTT at the selected quantile(s),
+#'   with cohorts on the x-axis; with several quantiles, one colored point per
+#'   quantile. CIs as for \code{type = "dynamic"}.
+#'
 #' @param object a \code{pte_qtt} object
-#' @param type which aggregation to plot: \code{"overall"} (default) or
-#'   \code{"dynamic"}. \code{"group"} is a stub.
+#' @param type which aggregation to plot: \code{"overall"} (default),
+#'   \code{"dynamic"} or \code{"group"}.
 #' @param cband logical; if \code{TRUE} (default), show uniform confidence band;
 #'   if \code{FALSE}, show pointwise intervals. Applies when CIs are displayed.
 #' @param plot_probs numeric vector of quantile levels to show in the dynamic
-#'   plot. Defaults to \code{0.5} (median). All values must be present in
-#'   \code{object$dynamic$probs}.
+#'   and group plots. Defaults to \code{0.5} (median). All values must be
+#'   among the estimated quantiles.
 #' @param plot_ci logical or \code{NULL}. If \code{NULL} (default), CIs are
 #'   shown when \code{length(plot_probs) == 1} and suppressed otherwise. Set
 #'   \code{TRUE} to always show CIs, \code{FALSE} to never show them.
@@ -116,7 +120,56 @@ autoplot.pte_qtt <- function(object, type = "overall", cband = TRUE,
     return(p)
   }
 
-  if (type == "group") stop("autoplot for type='group' not yet implemented")
+  if (type == "group") {
+    # each cohort's QTT at the selected quantile(s), as for type = "dynamic"
+    # but with cohorts on the x-axis (#26)
+    available <- unique(object$group$probs)
+    missing_p <- setdiff(plot_probs, available)
+    if (length(missing_p) > 0) {
+      stop("plot_probs value(s) not found in object$group$probs: ",
+           paste(missing_p, collapse = ", "))
+    }
+
+    if (is.null(plot_ci)) plot_ci <- length(plot_probs) == 1
+
+    df <- object$group[object$group$probs %in% plot_probs, ]
+    df$group <- factor(df$group)
+    has_ci <- plot_ci && !anyNA(df[[lower_col]]) && !anyNA(df[[upper_col]])
+
+    if (length(plot_probs) == 1) {
+      p <- ggplot(df, aes(x = group, y = qtt)) +
+        geom_hline(yintercept = 0, color = "gray50") +
+        geom_point() +
+        scale_x_discrete("Group") +
+        scale_y_continuous("QTT") +
+        theme_bw()
+      if (has_ci) {
+        p <- p +
+          geom_errorbar(aes(ymin = .data[[lower_col]],
+                            ymax = .data[[upper_col]]), width = 0.2)
+      }
+    } else {
+      df$probs <- as.factor(df$probs)
+      dodge <- position_dodge(width = 0.5)
+      p <- ggplot(df, aes(x = group, y = qtt, color = probs)) +
+        geom_hline(yintercept = 0, color = "gray50") +
+        geom_point(position = dodge) +
+        scale_x_discrete("Group") +
+        scale_y_continuous("QTT") +
+        theme_bw() +
+        theme(legend.position = "bottom") +
+        labs(color = "Quantile")
+      if (has_ci) {
+        p <- p +
+          geom_errorbar(aes(ymin = .data[[lower_col]],
+                            ymax = .data[[upper_col]]),
+                        width = 0.2, position = dodge)
+      }
+    }
+
+    return(p)
+  }
+
   stop("unknown type: ", type)
 }
 

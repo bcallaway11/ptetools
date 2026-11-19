@@ -16,15 +16,15 @@
 \arguments{
 \item{object}{a \code{pte_qtt} object}
 
-\item{type}{which aggregation to plot: \code{"overall"} (default) or
-\code{"dynamic"}. \code{"group"} is a stub.}
+\item{type}{which aggregation to plot: \code{"overall"} (default),
+\code{"dynamic"} or \code{"group"}.}
 
 \item{cband}{logical; if \code{TRUE} (default), show uniform confidence band;
 if \code{FALSE}, show pointwise intervals. Applies when CIs are displayed.}
 
 \item{plot_probs}{numeric vector of quantile levels to show in the dynamic
-plot. Defaults to \code{0.5} (median). All values must be present in
-\code{object$dynamic$probs}.}
+and group plots. Defaults to \code{0.5} (median). All values must be
+among the estimated quantiles.}
 
 \item{plot_ci}{logical or \code{NULL}. If \code{NULL} (default), CIs are
 shown when \code{length(plot_probs) == 1} and suppressed otherwise. Set
@@ -44,4 +44,8 @@ For \code{type = "dynamic"}: event-study plot with event time on the x-axis.
 Each selected quantile is a separate colored line. CIs are shown by default
 when a single quantile is plotted, and suppressed by default when multiple
 quantiles are plotted.
+
+For \code{type = "group"}: each cohort's QTT at the selected quantile(s),
+with cohorts on the x-axis; with several quantiles, one colored point per
+quantile. CIs as for \code{type = "dynamic"}.
 }

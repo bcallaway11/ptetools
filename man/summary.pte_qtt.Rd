@@ -4,17 +4,24 @@
 \alias{summary.pte_qtt}
 \title{summary.pte_qtt}
 \usage{
-\method{summary}{pte_qtt}(object, ...)
+\method{summary}{pte_qtt}(object, probs = 0.5, ...)
 }
 \arguments{
 \item{object}{a \code{pte_qtt} object}
 
+\item{probs}{quantile levels at which to report the event-study and group
+QTTs (default \code{0.5}, the median). Must be among the estimated
+quantiles.}
+
 \item{...}{additional arguments}
 }
 \value{
-None. Prints the overall QTT curve.
+a \code{summary.pte_qtt} object, printed by its \code{print}
+method
 }
 \description{
-Summary for \code{pte_qtt} object; prints the overall QTT curve.
+Summary for a \code{pte_qtt} object: the overall QTT curve,
+and the event-study and group QTTs at selected quantiles. Confidence bands
+are uniform over quantiles (for each curve) when \code{cband = TRUE} was
+used for estimation, and pointwise otherwise.
 }
-\keyword{internal}

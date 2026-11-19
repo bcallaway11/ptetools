@@ -553,26 +553,120 @@ pte_qtt <- function(overall,
 
 #' @title summary.pte_qtt
 #'
-#' @description Summary for \code{pte_qtt} object; prints the overall QTT curve.
+#' @description Summary for a \code{pte_qtt} object: the overall QTT curve,
+#'  and the event-study and group QTTs at selected quantiles. Confidence bands
+#'  are uniform over quantiles (for each curve) when \code{cband = TRUE} was
+#'  used for estimation, and pointwise otherwise.
 #'
 #' @param object a \code{pte_qtt} object
+#' @param probs quantile levels at which to report the event-study and group
+#'  QTTs (default \code{0.5}, the median). Must be among the estimated
+#'  quantiles.
 #' @param ... additional arguments
 #'
-#' @keywords internal
-#' @return None. Prints the overall QTT curve.
+#' @return a \code{summary.pte_qtt} object, printed by its \code{print}
+#'  method
 #' @export
-summary.pte_qtt <- function(object, ...) {
-  alp <- object$ptep$alp
+summary.pte_qtt <- function(object, probs = 0.5, ...) {
+  alp <- if (!is.null(object$ptep$alp)) object$ptep$alp else 0.05
+  cband <- isTRUE(object$ptep$cband)
+  lower_col <- if (cband) "lower_ub" else "lower_pw"
+  upper_col <- if (cband) "upper_ub" else "upper_pw"
 
-  cat("\nOverall QTT Curve:\n")
-  out <- object$overall[, c("probs", "qtt", "se", "lower_ub", "upper_ub")]
-  out <- round(out, 4)
-  colnames(out) <- c("Quantile", "QTT", "Std. Error",
-                     paste0(100 * (1 - alp), "% CB Lower"),
-                     paste0(100 * (1 - alp), "% CB Upper"))
-  print(out, row.names = FALSE)
+  # one table: key columns, QTT, SE, band, and "*" if the band excludes 0
+  qtt_table <- function(df, keys, key_names) {
+    if (is.null(df) || nrow(df) == 0) return(NULL)
+    lower <- df[[lower_col]]
+    upper <- df[[upper_col]]
+    sig <- (upper < 0) | (lower > 0)
+    sig[is.na(sig)] <- FALSE
+    out <- data.frame(df[keys], df$qtt, df$se, lower, upper)
+    out[] <- lapply(out, function(v) round(v, 4))
+    colnames(out) <- c(key_names, "QTT", "Std. Error", "Lower", "Upper")
+    out$sig <- ifelse(sig, "*", "")
+    # sorted by the keys (e.g. event time, then quantile)
+    out <- out[do.call(order, unname(as.list(df[keys]))), , drop = FALSE]
+    rownames(out) <- NULL
+    out
+  }
+
+  # event-study and group QTTs at the requested quantiles
+  at_probs <- function(df) {
+    if (is.null(df) || nrow(df) == 0) return(df)
+    available <- unique(df$probs)
+    near <- function(x, y) vapply(x, function(v) any(abs(v - y) < 1e-8),
+                                  logical(1))
+    keep <- near(df$probs, probs)
+    missing_p <- probs[!near(probs, available)]
+    if (length(missing_p) > 0) {
+      stop("probs value(s) not among the estimated quantiles: ",
+           paste(missing_p, collapse = ", "), call. = FALSE)
+    }
+    df[keep, , drop = FALSE]
+  }
+  dyn <- at_probs(object$dynamic)
+  grp <- at_probs(object$group)
+  one_prob <- length(probs) == 1
+
+  out <- list(
+    overall = qtt_table(object$overall, "probs", "Quantile"),
+    dynamic = if (one_prob) {
+      qtt_table(dyn, "e", "Event Time")
+    } else {
+      qtt_table(dyn, c("e", "probs"), c("Event Time", "Quantile"))
+    },
+    group = if (one_prob) {
+      qtt_table(grp, "group", "Group")
+    } else {
+      qtt_table(grp, c("group", "probs"), c("Group", "Quantile"))
+    },
+    probs = probs,
+    alp = alp,
+    cband = cband
+  )
+  class(out) <- "summary.pte_qtt"
+  out
+}
+
+
+#' @title print.summary.pte_qtt
+#'
+#' @description Prints a \code{summary.pte_qtt} object.
+#'
+#' @param x a \code{summary.pte_qtt} object
+#' @param ... extra arguments
+#'
+#' @keywords internal
+#' @return \code{x}, invisibly
+#' @export
+print.summary.pte_qtt <- function(x, ...) {
+  band <- paste0("[", 100 * (1 - x$alp), "% ",
+                 if (x$cband) "Simult. " else "Pointwise ", "Conf. Band]")
+  print_table <- function(title, tab) {
+    if (is.null(tab)) return(invisible(NULL))
+    cat(title, "\n", sep = "")
+    n <- ncol(tab)
+    colnames(tab)[n - 2] <- band
+    colnames(tab)[n - 1] <- ""
+    colnames(tab)[n] <- ""
+    print(tab, row.names = FALSE)
+    cat("\n")
+  }
+  at <- if (length(x$probs) == 1) {
+    paste0(" (quantile ", x$probs, ")")
+  } else {
+    ""
+  }
   cat("\n")
-  invisible(object)
+  print_table("Overall QTT curve:", x$overall)
+  print_table(paste0("Dynamic effects", at, ":"), x$dynamic)
+  print_table(paste0("Group effects", at, ":"), x$group)
+  cat("---\n")
+  cat("Signif. codes: `*' confidence band does not cover 0\n")
+  if (x$cband) {
+    cat("Simultaneous bands are uniform over quantiles, for each QTT curve.\n")
+  }
+  invisible(x)
 }
 
 
@@ -581,13 +675,14 @@ summary.pte_qtt <- function(object, ...) {
 #' @description Prints a \code{pte_qtt} object.
 #'
 #' @param x a \code{pte_qtt} object
-#' @param ... extra arguments
+#' @param ... extra arguments passed to \code{summary.pte_qtt()}
 #'
 #' @keywords internal
-#' @return None. Prints the overall QTT curve.
+#' @return \code{x}, invisibly
 #' @export
 print.pte_qtt <- function(x, ...) {
-  summary.pte_qtt(x, ...)
+  print(summary(x, ...))
+  invisible(x)
 }
 
 

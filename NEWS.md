@@ -1,5 +1,15 @@
 # ptetools 1.0.2
 
+* QTT results (`pte_qtt`), e.g. from qte's estimators (#26):
+  * `summary()` now returns a `summary.pte_qtt` object instead of printing,
+    so the table no longer appears twice at the console;
+  * the summary shows the dynamic (event-study) and group QTTs at selected
+    quantiles (`probs`, default the median), not only the overall curve;
+  * it labels the band (simultaneous over quantiles, or pointwise) and marks
+    estimates whose band excludes 0 with `*`, like the ATT summary;
+  * `autoplot(type = "group")` now plots each cohort's QTT at the selected
+    quantile(s); it used to error.
+
 * `setup_pte()` gains `require_comparison` (default `TRUE`). With `FALSE`,
   setup does not require comparison units and estimates every group; this
   is for estimators that use only variation within each group and build
