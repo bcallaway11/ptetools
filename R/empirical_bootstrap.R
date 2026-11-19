@@ -823,7 +823,10 @@ qtt_empirical_bootstrap <- function(attgt.list,
 #' @title Aggregate Group-Time Quantile of the Treatment Effect
 #'
 #' @description Aggregate group-time distribution of the treatment effect into
-#'  overall, group, and dynamic effects.
+#'  overall, group, and dynamic effects, at the quantile
+#'  \code{ptep$ret_quantile}. The distributions are mixed exactly, from
+#'  every support point of the cells' CDFs (\code{Fte}), which must be step
+#'  functions (such as those from \code{BMisc::weighted_ecdf()}).
 #'
 #' @inheritParams attgt_pte_aggregations
 #' @inheritParams attgt_if
@@ -837,38 +840,37 @@ qott_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   # compute results for att_gt, but we are actually just interested in getting
   # the weights here.
   attgt_res <- attgt_pte_aggregations(attgt.list, ptep = ptep)
-  Fte_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$Fte)
-  qott_gt <- unlist(lapply(1:length(Fte_gt), function(j) {
-    quantile(Fte_gt[[j]], probs = ret_quantile, type = 1)
-  }))
+
+  # support points and masses of each cell's distribution of the treatment
+  # effect, once. The mixtures are exact, as for the QTT (#25); they used to
+  # be evaluated on 1,000 points of [-max(y), max(y)], which rounded the
+  # quantiles, missed effects below -max(y) and ran backwards when every
+  # outcome was negative.
+  Fte_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
+    ecdf_masses(egr$extra_gt_returns$Fte)
+  })
+  # quantile names as quantile() gives them ("50%"), kept for compatibility
+  qname <- paste0(formatC(100 * ret_quantile, format = "fg", width = 1,
+                          digits = 7), "%")
+  mix_qott <- function(w) {
+    stats::setNames(mix_quantile(mix_cdf(Fte_gt, w), ret_quantile), qname)
+  }
+
+  # each cell's own QOTT (exact, unlike quantile() on a weighted ECDF)
+  qott_gt <- vapply(Fte_gt, function(m) {
+    mix_quantile(mix_cdf(list(m), 1), ret_quantile)
+  }, numeric(1))
   groups <- unlist(BMisc::get_list_element(attgt.list, "group"))
   time.periods <- unlist(BMisc::get_list_element(attgt.list, "time.period"))
-  yname <- ptep$yname
-  y.seq <- seq(-max(ptep$data[, yname]), max(ptep$data[, yname]), length.out = 1000)
 
-  Fte_overall <- BMisc::combine_ecdfs(
-    y.seq = y.seq,
-    ecdflist = Fte_gt,
-    weights = attgt_res$overall_weights
-  )
-  overall_qott <- quantile(Fte_overall, probs = ret_quantile, type = 1)
+  overall_qott <- mix_qott(attgt_res$overall_weights)
 
   dyn_qott <- lapply(attgt_res$dyn_weights, function(dw) {
-    Fte_e <- BMisc::combine_ecdfs(
-      y.seq = y.seq,
-      ecdflist = Fte_gt,
-      weights = dw$weights
-    )
-    list(e = dw$e, att.e = quantile(Fte_e, probs = ret_quantile, type = 1))
+    list(e = dw$e, att.e = mix_qott(dw$weights))
   })
 
   group_qott <- lapply(attgt_res$group_weights, function(gw) {
-    Fte_g <- BMisc::combine_ecdfs(
-      y.seq = y.seq,
-      ecdflist = Fte_gt,
-      weights = gw$weights
-    )
-    list(group = gw$g, att.g = quantile(Fte_g, probs = ret_quantile, type = 1))
+    list(group = gw$g, att.g = mix_qott(gw$weights))
   })
 
   pte_emp_boot(

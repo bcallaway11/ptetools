@@ -95,3 +95,61 @@ test_that("the overall QTT is the quantile of the exact mixture", {
     brute_quantile(lapply(cells, `[[`, "F0"), w, probs)
   expect_equal(agg$overall_results$qtt, expected)
 })
+
+
+# --- Quantile of the treatment effect (QOTT) ---------------------------------
+# The distribution of the treatment effect was mixed on 1,000 points of
+# [-max(y), max(y)]: rounded, blind to effects below -max(y), and backwards
+# when every outcome is negative. It is now exact, as for the QTT.
+
+# local distribution of the treatment effect: treated units' change in Y
+# minus the comparison units' mean change (enough to test aggregation)
+qott_cell <- function(gt_data, ...) {
+  pp <- gt_pre_post(gt_data)
+  dy <- pp$post$Y - pp$pre$Y
+  te <- dy[pp$pre$D == 1] - mean(dy[pp$pre$D == 0])
+  attgt_noif(attgt = mean(te),
+             extra_gt_returns = list(Fte = BMisc::weighted_ecdf(te)))
+}
+
+qott_by_hand <- function(data, ret_quantile) {
+  ptep <- setup_pte(yname = "y", gname = "grp", tname = "period",
+                    idname = "id", data = data, gt_type = "qott",
+                    ret_quantile = ret_quantile)
+  gt <- compute.pte(ptep, subset_fun = two_by_two_subset,
+                    attgt_fun = qott_cell)
+  list(
+    agg = qott_pte_aggregations(gt$attgt.list, ptep, gt$extra_gt_returns),
+    w = attgt_pte_aggregations(gt$attgt.list, ptep),
+    cells = lapply(gt$extra_gt_returns,
+                   function(e) e$extra_gt_returns$Fte)
+  )
+}
+
+test_that("QOTT aggregation is exact, also with negative outcomes", {
+  set.seed(3)
+  n <- 400
+  grp <- sample(c(0, 3, 4), n, replace = TRUE)
+  d <- expand.grid(id = seq_len(n), period = 1:4)
+  d$grp <- grp[d$id]
+  # all outcomes negative, effects far below -max(y)
+  d$y <- -50 + rnorm(n)[d$id] + rnorm(nrow(d)) -
+    20 * (d$grp > 0 & d$period >= d$grp)
+  expect_true(all(d$y < 0))
+  for (tau in c(0.1, 0.5, 0.9)) {
+    r <- qott_by_hand(d, tau)
+    expect_equal(unname(r$agg$overall_results),
+                 brute_quantile(r$cells, r$w$overall_weights, tau))
+    expect_equal(names(r$agg$overall_results), paste0(100 * tau, "%"))
+    for (j in seq_along(r$w$dyn_weights)) {
+      expect_equal(unname(r$agg$dyn_results$att.e[j]),
+                   brute_quantile(r$cells, r$w$dyn_weights[[j]]$weights, tau))
+    }
+    # each cell's QOTT is its own exact quantile
+    expect_equal(r$agg$attgt_results$att,
+                 vapply(r$cells, function(f) brute_quantile(list(f), 1, tau),
+                        numeric(1)))
+  }
+  # effects are about -20, far below -max(y) (about 47)
+  expect_lt(unname(qott_by_hand(d, 0.5)$agg$overall_results), -15)
+})

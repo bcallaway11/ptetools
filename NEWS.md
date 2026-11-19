@@ -10,6 +10,10 @@
   0.01). The cells' `F0`/`F1` must be step-function CDFs, as those from
   `BMisc::weighted_ecdf()` are. Bootstrap draws no longer keep their own
   overall CDFs, so memory does not grow with sample size times `biters`.
+  The quantile of the treatment effect (`qott_pte_aggregations()`) is now
+  exact in the same way. Its grid, 1,000 points on [-max(y), max(y)], also
+  missed effects below -max(y), and ran backwards when every outcome was
+  negative. Each cell's QOTT is now its exact quantile too.
 
 * The doubly robust estimator is now `est_method = "aipw"` (augmented
   inverse probability weighting), the new default in `pte_default()`,
