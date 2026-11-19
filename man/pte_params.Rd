@@ -112,7 +112,12 @@ outcomes can be estimated for all groups in the same time period.  Not supported
 can be estimated for all time periods for a single group.  Not supported yet.
 These functions aim at reducing or eliminating running the same code multiple times.}
 
-\item{biters}{number of bootstrap iterations; default is 100}
+\item{biters}{number of bootstrap iterations; default is 100.
+\code{biters = 0} skips the bootstrap: where \code{attgt_fun} returns an
+influence function this is the same as \code{bstrap = FALSE} (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with \code{NA} standard errors.}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
 

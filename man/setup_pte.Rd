@@ -89,7 +89,12 @@ this is a specific quantile at which to report results, e.g.,
 which to evaluate the QTT curve (e.g., \code{seq(0.05, 0.95, 0.05)}).
 Defaults to \code{seq(0.05, 0.95, 0.05)} when NULL.}
 
-\item{biters}{number of bootstrap iterations; default is 100}
+\item{biters}{number of bootstrap iterations; default is 100.
+\code{biters = 0} skips the bootstrap: where \code{attgt_fun} returns an
+influence function this is the same as \code{bstrap = FALSE} (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with \code{NA} standard errors.}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
 

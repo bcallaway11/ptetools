@@ -5,7 +5,7 @@
 #   for the dose case are always computed via the multiplier bootstrap;
 #   analytical standard errors are not yet supported here (see dev/NOTES.md).
 # Author: Brant Callaway
-# Last update: 2026-11-18
+# Last update: 2026-11-19
 # Date created: 2025-01-11
 # =============================================================================
 
@@ -83,7 +83,9 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     # overall acrt results
     overall_acrt <- weighted.mean(acrt.overall_gt, w = o_weights$overall_weight)
     overall_acrt_inffunc <- as.matrix(rowSums(sweep(acrt_gt_inffunc_mat, 2, o_weights$overall_weight, "*")) / sum(o_weights$overall_weight))
-    overall_acrt_se <- getSE(overall_acrt_inffunc, biters = biters, alp = alp)
+    # with biters = 0 (no bootstrap), use the analytical standard error (#14)
+    overall_acrt_se <- getSE(overall_acrt_inffunc, bstrap = biters > 0,
+                             biters = biters, alp = alp)
 
     # point estimates of ATT(d) and ACRT(d)
     att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
@@ -137,7 +139,16 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     biters <- ptep$biters
     alp <- ptep$alp
     cband <- ptep$cband
-    boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp)
+    # ATT(d) and ACRT(d) standard errors come only from the multiplier
+    # bootstrap; with biters = 0 they are NA (and cband is already FALSE,
+    # so the critical values below are pointwise) (#14)
+    if (biters == 0) {
+        message("biters = 0: standard errors of ATT(d) and ACRT(d) ",
+                "require the bootstrap, so they are NA.")
+        boot_res <- list(boot_se = rep(NA_real_, length(dvals)))
+    } else {
+        boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp)
+    }
     att.d_se <- boot_res$boot_se
     att_cband_ok <- FALSE
     if (cband) {
@@ -165,7 +176,11 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         }
     )
     acrt.d_inffunc <- BMisc::weighted_combine_list(acrt.d_gt_inffunc, o_weights$overall_weight)
-    acrt_boot_res <- mboot2(acrt.d_inffunc, biters = biters, alp = alp)
+    acrt_boot_res <- if (biters == 0) {
+        list(boot_se = rep(NA_real_, length(dvals)))
+    } else {
+        mboot2(acrt.d_inffunc, biters = biters, alp = alp)
+    }
     acrt.d_se <- acrt_boot_res$boot_se
     acrt_cband_ok <- FALSE
     if (cband) {

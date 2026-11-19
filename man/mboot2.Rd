@@ -9,7 +9,12 @@ mboot2(inffunc, biters = 1000, alp = 0.05)
 \arguments{
 \item{inffunc}{influence function matrix}
 
-\item{biters}{number of bootstrap iterations; default is 100}
+\item{biters}{number of bootstrap iterations; default is 100.
+\code{biters = 0} skips the bootstrap: where \code{attgt_fun} returns an
+influence function this is the same as \code{bstrap = FALSE} (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with \code{NA} standard errors.}
 
 \item{alp}{significance level; default is 0.05}
 }

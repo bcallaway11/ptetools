@@ -290,10 +290,26 @@ pte <- function(yname,
                 cl = 1,
                 call = NULL,
                 ...) {
+  if (!(is.numeric(biters) && length(biters) == 1 && !is.na(biters) &&
+          biters >= 0 && biters == round(biters))) {
+    stop("biters must be a single non-negative whole number.", call. = FALSE)
+  }
+
+  # biters = 0 skips the bootstrap (#14). Where attgt_fun returns an
+  # influence function this is the same as bstrap = FALSE (analytical,
+  # pointwise standard errors); where standard errors are only available
+  # from the bootstrap (empirical bootstrap, dose-specific effects), the
+  # bootstrap routines return point estimates with NA standard errors.
+  if (biters == 0) {
+    bstrap <- FALSE
+    cband <- FALSE
+  }
+
   # analytical standard errors are not yet supported for continuous
   # treatment; fall back to the multiplier bootstrap rather than silently
-  # ignoring the user's request (see dev/NOTES.md)
-  if (gt_type == "dose" && isFALSE(bstrap)) {
+  # ignoring the user's request (see dev/NOTES.md). With biters = 0 there is
+  # nothing to fall back to, and process_dose_gt() returns NA instead.
+  if (gt_type == "dose" && isFALSE(bstrap) && biters > 0) {
     warning("Analytical standard errors are not currently supported for continuous treatment (gt_type = \"dose\"); using the multiplier bootstrap instead.")
     bstrap <- TRUE
   }
@@ -353,7 +369,7 @@ pte <- function(yname,
   # the user explicitly asked for analytical standard errors).
   no_inffunc <- all(is.na(res$inffunc))
   if (no_inffunc | (ptep$boot_type == "empirical" & isTRUE(ptep$bstrap))) {
-    if (no_inffunc && isFALSE(ptep$bstrap)) {
+    if (no_inffunc && isFALSE(ptep$bstrap) && ptep$biters > 0) {
       warning("attgt_fun did not return an influence function, so analytical standard errors (bstrap = FALSE) are not available; falling back to the empirical bootstrap.")
     }
     return(panel_empirical_bootstrap(res$attgt.list,

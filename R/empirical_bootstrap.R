@@ -115,13 +115,36 @@ panel_empirical_bootstrap <- function(attgt.list,
     }
   )
 
+  # biters = 0 skips the bootstrap: point estimates only, NA standard
+  # errors (#14)
+  if (biters == 0) {
+    message("biters = 0: standard errors require the bootstrap here, ",
+            "so they are NA.")
+    attgt_results <- aggte$attgt_results
+    attgt_results$se <- NA_real_
+    dyn_results <- aggte$dyn_results
+    dyn_results$se <- NA_real_
+    group_results <- aggte$group_results
+    group_results$se <- NA_real_
+    overall_results <- data.frame(att = aggte$overall_results,
+                                  se = NA_real_, crit_val = NA_real_)
+    return(pte_emp_boot(
+      attgt_results = attgt_results,
+      overall_results = overall_results,
+      group_results = group_results,
+      dyn_results = dyn_results,
+      extra_gt_returns = extra_gt_returns,
+      ptep = ptep
+    ))
+  }
+
   # bootstrap
   # draws bootstrap samples; panel data are resampled by unit while repeated
   # cross sections are resampled at the observation level
   draw_sample <- make_boot_sampler(data, idname, ptep$panel)
 
   # loop for each nonparametric bootstrap iteration
-  boot.res <- pbapply::pblapply(1:biters, function(b) {
+  boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
     bdata <- draw_sample()
 
     bptep <- setup_pte_fun(
@@ -459,6 +482,25 @@ qtt_empirical_bootstrap <- function(attgt.list,
 
   # point estimates
   aggte <- aggte_fun(attgt.list, ptep, extra_gt_returns)
+
+  # biters = 0 skips the bootstrap: point estimates only, with NA standard
+  # errors and confidence bounds (#14)
+  if (biters == 0) {
+    message("biters = 0: standard errors require the bootstrap here, ",
+            "so they are NA.")
+    without_se <- function(res) {
+      res[c("se", "lower_pw", "upper_pw", "lower_ub", "upper_ub")] <- NA_real_
+      res
+    }
+    return(pte_qtt( # nolint: object_usage_linter
+      overall    = without_se(aggte$overall_results),
+      dynamic    = without_se(aggte$dyn_results),
+      group      = without_se(aggte$group_results),
+      F0_overall = aggte$F0_overall, # nolint: object_name_linter
+      F1_overall = aggte$F1_overall, # nolint: object_name_linter
+      ptep       = ptep
+    ))
+  }
 
   # bootstrap
   draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel)

@@ -4,7 +4,7 @@
 #   available: analytical variance, multiplier bootstrap or analytical
 #   standard errors, and the pre-treatment Wald test.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -134,6 +134,10 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'
 #' @export
 mboot2 <- function(inffunc, biters = 1000, alp = .05) {
+  if (!(is.numeric(biters) && length(biters) == 1 && !is.na(biters) &&
+          biters >= 1)) {
+    stop("mboot2() needs biters >= 1 bootstrap draws.", call. = FALSE)
+  }
   inffunc <- as.matrix(inffunc)
   n <- nrow(inffunc)
 

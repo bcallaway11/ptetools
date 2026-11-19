@@ -177,7 +177,12 @@ return.  This is unused except in cases where the results involve doses.}
 \item{probs}{For \code{gt_type = "qtt"}, a numeric vector of quantile levels at
 which to evaluate the QTT curve.  Defaults to \code{seq(0.05, 0.95, 0.05)}.}
 
-\item{biters}{number of bootstrap iterations; default is 100}
+\item{biters}{number of bootstrap iterations; default is 100.
+\code{biters = 0} skips the bootstrap: where \code{attgt_fun} returns an
+influence function this is the same as \code{bstrap = FALSE} (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with \code{NA} standard errors.}
 
 \item{cl}{number of clusters to be used when bootstrapping; default is 1}
 

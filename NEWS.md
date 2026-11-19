@@ -1,5 +1,14 @@
 # ptetools 1.0.2
 
+* `biters = 0` now skips the bootstrap (#14). It crashed the multiplier
+  bootstrap, and earlier versions silently ran 2 bootstrap draws. Where
+  `attgt_fun` returns an influence function, `biters = 0` is the same as
+  `bstrap = FALSE` (analytical, pointwise standard errors). Where standard
+  errors are only available from the bootstrap (the empirical bootstrap,
+  including the QTT estimators, and `ATT(d)`/`ACRT(d)` with a continuous
+  treatment), the point estimates are returned with `NA` standard errors.
+  `biters` must now be a non-negative whole number.
+
 * Fixed estimates when a column named in `gname`, `tname`, `idname` or
   `yname` is called `G`, `period`, `id` or `Y` (#13). With `gname = "G"` or
   `tname = "period"` and groups coded as calendar years, the overall ATT and
