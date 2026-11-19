@@ -1,5 +1,12 @@
 # ptetools 1.0.2
 
+* The doubly robust estimator is now `est_method = "aipw"` (augmented
+  inverse probability weighting), the new default in `pte_default()`,
+  `pte_attgt()` and `did_rcs_attgt()` (#30). `"dr"` still works as a
+  deprecated alias, with a warning; it was ambiguous next to qte's
+  `cond_dist = "dr"` (distribution regression). An unsupported
+  `est_method` now gives a clear error up front.
+
 * New `control_group = "eventuallytreated"` (#29): the comparison units are
   units that are treated at some point but not yet treated (net of
   anticipation) in either period of a group-time comparison, i.e. the

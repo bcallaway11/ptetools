@@ -25,7 +25,7 @@ collision_data <- function() {
 # Estimates with the user's columns given the names in `nm` (a named vector:
 # gname, tname, idname, yname); the data keep the original columns too, so a
 # collision cannot be avoided by the other copy being absent.
-run_named <- function(nm, est_method = "dr") {
+run_named <- function(nm, est_method = "aipw") {
   d <- collision_data()
   d[[nm[["gname"]]]] <- d$grp
   d[[nm[["tname"]]]] <- d$year
@@ -61,7 +61,7 @@ colliding <- list(
 )
 
 test_that("internal column names give the same results as other names", {
-  for (method in c("dr", "reg")) {
+  for (method in c("aipw", "reg")) {
     expected <- summarize_res(run_named(plain, method))
     # sanity check: years are mapped back and the overall ATT is finite
     expect_equal(sort(unique(expected$group)), c(2003, 2004))

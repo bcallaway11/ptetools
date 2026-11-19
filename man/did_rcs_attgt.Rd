@@ -4,7 +4,7 @@
 \alias{did_rcs_attgt}
 \title{Repeated Cross Sections Difference-in-Differences for ATT(g,t)}
 \usage{
-did_rcs_attgt(gt_data, xformula = ~1, est_method = "dr", ...)
+did_rcs_attgt(gt_data, xformula = ~1, est_method = "aipw", ...)
 }
 \arguments{
 \item{gt_data}{data that is "local" to a particular group-time average
@@ -13,8 +13,10 @@ treatment effect}
 \item{xformula}{one-sided formula for covariates used in the propensity score
 and outcome regression models}
 
-\item{est_method}{Which type of estimation method to use. Default is "dr" for
-doubly robust.  The other option is "reg" for regression adjustment.}
+\item{est_method}{Which type of estimation method to use. The default is
+"aipw" (augmented inverse probability weighting, i.e. doubly robust).
+The other option is "reg" for regression adjustment. "dr" is a
+deprecated alias for "aipw".}
 
 \item{...}{extra function arguments; not used here}
 }

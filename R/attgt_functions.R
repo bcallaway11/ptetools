@@ -7,6 +7,31 @@
 # Date created: 2021-05-18
 # =============================================================================
 
+# --- Internal: est_method names (#30) ---------------------------------------
+# "aipw" (augmented inverse probability weighting, i.e. doubly robust) is
+# the name of the doubly robust estimator; "dr" is a deprecated alias for it.
+# "dr" was ambiguous in this family of packages (qte uses cond_dist = "dr"
+# for distribution regression). The deprecation warning is given once per
+# session, since the attgt functions are called once per (g,t) cell.
+pte_env <- new.env(parent = emptyenv())
+
+pte_est_method <- function(est_method) {
+  if (!(is.character(est_method) && length(est_method) == 1 &&
+          est_method %in% c("aipw", "reg", "dr"))) {
+    stop("est_method must be \"aipw\" (doubly robust) or \"reg\" ",
+         "(outcome regression).", call. = FALSE)
+  }
+  if (est_method == "dr") {
+    if (!isTRUE(pte_env$warned_dr)) {
+      warning("est_method = \"dr\" is deprecated; use \"aipw\", the same ",
+              "doubly robust estimator.", call. = FALSE)
+      pte_env$warned_dr <- TRUE
+    }
+    est_method <- "aipw"
+  }
+  est_method
+}
+
 # --- Internal: 2x2 panel cell in wide form -------------------------------
 # Splits a panel gt_data_frame into its "pre" and "post" rows, with the post
 # rows reordered to match the pre rows by id. Everything per-unit (outcomes,
@@ -128,13 +153,16 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
 #'  influence function using a repeated cross sections DID approach.
 #'
 #' @inheritParams did_attgt
-#' @param est_method Which type of estimation method to use. Default is "dr" for
-#'  doubly robust.  The other option is "reg" for regression adjustment.
+#' @param est_method Which type of estimation method to use. The default is
+#'  "aipw" (augmented inverse probability weighting, i.e. doubly robust).
+#'  The other option is "reg" for regression adjustment. "dr" is a
+#'  deprecated alias for "aipw".
 #'
 #' @return attgt_if
 #'
 #' @export
-did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "dr", ...) {
+did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "aipw", ...) {
+  est_method <- pte_est_method(est_method)
   gt_data <- droplevels(gt_data)
 
   y <- gt_data$Y
@@ -143,7 +171,7 @@ did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "dr", ...) {
   covariates <- model.matrix(xformula, data = gt_data)
   i.weights <- gt_data$.w / mean(gt_data$.w)
 
-  if (est_method == "dr") {
+  if (est_method == "aipw") {
     attgt <- DRDID::drdid_rc(
       y = y,
       post = post,
@@ -161,8 +189,6 @@ did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "dr", ...) {
       i.weights = i.weights,
       inffunc = TRUE
     )
-  } else {
-    stop(paste0("est_method: ", est_method, " is not supported"))
   }
 
   attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)
@@ -196,8 +222,10 @@ did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "dr", ...) {
 #'  to only include pre-treatment covariates.
 #' @param lagged_outcome_cov Whether to include the lagged outcome as a covariate.
 #'  Default is FALSE.
-#' @param est_method Which type of estimation method to use. Default is "dr" for
-#'  doubly robust.  The other option is "reg" for regression adjustment.
+#' @param est_method Which type of estimation method to use. The default is
+#'  "aipw" (augmented inverse probability weighting, i.e. doubly robust).
+#'  The other option is "reg" for regression adjustment. "dr" is a
+#'  deprecated alias for "aipw".
 #' @param ... extra function arguments; not used here
 #'
 #' @return attgt_if
@@ -208,8 +236,9 @@ pte_attgt <- function(
     xformula,
     d_outcome = FALSE,
     d_covs_formula = ~ -1, lagged_outcome_cov = FALSE,
-    est_method = "dr",
+    est_method = "aipw",
     ...) {
+  est_method <- pte_est_method(est_method)
   # pre and post rows, matched by unit
   pp <- gt_pre_post(gt_data)
 
@@ -247,7 +276,7 @@ pte_attgt <- function(
   covmat <- covmat[, keep_covs]
 
   # if group is too small, switch to reg adjustment
-  if (est_method == "dr") {
+  if (est_method == "aipw") {
     # Overlap check: logit propensity scores. quasibinomial() fits the same
     # model with the same algorithm (identical fitted values) but, unlike
     # binomial(), does not warn "non-integer #successes" for non-integer
@@ -265,7 +294,7 @@ pte_attgt <- function(
     }
   }
 
-  if (est_method == "dr") {
+  if (est_method == "aipw") {
     attgt <- DRDID::drdid_panel(
       y1 = Y,
       y0 = rep(0, length(Y)),
@@ -283,8 +312,6 @@ pte_attgt <- function(
       i.weights = .w / mean(.w), # DRDID rescales to mean 1 anyway
       inffunc = TRUE
     )
-  } else {
-    stop(paste0("est_method: ", est_method, " is not supported"))
   }
   # return attgt
   attgt_if(attgt = attgt$ATT, inf_func = attgt$att.inf.func)

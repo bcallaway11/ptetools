@@ -63,7 +63,7 @@ test_that("overall weights tolerate floating-point rounding", {
 })
 
 # pte_attgt()'s overlap check fitted a binomial glm() with weights that were
-# never whole numbers, so every est_method = "dr" call warned "non-integer
+# never whole numbers, so every doubly robust call warned "non-integer
 # #successes in a binomial glm!" (#20).
 test_that("doubly robust estimation does not warn about non-integer weights", {
   skip_if_not_installed("did")
@@ -74,7 +74,7 @@ test_that("doubly robust estimation does not warn about non-integer weights", {
     expect_no_warning(pte_default(
       yname = "lemp", gname = "first.treat", tname = "year",
       idname = "countyreal", data = data, d_outcome = TRUE,
-      xformula = ~lpop, est_method = "dr", weightsname = wname, biters = 0
+      xformula = ~lpop, est_method = "aipw", weightsname = wname, biters = 0
     ))
   }
 })

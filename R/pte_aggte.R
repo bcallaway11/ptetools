@@ -747,8 +747,8 @@ summary.aggte_obj <- function(object, ...) {
   est_method <- object$DIDparams$est_method
   if (inherits(est_method, "character")) {
     est_method_text <- est_method
-    if (est_method == "dr") {
-      est_method_text <- "Doubly Robust"
+    if (est_method %in% c("aipw", "dr")) {
+      est_method_text <- "Doubly Robust (AIPW)"
     } else if (est_method == "ipw") {
       est_method_text <- "Inverse Probability Weighting"
     } else if (est_method == "reg") {

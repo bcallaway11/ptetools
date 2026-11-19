@@ -481,7 +481,7 @@ pte_default <- function(yname,
                         d_outcome = FALSE,
                         d_covs_formula = ~ -1,
                         lagged_outcome_cov = FALSE,
-                        est_method = "dr",
+                        est_method = "aipw",
                         anticipation = 0,
                         base_period = "varying",
                         control_group = "notyettreated",
@@ -494,6 +494,10 @@ pte_default <- function(yname,
                         biters = 100,
                         cl = 1,
                         ...) {
+  # check est_method (and warn about the deprecated "dr") once, here, rather
+  # than in each (g,t) cell, which may run in parallel workers (#30)
+  est_method <- pte_est_method(est_method)
+
   use_subset_fun <- if (isTRUE(panel)) two_by_two_subset else two_by_two_rcs_subset
   use_attgt_fun <- if (isTRUE(panel)) pte_attgt else did_rcs_attgt
 

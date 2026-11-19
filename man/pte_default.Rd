@@ -15,7 +15,7 @@ pte_default(
   d_outcome = FALSE,
   d_covs_formula = ~-1,
   lagged_outcome_cov = FALSE,
-  est_method = "dr",
+  est_method = "aipw",
   anticipation = 0,
   base_period = "varying",
   control_group = "notyettreated",
@@ -57,8 +57,10 @@ to only include pre-treatment covariates.}
 \item{lagged_outcome_cov}{Whether to include the lagged outcome as a covariate.
 Default is FALSE.}
 
-\item{est_method}{Which type of estimation method to use. Default is "dr" for
-doubly robust.  The other option is "reg" for regression adjustment.}
+\item{est_method}{Which type of estimation method to use. The default is
+"aipw" (augmented inverse probability weighting, i.e. doubly robust).
+The other option is "reg" for regression adjustment. "dr" is a
+deprecated alias for "aipw".}
 
 \item{anticipation}{how long before the treatment actually takes place it
 can already affect outcomes, in units of the time variable \code{tname}
