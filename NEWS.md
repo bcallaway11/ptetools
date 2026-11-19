@@ -1,5 +1,15 @@
 # ptetools 1.0.2
 
+* Empirical bootstrap: group effects and event times of a small cohort that
+  is missing from some bootstrap draws now keep their estimates and get
+  standard errors from the draws that contain the cohort; if it is missing
+  from more than 10% of the draws, the standard errors are `NA` (#22).
+  Before, such estimates were dropped from the results, estimate and all,
+  if any single draw missed the cohort. The same applies to the QTT
+  estimators. Also fixed: group-time standard errors from the empirical
+  bootstrap were attached to the wrong (g,t) cells; they are now matched by
+  group and time period.
+
 * New `clustervars` argument for `pte_default()`, `pte()` (via
   `setup_pte()`) to cluster standard errors at a level above the unit, as
   in `did::att_gt()` (#6): one variable, constant within each unit. It

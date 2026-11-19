@@ -75,6 +75,52 @@ drop_empty_draws <- function(boot.res) {
   boot.res[!empty]
 }
 
+# --- Internal: bootstrap SEs by estimate --------------------------------------
+# Bootstrap standard errors for estimates identified by key columns (e.g.
+# group and time period, or event time), from the rows of all bootstrap
+# draws. A draw can lack an estimate when it misses a small cohort (with
+# probability about exp(-k) for a cohort of k units). Each standard error
+# uses the draws in which its estimate exists, i.e. the bootstrap
+# distribution conditional on the cohort being in the sample, as for draws
+# without any treated units (#10). If an estimate is missing from more than
+# 10% of the draws, its standard error is NA. Point estimates are always
+# kept. Previously an estimate missing from any single draw was dropped,
+# estimate and all (#22).
+#
+# Arguments: est (point estimates, with the key columns), draws (rows from
+#   all draws, with the key columns and `value`), keys, value, n_draws
+#   (number of usable draws), what (label for warnings).
+# Returns: est with a column se.
+boot_se_by <- function(est, draws, keys, value, n_draws, what) {
+  est <- as.data.frame(est)
+  draws <- as.data.frame(draws)
+  key_est <- do.call(paste, unname(as.list(est[keys])))
+  key_draw <- do.call(paste, unname(as.list(draws[keys])))
+  by_key <- split(draws[[value]], factor(key_draw, levels = unique(key_est)))
+  by_key <- lapply(by_key, function(v) v[!is.na(v)])
+  n_avail <- lengths(by_key)
+  enough <- n_avail >= 0.9 * n_draws & n_avail >= 2
+  se <- vapply(by_key, function(v) {
+    if (length(v) >= 2) stats::sd(v) else NA_real_
+  }, numeric(1))
+  se[!enough] <- NA_real_
+  est$se <- unname(se[key_est])
+
+  if (any(!enough)) {
+    warning("Bootstrap standard errors for ", sum(!enough), " ", what,
+            " are NA: they are missing from more than 10% of the ", n_draws,
+            " bootstrap draws (small cohorts).", call. = FALSE)
+  }
+  partial <- enough & n_avail < n_draws
+  if (any(partial)) {
+    warning("Bootstrap standard errors for ", sum(partial), " ", what,
+            " use only the draws in which they are estimated (at least ",
+            min(n_avail[partial]), " of ", n_draws, "; small cohorts).",
+            call. = FALSE)
+  }
+  est
+}
+
 # --- Internal: bootstrap resampling ----------------------------------------
 # Returns a function that draws one bootstrap sample of `data`. Panel data
 # are resampled by unit (block bootstrap): the rows of each unit are indexed
@@ -274,49 +320,24 @@ panel_empirical_bootstrap <- function(attgt.list,
   # them get bootstrap standard errors
   n_draws <- length(boot.res)
 
-  # attgt results
-  attgt_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "attgt_results")) |>
-    group_by(group, time.period)
-  attgt_results_se <- unlist(attgt_results_inner |>
-    group_map(~ sd(.x$att)))
-  attgt_results <- aggte$attgt_results
-  attgt_results$se <- attgt_results_se
-
-  # dynamic results
-  dyn_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "dyn_results")) |>
-    group_by(e) |>
-    mutate(length.e = length(e))
-  original_elength <- length(unique(dyn_results_inner$e))
-  dyn_results_inner <- subset(dyn_results_inner, length.e == n_draws)
-  new_elength <- length(unique(dyn_results_inner$e))
-  if (new_elength != original_elength) {
-    warning("dropping some event times due to small groups")
-  }
-
-  dyn_results_se <- dyn_results_inner |>
-    transmute(se = sd(att.e))
-  dyn_results_se <- dyn_results_se[1:new_elength, ]
-
-  dyn_results <- aggte$dyn_results
-  dyn_results <- inner_join(dyn_results, dyn_results_se, by = "e")
-
-  # group results
-  group_results <- aggte$group_results
-  group_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "group_results")) |>
-    group_by(group) |>
-    mutate(length.group = length(group))
-  original_glength <- length(unique(group_results_inner$group))
-  group_results_inner <- subset(group_results_inner, length.group == n_draws)
-  new_glength <- length(unique(group_results_inner$group))
-  if (new_glength != original_glength) {
-    warning("dropping some groups due to small groups")
-  }
-
-  group_results_se <- group_results_inner |>
-    transmute(se = sd(att.g))
-  group_results_se <- group_results_se[1:new_glength, ]
-
-  group_results <- inner_join(group_results, group_results_se, by = "group")
+  # standard errors of group-time, event-study and group estimates, each from
+  # the draws in which it is estimated (#22)
+  attgt_results <- boot_se_by(
+    aggte$attgt_results,
+    bind_rows(BMisc::get_list_element(boot.res, "attgt_results")),
+    keys = c("group", "time.period"), value = "att", n_draws = n_draws,
+    what = "group-time effects"
+  )
+  dyn_results <- boot_se_by(
+    aggte$dyn_results,
+    bind_rows(BMisc::get_list_element(boot.res, "dyn_results")),
+    keys = "e", value = "att.e", n_draws = n_draws, what = "event times"
+  )
+  group_results <- boot_se_by(
+    aggte$group_results,
+    bind_rows(BMisc::get_list_element(boot.res, "group_results")),
+    keys = "group", value = "att.g", n_draws = n_draws, what = "groups"
+  )
 
   # overall results
   alp <- ptep$alp
@@ -669,57 +690,62 @@ qtt_empirical_bootstrap <- function(attgt.list,
   overall_results$lower_ub  <- overall_results$qtt - overall_cval * overall_se
   overall_results$upper_ub  <- overall_results$qtt + overall_cval * overall_se
 
-  # --- dynamic SE --------------------------------------------------------
-  dyn_e_vals <- unique(aggte$dyn_results$e)
-  dyn_se_list <- lapply(dyn_e_vals, function(this_e) {
-    boot_rows <- lapply(boot.res, function(br) {
-      vals <- br$dyn_results$qtt[br$dyn_results$e == this_e]
-      if (length(vals) != length(probs)) NULL else vals
+  # --- dynamic and group SE ------------------------------------------------
+  # Each QTT curve's standard errors use the draws in which it is estimated;
+  # if it is missing from more than 10% of the draws (small cohorts), its
+  # standard errors and bounds are NA, but the estimates are kept (#22).
+  n_draws <- length(boot.res)
+  curve_se <- function(results_name, key, key_vals) {
+    out <- lapply(key_vals, function(this_k) {
+      boot_rows <- lapply(boot.res, function(br) {
+        res <- br[[results_name]]
+        vals <- res$qtt[res[[key]] == this_k]
+        if (length(vals) != length(probs)) NULL else vals
+      })
+      n_complete <- sum(!vapply(boot_rows, is.null, logical(1)))
+      if (n_complete < max(2, 0.9 * n_draws)) {
+        se <- NA_real_
+        this_cval <- NA_real_
+      } else {
+        boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
+        qtt_est   <- aggte[[results_name]]$qtt[aggte[[results_name]][[key]] ==
+                                                 this_k]
+        se        <- unname(apply(boot_mat, 2, sd))
+        this_cval <- qtt_crit_val(boot_mat, qtt_est)
+      }
+      df <- data.frame(probs = probs, se = se, cval = this_cval)
+      df[[key]] <- this_k
+      attr(df, "n_complete") <- n_complete
+      df
     })
-    n_complete <- sum(!sapply(boot_rows, is.null))
-    if (n_complete < 2) {
-      warning(paste0("dropping event time ", this_e, " from dynamic QTT (small groups)"))
-      return(NULL)
+    n_complete <- vapply(out, function(df) attr(df, "n_complete"), numeric(1))
+    label <- if (key == "e") "event-time" else key
+    dropped <- n_complete < max(2, 0.9 * n_draws)
+    if (any(dropped)) {
+      warning("Bootstrap standard errors for ", sum(dropped), " ", label,
+              " QTT curve(s) are NA: missing from more than 10% of the ",
+              n_draws, " bootstrap draws (small cohorts).", call. = FALSE)
     }
-    boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
-    qtt_est   <- aggte$dyn_results$qtt[aggte$dyn_results$e == this_e]
-    this_cval <- qtt_crit_val(boot_mat, qtt_est)
-    data.frame(e = this_e, probs = probs, se = unname(apply(boot_mat, 2, sd)),
-               cval = this_cval)
-  })
-  dyn_se_df   <- do.call(rbind, Filter(Negate(is.null), dyn_se_list))
-  dyn_results <- merge(aggte$dyn_results, dyn_se_df, by = c("e", "probs"), all.x = FALSE)
-  dyn_results$lower_pw <- dyn_results$qtt - z                  * dyn_results$se
-  dyn_results$upper_pw <- dyn_results$qtt + z                  * dyn_results$se
-  dyn_results$lower_ub <- dyn_results$qtt - dyn_results$cval   * dyn_results$se
-  dyn_results$upper_ub <- dyn_results$qtt + dyn_results$cval   * dyn_results$se
-  dyn_results$cval     <- NULL
-
-  # --- group SE ----------------------------------------------------------
-  group_vals <- unique(aggte$group_results$group)
-  group_se_list <- lapply(group_vals, function(this_g) {
-    boot_rows <- lapply(boot.res, function(br) {
-      vals <- br$group_results$qtt[br$group_results$group == this_g]
-      if (length(vals) != length(probs)) NULL else vals
-    })
-    n_complete <- sum(!sapply(boot_rows, is.null))
-    if (n_complete < 2) {
-      warning(paste0("dropping group ", this_g, " from group QTT (small groups)"))
-      return(NULL)
+    partial <- !dropped & n_complete < n_draws
+    if (any(partial)) {
+      warning("Bootstrap standard errors for ", sum(partial), " ", label,
+              " QTT curve(s) use only the draws in which they are estimated ",
+              "(at least ", min(n_complete[partial]), " of ", n_draws,
+              "; small cohorts).", call. = FALSE)
     }
-    boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
-    qtt_est   <- aggte$group_results$qtt[aggte$group_results$group == this_g]
-    this_cval <- qtt_crit_val(boot_mat, qtt_est)
-    data.frame(group = this_g, probs = probs, se = unname(apply(boot_mat, 2, sd)),
-               cval = this_cval)
-  })
-  group_se_df   <- do.call(rbind, Filter(Negate(is.null), group_se_list))
-  group_results <- merge(aggte$group_results, group_se_df, by = c("group", "probs"), all.x = FALSE)
-  group_results$lower_pw <- group_results$qtt - z                    * group_results$se
-  group_results$upper_pw <- group_results$qtt + z                    * group_results$se
-  group_results$lower_ub <- group_results$qtt - group_results$cval   * group_results$se
-  group_results$upper_ub <- group_results$qtt + group_results$cval   * group_results$se
-  group_results$cval     <- NULL
+    se_df <- do.call(rbind, out)
+    res <- merge(aggte[[results_name]], se_df, by = c(key, "probs"),
+                 all.x = TRUE)
+    res$lower_pw <- res$qtt - z        * res$se
+    res$upper_pw <- res$qtt + z        * res$se
+    res$lower_ub <- res$qtt - res$cval * res$se
+    res$upper_ub <- res$qtt + res$cval * res$se
+    res$cval     <- NULL
+    res
+  }
+  dyn_results <- curve_se("dyn_results", "e", unique(aggte$dyn_results$e))
+  group_results <- curve_se("group_results", "group",
+                            unique(aggte$group_results$group))
 
   pte_qtt( # nolint: object_usage_linter
     overall    = overall_results,
