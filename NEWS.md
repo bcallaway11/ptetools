@@ -1,4 +1,4 @@
-# ptetools 1.0.2
+# ptetools 1.1.0
 
 * Aggregated QTTs (`qtt_pte_aggregations()`) are now exact (#25). The
   cells' distribution functions used to be mixed on a 1,000-point grid of

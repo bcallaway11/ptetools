@@ -286,7 +286,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
 # `ptep$boundary_knots`); bSpline() and dbs() would otherwise default to
 # range(dvals), which gives a different basis whenever dvals does not span
 # exactly the positive doses (ptetools #7, contdid #16). If `boundary_knots`
-# is NULL, falls back to range(dvals), the behavior before ptetools 1.0.2.
+# is NULL, falls back to range(dvals), the behavior before ptetools 1.1.0.
 #
 # Arguments: dvals (doses to evaluate at), degree, knots (interior knots),
 #   boundary_knots (length-2 numeric or NULL).
