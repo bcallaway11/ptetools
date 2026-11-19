@@ -1,5 +1,15 @@
 # ptetools 1.0.2
 
+* Fixed pre-treatment `ATT(g,t)` with `base_period = "universal"` and
+  not-yet-treated controls (the default) (#16). The comparison group could
+  include units already treated in the base period, which comes after the
+  current period in pre-treatment cells. Not-yet-treated controls are now
+  units first treated after both periods of the cell, as in
+  `did::att_gt()`. Post-treatment estimates and the overall ATT are
+  unchanged; pre-trends in event studies can change. `pte_default()` now
+  matches `did::att_gt()` for both base periods and both control groups,
+  including with unequally spaced time periods.
+
 * `biters = 0` now skips the bootstrap (#14). It crashed the multiplier
   bootstrap, and earlier versions silently ran 2 bootstrap draws. Where
   `attgt_fun` returns an influence function, `biters = 0` is the same as

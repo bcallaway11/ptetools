@@ -91,33 +91,36 @@ two_by_two_subset <- function(data,
 # tp and base.period, in their original order (the same rows as
 # subset(data, <group condition> & <period condition>)).
 #
+# Not-yet-treated comparison units must be untreated in *both* periods of the
+# cell, so they are units first treated after max(tp, base.period), as in
+# did::att_gt(). With a universal base period, the base period (g - 1) comes
+# after tp in pre-treatment cells; selecting on G > tp alone would use units
+# that are already treated in the base period as controls (#16).
+#
 # When `data` comes from setup_pte(), it carries the row indices of each
 # period ("pte_period_rows"), so only the rows of the two periods are
 # examined and copied; otherwise this falls back to scanning all rows.
 gt_cell_data <- function(data, g, tp, base.period, control_group) {
+  last_period <- max(tp, base.period)
+  in_group <- function(G) {
+    if (control_group == "notyettreated") {
+      G == g | G > last_period | G == 0
+    } else {
+      # use never treated group
+      G == g | G == 0
+    }
+  }
+
   period_rows <- attr(data, "pte_period_rows")
   if (!is.null(period_rows) && sum(lengths(period_rows)) == nrow(data)) {
     rows <- sort(c(period_rows[[as.character(tp)]],
                    period_rows[[as.character(base.period)]]))
-    G <- data$.G[rows]
-    in_cell <- if (control_group == "notyettreated") {
-      G == g | G > tp | G == 0
-    } else {
-      G == g | G == 0
-    }
     # which() drops NA, as subset() does
-    return(data[rows[which(in_cell)], , drop = FALSE])
+    return(data[rows[which(in_group(data$.G[rows]))], , drop = FALSE])
   }
 
-  G <- data$.G
-  in_group <- if (control_group == "notyettreated") {
-    G == g | G > tp | G == 0
-  } else {
-    # use never treated group
-    G == g | G == 0
-  }
   in_period <- data$.period == tp | data$.period == base.period
-  data[which(in_group & in_period), , drop = FALSE]
+  data[which(in_group(data$.G) & in_period), , drop = FALSE]
 }
 
 #' @title Two Period Two Group Repeated Cross Sections Subset
