@@ -26,6 +26,43 @@ gt_wide_outcomes <- function(pp) {
   data.frame(id = pp$pre$id, D = pp$pre$D, post = pp$post$Y, pre = pp$pre$Y)
 }
 
+# Covariate matrix for a 2x2 cell, one row per unit (in the order of the pre
+# rows, as gt_wide_outcomes()): the design matrix of `xformula` evaluated on
+# the pre-period rows, plus the change between periods in the variables of
+# `d_covs_formula` and, optionally, the pre-period (lagged) outcome.
+#
+# The design matrix is built in one step from the original variables, so
+# terms that transform them, such as factor(), I() or log(), work. These
+# failed when the matrix was rebuilt from the names of already-transformed
+# columns (#5). Like before, an intercept is always included.
+#
+# Arguments: pp (from gt_pre_post()), xformula, d_covs_formula (~-1 for
+#   none), lagged_outcome_cov (logical).
+# Returns: numeric matrix.
+gt_covariates <- function(pp, xformula, d_covs_formula = ~-1,
+                          lagged_outcome_cov = FALSE) {
+  pre <- droplevels(pp$pre)
+  # na.pass keeps one row per unit, aligned with the outcomes
+  mf <- stats::model.frame(xformula, data = pre, na.action = stats::na.pass)
+  covmat <- stats::model.matrix(attr(mf, "terms"), data = mf)
+  if (!("(Intercept)" %in% colnames(covmat))) {
+    covmat <- cbind("(Intercept)" = 1, covmat)
+  }
+
+  # change in covariates between the post and pre periods
+  d_frame <- function(d) {
+    stats::model.frame(d_covs_formula, data = d, na.action = stats::na.pass)
+  }
+  dX <- d_frame(pp$post) - d_frame(pp$pre)
+  if (ncol(dX) > 0) {
+    colnames(dX) <- paste0("d", colnames(dX))
+    covmat <- cbind(covmat, as.matrix(dX))
+  }
+
+  if (isTRUE(lagged_outcome_cov)) covmat <- cbind(covmat, pre = pp$pre$Y)
+  covmat
+}
+
 #' @title Difference-in-differences for ATT(g,t)
 #'
 #' @description Takes a data.frame and computes for a particular group g
@@ -59,11 +96,9 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
   # pre and post rows, matched by unit
   pp <- gt_pre_post(gt_data)
 
-  # for outcome regression, get pre-treatment values
-  Xpre <- model.frame(xformula, data = pp$pre)
-
-  # merge outcome and covariate data (one row per unit)
-  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre)
+  # outcomes and pre-treatment covariates (one row per unit)
+  gt_dataX <- gt_wide_outcomes(pp)
+  covmat <- gt_covariates(pp, xformula)
 
   # treatment dummy variable
   D <- gt_dataX$D
@@ -74,14 +109,11 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
 
   # call DRDID functions to make the computations;
   # just like in `did` package
-  gt_dataX <- droplevels(gt_dataX)
   attgt <- DRDID::drdid_panel(
     y1 = Y_post,
     y0 = Y_pre,
     D = D,
-    covariates = model.matrix(xformula,
-      data = gt_dataX
-    ),
+    covariates = covmat,
     inffunc = TRUE
   )
 
@@ -188,16 +220,13 @@ pte_attgt <- function(
   # handle covariates
   #-----------------------------------------------------------------------------
 
-  # pre-treatment covariates
-  Xpre <- model.frame(xformula, data = pp$pre)
+  # pre-treatment covariates, changes in covariates and (optionally) the
+  # lagged outcome, one row per unit
+  covmat <- gt_covariates(pp, xformula, d_covs_formula, lagged_outcome_cov)
   .w <- pp$pre$.w
 
-  # change in covariates
-  dX <- model.frame(d_covs_formula, data = pp$post) - model.frame(d_covs_formula, data = pp$pre)
-  if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
-
-  # merge outcome and covariate data (one row per unit)
-  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre, dX, .w)
+  # outcomes (one row per unit)
+  gt_dataX <- gt_wide_outcomes(pp)
 
   # treatment dummy variable
   D <- gt_dataX$D
@@ -211,10 +240,6 @@ pte_attgt <- function(
   # DRDID::drdid_panel is for panel data, but we can hack it
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
-  gt_dataX <- droplevels(gt_dataX)
-  use_formula <- BMisc::toformula("", c(BMisc::rhs_vars(xformula), colnames(dX)))
-  if (lagged_outcome_cov) use_formula <- BMisc::add_cov_to_formula("pre", use_formula)
-  covmat <- model.matrix(use_formula, data = gt_dataX)
   covmat2 <- covmat[D == 0, ]
   n_unt <- sum(1 - D)
   precheck_reg <- qr(t(covmat2) %*% covmat2 / n_unt)

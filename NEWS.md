@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* Covariate formulas can now transform variables, e.g.
+  `xformula = ~ factor(state) + I(x^2) + log(z)`, in `pte_default()` /
+  `pte_attgt()`, `did_attgt()` and `covid_attgt()` (#5). Such terms failed
+  with "object not found". Results for untransformed covariates are
+  unchanged.
+
 * An error while estimating one group-time cell now says which group and
   time period it is (in units of `tname`) (#17). With a continuous
   treatment, a cohort with no more treated units than parameters in the

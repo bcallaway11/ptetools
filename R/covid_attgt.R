@@ -3,7 +3,7 @@
 # Description: Unconfoundedness-based ATT(g,t) estimator for pandemic policy
 #   evaluation (Callaway and Li 2021). Moved here from the ppe package.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -43,16 +43,11 @@ covid_attgt <- function(gt_data, xformla, d_outcome = FALSE,
   # pre and post rows, matched by unit
   pp <- gt_pre_post(gt_data)
 
-  # pre-treatment covariates
-  Xpre <- model.frame(xformla, data = pp$pre)
+  # pre-treatment covariates and changes in covariates, one row per unit
+  covmat <- gt_covariates(pp, xformla, d_covs_formula)
 
-  # change in covariates
-  dX <- model.frame(d_covs_formula, data = pp$post) -
-    model.frame(d_covs_formula, data = pp$pre)
-  if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
-
-  # merge outcome and covariate data (one row per unit)
-  gt_dataX <- cbind.data.frame(gt_wide_outcomes(pp), Xpre, dX)
+  # outcomes (one row per unit)
+  gt_dataX <- gt_wide_outcomes(pp)
 
   # treatment dummy variable
   D <- gt_dataX$D
@@ -65,10 +60,6 @@ covid_attgt <- function(gt_data, xformla, d_outcome = FALSE,
   # estimate ATT(g,t) via DRDID
   # drdid_panel is for panel data; setting y0 = 0 adapts it to the levels case
   #-----------------------------------------------------------------------------
-  gt_dataX <- droplevels(gt_dataX)
-  use_formula <- BMisc::toformula("", c(BMisc::rhs_vars(xformla), colnames(dX)))
-  covmat <- model.matrix(use_formula, data = gt_dataX)
-
   # drop collinear columns among untreated units
   covmat2 <- covmat[D == 0, ]
   n_unt <- sum(1 - D)
