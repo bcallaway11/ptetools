@@ -105,6 +105,21 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     # since we are picking dvals over a grid, the only randomness comes from
     # estimating the \beta's
     n1_vec <- sapply(Xe_gt, nrow)
+
+    # each dose regression needs more treated units than parameters: with as
+    # many, it fits them exactly (zero residuals, so their influence-function
+    # entries are 0 and the check below fails); with fewer it is not
+    # identified (#17)
+    n_par_vec <- sapply(Xe_gt, ncol)
+    too_small <- n1_vec <= n_par_vec
+    if (any(too_small)) {
+        i <- which(too_small)[1]
+        stop("The dose regression for group ", groups[i], ", period ",
+             time.periods[i], " has ", n1_vec[i], " treated unit(s) but ",
+             n_par_vec[i], " parameters; it needs more treated units than ",
+             "parameters. Use a less flexible dose specification, or drop ",
+             "this group.", call. = FALSE)
+    }
     n <- nrow(acrt_gt_inffunc_mat)
     # these are treated observations
     keep_mat <- acrt_gt_inffunc_mat != 0
@@ -117,7 +132,10 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     comparison_inffunc[!keep_mat2] <- 0
     n0_vec <- colSums(keep_mat2)
     if (!all(colSums(keep_mat) == n1_vec)) {
-        stop("something off with overall influence function")
+        stop("Internal check failed: the number of nonzero entries of the ",
+             "ACRT(d) influence function does not match the number of ",
+             "treated units in some group-time cell. This can happen if some ",
+             "treated units fit the dose regression exactly.", call. = FALSE)
     }
 
     att.d_gt_inffunc <- lapply(

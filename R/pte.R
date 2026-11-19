@@ -100,7 +100,17 @@ compute.pte <- function(ptep,
       #-----------------------------------------------------------------------------
       # code to estimate attgt using correct relevant data
       #-----------------------------------------------------------------------------
-      attgt <- attgt_fun(gt_data = gt_data, ...)
+      # an error in one cell says which group and period it is (in units of
+      # tname), so users can tell, e.g., which cohort is too small (#17)
+      attgt <- withCallingHandlers(
+        attgt_fun(gt_data = gt_data, ...),
+        error = function(e) {
+          stop("Estimating ATT(g,t) for group ",
+               pte_calendar_time(data, g), ", period ",
+               pte_calendar_time(data, tp), " failed: ",
+               conditionMessage(e), call. = FALSE)
+        }
+      )
 
       #-----------------------------------------------------------------------------
       # process attgt results

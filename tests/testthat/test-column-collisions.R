@@ -118,3 +118,15 @@ test_that("gt_data_frame() errors clearly without the internal columns", {
                           D = 0)
   expect_error(gt_data_frame(old_style), "\\.G, \\.id, \\.period, \\.Y")
 })
+
+test_that("an error in one group-time cell says which group and period", {
+  # (#17) the error should name the cell in units of tname, so users can
+  # tell e.g. which cohort is too small
+  failing_attgt <- function(gt_data, ...) stop("cannot estimate this cell")
+  expect_error(
+    pte(yname = "y", gname = "grp", tname = "year", idname = "unit",
+        data = collision_data(), setup_pte_fun = setup_pte,
+        subset_fun = two_by_two_subset, attgt_fun = failing_attgt),
+    "group 2003, period 2002 failed: cannot estimate this cell"
+  )
+})

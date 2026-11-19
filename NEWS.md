@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* An error while estimating one group-time cell now says which group and
+  time period it is (in units of `tname`) (#17). With a continuous
+  treatment, a cohort with no more treated units than parameters in the
+  dose regression now gives a clear error instead of "something off with
+  overall influence function".
+
 * The empirical bootstrap no longer errors when a bootstrap draw contains no
   treated units, which happened often with small cohorts (#10). Such draws
   are dropped, with a warning that says how many, and standard errors use
