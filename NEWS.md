@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* The pre-test of parallel trends is now reported with
+  `base_period = "universal"` (#18). The reference cells, which are 0 by
+  construction, made the covariance matrix singular. Cells with zero
+  variance are now left out, as in `did::att_gt()`, and the pre-test
+  matches `did` for both base periods.
+
 * Fixed standard errors of aggregated parameters (overall ATT, event study,
   group effects) from `pte_aggte()`, which were slightly off (about 0.3-0.8%
   on `mpdta`) (#19). The term for estimating the group shares used shares

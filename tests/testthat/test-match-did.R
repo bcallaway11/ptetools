@@ -4,7 +4,8 @@
 #   equal did::att_gt() for both base periods and both control groups, on
 #   mpdta and on unequally spaced periods. Covers #16: with a universal base
 #   period, not-yet-treated controls must be untreated in the base period
-#   (#16); aggregated standard errors must match too (#19);
+#   (#16); aggregated standard errors (#19) and the pre-test (#18) must
+#   match too;
 #   anticipation follows did's rules, in units of the time variable.
 # Author: Brant Callaway
 # Last update: 2026-11-19
@@ -37,7 +38,9 @@ diff_from_did <- function(data, yname, gname, tname, idname, base_period,
     # a universal reference period is NA in both packages
     event_study_se = max(abs(a$event_study$se.egt - dyn$se.egt[e_match]),
                          na.rm = TRUE),
-    overall_se = abs(a$overall_att$overall.se - grp$overall.se)
+    overall_se = abs(a$overall_att$overall.se - grp$overall.se),
+    # Wald pre-test, also with a universal base period (#18)
+    pretest = abs(as.numeric(a$att_gt$W) - d$W)
   )
 }
 

@@ -63,12 +63,24 @@ process_att_gt <- function(att_gt_results, ptep) {
   #-----------------------------------------------------------------------------
   # compute Wald pre-test
   #-----------------------------------------------------------------------------
-  # select which periods are pre-treatment; periods in the anticipation
-  # window (g - anticipation <= t < g, in units of tname) are not, as in
-  # did::att_gt()
+  # select which periods are pre-treatment; as in the did package, periods
+  # in the anticipation window (g - anticipation <= t < g, in units of
+  # tname) are not
   anticipation <- if (is.null(ptep$anticipation)) 0 else ptep$anticipation
   pre <- which(pte_calendar_time(ptep$data, group) - anticipation >
                  pte_calendar_time(ptep$data, time.period))
+
+  # leave out cells whose variance is zero or not finite, as did::att_gt()
+  # does. With a universal base period these include the reference cells,
+  # which are 0 by construction with all-zero influence functions; keeping
+  # them made the covariance matrix singular, so no pre-test was reported
+  # (#18). With never-treated controls, the remaining universal-base
+  # pre-treatment ATTs are an invertible transformation (within each group)
+  # of the varying-base ones, so the Wald statistic is the same for both base
+  # periods; with not-yet-treated controls the comparison groups differ, and
+  # so does the statistic, slightly.
+  has_variance <- is.finite(se_analytical) & se_analytical > 0
+  pre <- pre[has_variance[pre]]
 
   # pseudo-atts in pre-treatment periods
   preatt <- as.matrix(att[pre])
