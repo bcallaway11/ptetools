@@ -438,6 +438,8 @@ pte_params <- function(yname,
                        biters,
                        cl,
                        call = NULL) {
+  if (!is.null(weightsname)) validate_weights(data, panel)
+
   obj <- list(
     yname = yname,
     gname = gname,
@@ -467,4 +469,33 @@ pte_params <- function(yname,
   class(obj) <- "pte_params"
 
   obj
+}
+
+
+# --- Internal: check sampling weights (#24) ---------------------------------
+# Called by pte_params(), so every setup function (in ptetools or in packages
+# built on it) gets these checks. Weights (column .w) must be non-missing,
+# finite and non-negative with a positive sum; with panel data they must also
+# be constant within each unit, as in did::att_gt(): estimators combine pre-
+# and post-period weights for the same units, which only makes sense if each
+# unit has one weight.
+validate_weights <- function(data, panel = TRUE) {
+  w <- data$.w
+  if (is.null(w)) return(invisible(NULL))
+  if (!is.numeric(w) || anyNA(w) || any(!is.finite(w))) {
+    stop("Sampling weights must be numeric, non-missing and finite.",
+         call. = FALSE)
+  }
+  if (any(w < 0) || sum(w) <= 0) {
+    stop("Sampling weights must be non-negative with a positive sum.",
+         call. = FALSE)
+  }
+  if (isTRUE(panel) && !is.null(data$.id)) {
+    n_values <- tapply(w, data$.id, function(x) length(unique(x)))
+    if (any(n_values > 1)) {
+      stop("Sampling weights must be constant over time within each unit.",
+           call. = FALSE)
+    }
+  }
+  invisible(NULL)
 }

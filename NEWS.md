@@ -1,5 +1,16 @@
 # ptetools 1.0.2
 
+* Fixed the empirical-bootstrap aggregation with `weightsname`: cohorts
+  were combined by unweighted unit counts instead of weighted shares, so
+  overall and event-study results were wrong whenever average weights
+  differed across cohorts (#23). This affected estimators that use the
+  empirical bootstrap, including qte's. They now match `pte_aggte()`.
+
+* Sampling weights are now checked (#24): they must be non-missing, finite
+  and non-negative with a positive sum, and, with panel data, constant over
+  time within each unit (as in `did`). Previously, invalid weights gave
+  `NaN` estimates or inconsistent results without an error.
+
 * Empirical bootstrap: group effects and event times of a small cohort that
   is missing from some bootstrap draws now keep their estimates and get
   standard errors from the draws that contain the cohort; if it is missing

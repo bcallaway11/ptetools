@@ -78,3 +78,59 @@ test_that("doubly robust estimation does not warn about non-integer weights", {
     ))
   }
 })
+
+# The empirical-bootstrap aggregation weighted cohorts by row counts, not by
+# sampling weights (#23). With weights that differ across cohorts, its
+# overall ATT and event study must match pte_aggte() (the multiplier path),
+# and integer weights must match duplicating units.
+test_that("empirical-bootstrap aggregation uses sampling weights", {
+  skip_if_not_installed("did")
+  data <- did::mpdta
+  set.seed(1)
+  data$w <- rep(sample(1:5, 500, replace = TRUE), each = 5)
+  data$w[data$first.treat == 2007] <- data$w[data$first.treat == 2007] * 4
+  run <- function(d, boot_type, idname = "countyreal", weightsname = "w") {
+    suppressMessages(suppressWarnings(pte(
+      yname = "lemp", gname = "first.treat", tname = "year",
+      idname = idname, data = d, setup_pte_fun = setup_pte,
+      subset_fun = two_by_two_subset, attgt_fun = pte_attgt,
+      xformula = ~1, d_outcome = TRUE, boot_type = boot_type, biters = 5,
+      weightsname = weightsname
+    )))
+  }
+  mult <- run(data, "multiplier")
+  emp <- run(data, "empirical")
+  expect_equal(emp$overall_results$att, mult$overall_att$overall.att)
+  expect_equal(emp$dyn_results$att.e[match(mult$event_study$egt,
+                                           emp$dyn_results$e)],
+               mult$event_study$att.egt)
+
+  # integer weights = each unit duplicated w times (with new ids)
+  replicated <- data[rep(seq_len(nrow(data)), data$w), ]
+  replicated$copy <- stats::ave(replicated$year, replicated$countyreal,
+                                replicated$year, FUN = seq_along)
+  replicated$newid <- as.integer(factor(paste(replicated$countyreal,
+                                              replicated$copy)))
+  rep_res <- run(replicated, "empirical", idname = "newid",
+                 weightsname = NULL)
+  expect_equal(rep_res$overall_results$att, emp$overall_results$att)
+})
+
+test_that("invalid sampling weights give clear errors", {
+  skip_if_not_installed("did")
+  run <- function(w) {
+    d <- did::mpdta
+    d$w <- w
+    pte_default(yname = "lemp", gname = "first.treat", tname = "year",
+                idname = "countyreal", data = d, d_outcome = TRUE,
+                weightsname = "w", biters = 0)
+  }
+  good <- rep(seq(1, 2, length.out = 500), each = 5)
+  bad <- good
+  bad[3] <- NA
+  expect_error(run(bad), "non-missing and finite")
+  bad <- good
+  bad[3] <- -1
+  expect_error(run(bad), "non-negative")
+  expect_error(run(good * rep(1:5, 500)), "constant over time within each unit")
+})

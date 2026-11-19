@@ -404,9 +404,17 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
   attgt.results$e <- attgt.results$time.period - attgt.results$group
 
   # calculate relative sizes of each group (will be used as weights):
-  # number of rows of each group in the first period
-  first_G <- data[which(data[, ptep$tname] == time.periods[1]), ptep$gname]
-  n.group <- vapply(groups, function(gg) sum(first_G == gg, na.rm = TRUE), integer(1))
+  # weighted number of units of each group in the first period
+  # Weighted by the sampling weights (.w, all 1 without weightsname), as the
+  # group shares in pte_aggte() and did::aggte(); counting rows combined
+  # cohorts by sample counts instead of weighted population shares (#23)
+  first_rows <- which(data[, ptep$tname] == time.periods[1])
+  first_G <- data[first_rows, ptep$gname]
+  first_w <- data$.w[first_rows]
+  if (is.null(first_w)) first_w <- rep(1, length(first_rows))
+  n.group <- vapply(groups, function(gg) {
+    sum(first_w[first_G == gg], na.rm = TRUE)
+  }, numeric(1))
   # merge in group sizes
   ngroup.mat <- cbind(groups, n.group)
   attgt.results <- merge(attgt.results, ngroup.mat, by.x = "group", by.y = "groups")
@@ -438,7 +446,7 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
   }
 
   # calculate average effects by group
-  att.g <- data.frame(group = integer(), att.g = double(), n.group = integer(), group_post_length = integer())
+  att.g <- data.frame(group = integer(), att.g = double(), n.group = double(), group_post_length = integer())
   weights.g <- list()
   counter <- 1
   for (this.g in groups) {
