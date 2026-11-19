@@ -136,6 +136,7 @@ setup_pte <- function(yname,
                       anticipation = 0,
                       base_period = "varying",
                       control_group = "notyettreated",
+                      clustervars = NULL,
                       cband = TRUE,
                       alp = 0.05,
                       boot_type = "multiplier",
@@ -177,6 +178,34 @@ setup_pte <- function(yname,
   data$.id <- id
   data$.Y <- data[, yname]
   data$.w <- .w
+
+  # cluster variable for standard errors (#6), as in did::att_gt(): at most
+  # one variable beyond idname, constant within unit; stored as .cluster
+  clustervars <- setdiff(clustervars, idname)
+  if (length(clustervars) > 1) {
+    stop("At most one cluster variable (beyond idname) is supported.",
+         call. = FALSE)
+  }
+  if (length(clustervars) == 1) {
+    if (!(clustervars %in% colnames(data))) {
+      stop("clustervars = \"", clustervars, "\" is not a column of data.",
+           call. = FALSE)
+    }
+    data$.cluster <- data[[clustervars]]
+    if (anyNA(data$.cluster)) {
+      stop("The cluster variable has missing values.", call. = FALSE)
+    }
+    if (isTRUE(panel)) {
+      n_per_unit <- tapply(data$.cluster, data$.id,
+                           function(x) length(unique(x)))
+      if (any(n_per_unit > 1)) {
+        stop("The cluster variable must be constant over time within each ",
+             "unit.", call. = FALSE)
+      }
+    }
+  } else {
+    clustervars <- NULL
+  }
 
   time.periods <- sort(unique(period))
 
@@ -277,6 +306,7 @@ setup_pte <- function(yname,
     # comparison group; it was always the default before (contdid #19)
     control_group = control_group,
     weightsname = weightsname,
+    clustervars = clustervars,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     probs = probs,
@@ -334,6 +364,13 @@ setup_pte <- function(yname,
 #'  identification strategies.
 #' @param weightsname The name of the column that contains sampling weights.
 #'  The default is NULL, in which case no sampling weights are used.
+#' @param clustervars The name of a variable to cluster standard errors on,
+#'  in addition to \code{idname} (as in \code{did::att_gt()}): one variable,
+#'  constant over time within each unit (e.g. state when units are
+#'  counties). The default is NULL, which clusters at the unit level.
+#'  Clustering applies to analytical standard errors, the multiplier
+#'  bootstrap (one multiplier per cluster) and the empirical bootstrap
+#'  (whole clusters are resampled).
 #' @param control_group Which group is used as the comparison group.
 #'  The default choice is "notyettreated", but
 #'  different estimation strategies can implement their own choices
@@ -390,6 +427,7 @@ pte_params <- function(yname,
                        anticipation = NULL,
                        base_period = NULL,
                        weightsname = NULL,
+                       clustervars = NULL,
                        control_group = "notyettreated",
                        gt_type = "att",
                        ret_quantile = 0.5,
@@ -417,6 +455,7 @@ pte_params <- function(yname,
     control_group = control_group,
     base_period = base_period,
     weightsname = weightsname,
+    clustervars = clustervars,
     gt_type = gt_type,
     ret_quantile = ret_quantile,
     probs = probs,

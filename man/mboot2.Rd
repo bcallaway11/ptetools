@@ -4,7 +4,7 @@
 \alias{mboot2}
 \title{Multiplier Bootstrap}
 \usage{
-mboot2(inffunc, biters = 1000, alp = 0.05, cband = TRUE)
+mboot2(inffunc, biters = 1000, alp = 0.05, cband = TRUE, cluster = NULL)
 }
 \arguments{
 \item{inffunc}{influence function matrix}
@@ -21,6 +21,9 @@ point estimates are returned with \code{NA} standard errors.}
 \item{cband}{whether to compute the critical value for uniform confidence
 bands (default \code{TRUE}). With \code{FALSE}, only standard errors are
 computed and \code{crit_val} is \code{NA}.}
+
+\item{cluster}{cluster identifiers, one per row of \code{inffunc}, or
+\code{NULL} (the default) for clustering at the level of the rows (units)}
 }
 \value{
 list with the following elements:

@@ -49,6 +49,8 @@ pte_aggte <- function(attgt,
   cband <- ptep$cband
   alp <- ptep$alp
   biters <- ptep$biters
+  # clusters for standard errors (NULL: unit level) (#6)
+  cluster <- pte_cluster(ptep)
   data <- ptep$data
   tname <- ptep$tname
   glist <- sort(unique(group))
@@ -121,7 +123,8 @@ pte_aggte <- function(attgt,
         weights.agg = pg[whichg] / sum(pg[whichg]),
         wif = NULL
       ))
-      se.g <- getSE(as.matrix(inf.func.g), bstrap = bstrap, biters = biters, alp = alp)
+      se.g <- getSE(as.matrix(inf.func.g), bstrap = bstrap, biters = biters, alp = alp,
+        cluster = cluster)
       list(inf.func = inf.func.g, se = se.g)
     })
 
@@ -140,7 +143,8 @@ pte_aggte <- function(attgt,
       if (bstrap == FALSE) {
         warning("Used bootstrap procedure to compute simultaneous confidence band")
       }
-      selective.crit.val <- mboot2(selective.inf.func.g, biters = biters, alp = alp)$crit_val
+      selective.crit.val <- mboot2(selective.inf.func.g, biters = biters, alp = alp,
+        cluster = cluster)$crit_val
 
       selective.crit.val <- crit_val_checks(selective.crit.val, alp)
       selective.cband <- isTRUE(attr(selective.crit.val, "cband"))
@@ -174,7 +178,8 @@ pte_aggte <- function(attgt,
 
     selective.inf.func <- as.matrix(selective.inf.func)
     # get overall standard error
-    selective.se <- getSE(selective.inf.func, bstrap = bstrap, biters = biters, alp = alp)
+    selective.se <- getSE(selective.inf.func, bstrap = bstrap, biters = biters, alp = alp,
+        cluster = cluster)
     if (!is.na(selective.se)) {
       if ((selective.se <= sqrt(.Machine$double.eps) * 10)) selective.se <- NA
     }
@@ -245,7 +250,8 @@ pte_aggte <- function(attgt,
         weights.agg = pge,
         wif = wif.e
       ))
-      se.e <- getSE(as.matrix(inf.func.e), bstrap = bstrap, biters = biters, alp = alp)
+      se.e <- getSE(as.matrix(inf.func.e), bstrap = bstrap, biters = biters, alp = alp,
+        cluster = cluster)
       list(inf.func = inf.func.e, se = se.e)
     })
 
@@ -260,7 +266,8 @@ pte_aggte <- function(attgt,
       if (bstrap == FALSE) {
         warning("Used bootstrap procedure to compute simultaneous confidence band")
       }
-      dynamic.crit.val <- mboot2(dynamic.inf.func.e, biters = biters, alp = alp)$crit_val
+      dynamic.crit.val <- mboot2(dynamic.inf.func.e, biters = biters, alp = alp,
+        cluster = cluster)$crit_val
 
       dynamic.crit.val <- crit_val_checks(dynamic.crit.val, alp)
       dynamic.cband <- isTRUE(attr(dynamic.crit.val, "cband"))
@@ -278,7 +285,8 @@ pte_aggte <- function(attgt,
       wif = NULL
     )
 
-    dynamic.se <- getSE(dynamic.inf.func, bstrap = bstrap, biters = biters, alp = alp)
+    dynamic.se <- getSE(dynamic.inf.func, bstrap = bstrap, biters = biters, alp = alp,
+        cluster = cluster)
     if (!is.na(dynamic.se)) {
       if (dynamic.se <= sqrt(.Machine$double.eps) * 10) dynamic.se <- NA
     }
@@ -385,19 +393,26 @@ get_agg_inf_func <- function(att, inffunc1, whichones, weights.agg, wif = NULL) 
 #'  a standard error
 #'
 #' @param thisinffunc An influence function
+#' @param cluster cluster identifiers, one per element of \code{thisinffunc},
+#'  or \code{NULL} for unit-level clustering
 #' @inheritParams pte_aggte
 #'
 #' @return scalar standard error
 #'
 #' @keywords internal
-getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
+getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05,
+                  cluster = NULL) {
   n <- length(thisinffunc)
   if (bstrap) {
     # only the standard error is needed here (#3)
-    bout <- mboot2(thisinffunc, biters = biters, alp = alp, cband = FALSE)
+    bout <- mboot2(thisinffunc, biters = biters, alp = alp, cband = FALSE,
+                   cluster = cluster)
     return(bout$boot_se)
-  } else {
+  } else if (is.null(cluster)) {
     return(sqrt(mean((thisinffunc)^2) / n))
+  } else {
+    # cluster-robust: (1/n) sqrt(sum over clusters of squared sums) (#6)
+    return(sqrt(sum(cluster_sums(thisinffunc, cluster)^2)) / n)
   }
 }
 

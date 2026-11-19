@@ -20,6 +20,7 @@ pte_params(
   anticipation = NULL,
   base_period = NULL,
   weightsname = NULL,
+  clustervars = NULL,
   control_group = "notyettreated",
   gt_type = "att",
   ret_quantile = 0.5,
@@ -88,6 +89,14 @@ identification strategies.}
 
 \item{weightsname}{The name of the column that contains sampling weights.
 The default is NULL, in which case no sampling weights are used.}
+
+\item{clustervars}{The name of a variable to cluster standard errors on,
+in addition to \code{idname} (as in \code{did::att_gt()}): one variable,
+constant over time within each unit (e.g. state when units are
+counties). The default is NULL, which clusters at the unit level.
+Clustering applies to analytical standard errors, the multiplier
+bootstrap (one multiplier per cluster) and the empirical bootstrap
+(whole clusters are resampled).}
 
 \item{control_group}{Which group is used as the comparison group.
 The default choice is "notyettreated", but

@@ -36,8 +36,12 @@ process_att_gt <- function(att_gt_results, ptep) {
   #     this is analogous to cluster robust standard errors that
   #     are clustered at the unit level
   #-----------------------------------------------------------------------------
+  #     (or at the level of clustervars: the variance uses sums of the
+  #     influence function within clusters, #6)
   n <- nrow(inffunc)
-  V <- Matrix::t(inffunc) %*% inffunc / n
+  cluster <- pte_cluster(ptep)
+  inffunc_sums <- cluster_sums(inffunc, cluster)
+  V <- Matrix::t(inffunc_sums) %*% inffunc_sums / n
   se_analytical <- sqrt(Matrix::diag(V) / n)
   cband <- ptep$cband
   alp <- ptep$alp
@@ -51,11 +55,13 @@ process_att_gt <- function(att_gt_results, ptep) {
     # multiplier bootstrap results (biters was previously not passed, so
     # ATT(g,t) standard errors always used 1000 draws)
     biters <- if (is.null(ptep$biters)) 1000 else ptep$biters
-    bout <- mboot2(inffunc, biters = biters, alp = alp, cband = cband)
+    bout <- mboot2(inffunc, biters = biters, alp = alp, cband = cband,
+                   cluster = cluster)
     se <- bout$boot_se
     if (cband && is.finite(bout$crit_val)) cval <- bout$crit_val
   } else {
-    # purely analytical standard errors (clustered at the unit level);
+    # purely analytical standard errors (clustered at the unit level, or
+    # by clustervars);
     # only pointwise confidence intervals are supported for this option
     se <- se_analytical
   }
@@ -142,6 +148,8 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'  inference
 #'
 #' @param inffunc influence function matrix
+#' @param cluster cluster identifiers, one per row of \code{inffunc}, or
+#'  \code{NULL} (the default) for clustering at the level of the rows (units)
 #' @param cband whether to compute the critical value for uniform confidence
 #'  bands (default \code{TRUE}). With \code{FALSE}, only standard errors are
 #'  computed and \code{crit_val} is \code{NA}.
@@ -155,7 +163,8 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'     are none or \code{cband = FALSE})
 #'
 #' @export
-mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE) {
+mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE,
+                   cluster = NULL) {
   if (!(is.numeric(biters) && length(biters) == 1 && !is.na(biters) &&
           biters >= 1)) {
     stop("mboot2() needs biters >= 1 bootstrap draws.", call. = FALSE)
@@ -163,29 +172,41 @@ mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE) {
   inffunc <- as.matrix(inffunc)
   n <- nrow(inffunc)
 
+  # Sums of the influence function within clusters; without clustering each
+  # unit is its own cluster and these are the influence functions
+  # themselves. With clustering, one multiplier is drawn per cluster, as in
+  # did::att_gt() (Callaway and Sant'Anna 2021, Remark 10) (#6).
+  inf_sums <- cluster_sums(inffunc, cluster)
+  n_sums <- nrow(inf_sums)
+
   # run the multiplier bootstrap: draw b uses Rademacher weights U_b
-  # (-1 or 1, each with p = 1/2) and gives R_b = sqrt(n) * colMeans(U_b * inffunc).
+  # (-1 or 1, each with p = 1/2) and gives T_b = sum_c U_bc * S_c, the sum
+  # over clusters c of the multiplier times the influence-function sum S_c.
   # All draws in a block are one sample() call and one matrix product,
   # rather than an R loop over draws. One sample() call of size n * k
   # produces the same stream as k calls of size n, so the draws (and results)
   # match the draw-by-draw loop. Blocks keep the n x k weight matrix to
   # roughly 10 million entries.
-  block <- max(1L, min(biters, floor(1e7 / n)))
+  block <- max(1L, min(biters, floor(1e7 / n_sums)))
   starts <- seq.int(1L, biters, by = block)
   bres <- do.call("rbind", lapply(starts, function(s) {
     k <- min(block, biters - s + 1L)
-    U <- matrix(sample(c(-1, 1), size = n * k, replace = TRUE), nrow = n, ncol = k)
-    sqrt(n) * crossprod(U, inffunc) / n
+    U <- matrix(sample(c(-1, 1), size = n_sums * k, replace = TRUE),
+                nrow = n_sums, ncol = k)
+    crossprod(U, inf_sums)
   }))
 
-  # bootstrap compatible standard errors
-  boot_se <- apply(
+  # bootstrap scale of T_b (interquartile range, normalized to the SD of a
+  # normal), and standard errors scale / n = (1/n) sqrt(sum_c S_c^2), the
+  # cluster-robust form (with unit clusters, the usual one)
+  boot_scale <- apply(
     bres, 2,
     function(b) {
-      (quantile(b, .75, type = 1, na.rm = T) -
-        quantile(b, .25, type = 1, na.rm = T)) / (qnorm(.75) - qnorm(.25))
+      (quantile(b, .75, type = 1, na.rm = TRUE) -
+        quantile(b, .25, type = 1, na.rm = TRUE)) / (qnorm(.75) - qnorm(.25))
     }
-  ) / sqrt(n)
+  )
+  boot_se <- boot_scale / n
 
   # Only standard errors are needed (e.g. for a single parameter): skip the
   # sup-t statistic, which would otherwise warn on every draw for a
@@ -208,7 +229,7 @@ mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE) {
     return(list(boot_se = boot_se, crit_val = qnorm(1 - alp / 2)))
   }
   bT <- apply(bres[, usable, drop = FALSE], 1,
-              function(b) max(abs(b / boot_se[usable]))) / sqrt(n)
+              function(b) max(abs(b / boot_scale[usable])))
   crit_val <- quantile(bT, 1 - alp, type = 1, na.rm = TRUE)
   if (crit_val < qnorm(1 - alp / 2)) {
     warning("critical value for uniform confidence band is somehow smaller than
@@ -218,4 +239,28 @@ mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE) {
   }
 
   list(boot_se = boot_se, crit_val = crit_val)
+}
+
+
+# --- Internal: clustering (#6) ----------------------------------------------
+# pte_cluster(): the cluster of each row of the influence function (units in
+#   the order of unique(.id) for panel data, observations for repeated cross
+#   sections), or NULL if standard errors are not clustered beyond units.
+pte_cluster <- function(ptep) {
+  if (is.null(ptep$clustervars) || is.null(ptep$data$.cluster)) return(NULL)
+  data <- ptep$data
+  if (isTRUE(ptep$panel)) {
+    ids <- attr(data, "pte_ids")
+    if (is.null(ids)) ids <- unique(data$.id)
+    data$.cluster[match(ids, data$.id)]
+  } else {
+    data$.cluster
+  }
+}
+
+# cluster_sums(): sums of the rows of an influence function (vector or
+#   matrix) within clusters; unchanged when cluster is NULL.
+cluster_sums <- function(inffunc, cluster) {
+  if (is.null(cluster)) return(inffunc)
+  rowsum(as.matrix(inffunc), cluster, reorder = FALSE)
 }

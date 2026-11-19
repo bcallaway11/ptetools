@@ -83,7 +83,27 @@ drop_empty_draws <- function(boot.res) {
 # 1, ..., n in the id column, as in BMisc::block_boot_sample(), and the same
 # random draws are used: sample(uid, replace = TRUE) is uid[sample.int(...)].
 # Repeated cross sections are resampled by row.
-make_boot_sampler <- function(data, idname, panel) {
+make_boot_sampler <- function(data, idname, panel, clustered = FALSE) {
+  # With clustervars, whole clusters are resampled (#6). Each sampled copy of
+  # a cluster gets new unit ids (panel) and row ids, so units that appear in
+  # several copies are treated as distinct units.
+  if (isTRUE(clustered) && !is.null(data$.cluster)) {
+    clusters <- unique(data$.cluster)
+    rows <- split(seq_len(nrow(data)),
+                  factor(data$.cluster, levels = clusters))
+    n_rows <- lengths(rows)
+    return(function() {
+      pos <- sample.int(length(clusters), length(clusters), replace = TRUE)
+      bdata <- data[unlist(rows[pos], use.names = FALSE), , drop = FALSE]
+      copy <- rep(seq_along(pos), n_rows[pos])
+      if (isTRUE(panel)) {
+        bdata[, idname] <- match(paste(copy, bdata[[idname]]),
+                                 unique(paste(copy, bdata[[idname]])))
+      }
+      bdata$.rowid <- seq_len(nrow(bdata))
+      bdata
+    })
+  }
   if (!isTRUE(panel)) {
     return(function() {
       bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
@@ -211,7 +231,8 @@ panel_empirical_bootstrap <- function(attgt.list,
   # bootstrap
   # draws bootstrap samples; panel data are resampled by unit while repeated
   # cross sections are resampled at the observation level
-  draw_sample <- make_boot_sampler(data, idname, ptep$panel)
+  draw_sample <- make_boot_sampler(data, idname, ptep$panel,
+                                   clustered = !is.null(ptep$clustervars))
 
   # loop for each nonparametric bootstrap iteration
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
@@ -582,7 +603,8 @@ qtt_empirical_bootstrap <- function(attgt.list,
   # bootstrap; parallel workers as in panel_empirical_bootstrap() (#11)
   cl <- boot_cluster(ptep$cl)
   if (!identical(cl, ptep$cl)) on.exit(parallel::stopCluster(cl), add = TRUE)
-  draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel)
+  draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel,
+                                   clustered = !is.null(ptep$clustervars))
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
     bdata <- draw_sample()
     # no treated units in this draw: nothing to estimate (#10)

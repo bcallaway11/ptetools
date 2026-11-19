@@ -4,10 +4,13 @@
 \alias{getSE}
 \title{Influence Functions to Standard Errors}
 \usage{
-getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05)
+getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05, cluster = NULL)
 }
 \arguments{
 \item{thisinffunc}{An influence function}
+
+\item{cluster}{cluster identifiers, one per element of \code{thisinffunc},
+or \code{NULL} for unit-level clustering}
 }
 \value{
 scalar standard error

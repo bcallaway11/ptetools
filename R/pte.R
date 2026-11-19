@@ -486,6 +486,7 @@ pte_default <- function(yname,
                         base_period = "varying",
                         control_group = "notyettreated",
                         weightsname = NULL,
+                        clustervars = NULL,
                         cband = TRUE,
                         alp = 0.05,
                         boot_type = "multiplier",
@@ -500,7 +501,7 @@ pte_default <- function(yname,
   # bootstrap sample copies the data, so unused columns are pure overhead.
   data <- as.data.frame(data)
   used_cols <- unique(c(
-    yname, gname, tname, idname, weightsname,
+    yname, gname, tname, idname, weightsname, clustervars,
     all.vars(xformula), all.vars(d_covs_formula)
   ))
   data <- data[, intersect(used_cols, names(data)), drop = FALSE]
@@ -530,6 +531,7 @@ pte_default <- function(yname,
     base_period = base_period,
     control_group = control_group,
     weightsname = weightsname,
+    clustervars = clustervars,
     cband = cband,
     alp = alp,
     boot_type = boot_type,

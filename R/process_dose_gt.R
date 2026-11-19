@@ -61,6 +61,8 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     Xe_gt <- BMisc::get_list_element(inner_extra_gt_returns, "Xe")
 
     acrt_gt_inffunc_mat <- gt_results$inffunc[, has_dose, drop = FALSE]
+    # clusters for standard errors (NULL: unit level) (#6)
+    cluster <- pte_cluster(ptep)
     biters <- ptep$biters
     bstrap <- ptep$bstrap
     alp <- ptep$alp
@@ -78,6 +80,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
             base_period = ptep$base_period,
             control_group = ptep$control_group,
             weightsname = ptep$weightsname,
+            clustervars = ptep$clustervars,
             biters = ptep$biters,
             alp = ptep$alp
         )
@@ -95,7 +98,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     overall_acrt_inffunc <- as.matrix(rowSums(sweep(acrt_gt_inffunc_mat, 2, o_weights$overall_weight, "*")) / sum(o_weights$overall_weight))
     # with biters = 0 (no bootstrap), use the analytical standard error (#14)
     overall_acrt_se <- getSE(overall_acrt_inffunc, bstrap = biters > 0,
-                             biters = biters, alp = alp)
+                             biters = biters, alp = alp, cluster = cluster)
 
     # point estimates of ATT(d) and ACRT(d)
     att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
@@ -179,7 +182,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         boot_res <- list(boot_se = rep(NA_real_, length(dvals)))
     } else {
         boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp,
-                           cband = cband)
+                           cband = cband, cluster = cluster)
     }
     att.d_se <- boot_res$boot_se
     att_cband_ok <- FALSE
@@ -211,7 +214,8 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     acrt_boot_res <- if (biters == 0) {
         list(boot_se = rep(NA_real_, length(dvals)))
     } else {
-        mboot2(acrt.d_inffunc, biters = biters, alp = alp, cband = cband)
+        mboot2(acrt.d_inffunc, biters = biters, alp = alp, cband = cband,
+               cluster = cluster)
     }
     acrt.d_se <- acrt_boot_res$boot_se
     acrt_cband_ok <- FALSE

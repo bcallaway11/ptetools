@@ -1,5 +1,15 @@
 # ptetools 1.0.2
 
+* New `clustervars` argument for `pte_default()`, `pte()` (via
+  `setup_pte()`) to cluster standard errors at a level above the unit, as
+  in `did::att_gt()` (#6): one variable, constant within each unit. It
+  applies to analytical standard errors (cluster-robust variance, including
+  the pre-test), the multiplier bootstrap (one multiplier per cluster,
+  applied to influence functions summed within clusters) and the empirical
+  bootstrap (whole clusters are resampled), for group-time effects and all
+  aggregations. `mboot2()` and `getSE()` gain a `cluster` argument.
+  Unclustered results are unchanged.
+
 * `setup_pte()` now stores `control_group` in the `pte_params` object, so
   later steps (the overall ATT for continuous treatments) use the requested
   comparison group instead of always the default. Continuous-treatment

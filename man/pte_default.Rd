@@ -20,6 +20,7 @@ pte_default(
   base_period = "varying",
   control_group = "notyettreated",
   weightsname = NULL,
+  clustervars = NULL,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -83,6 +84,14 @@ for the control group}
 
 \item{weightsname}{The name of the column that contains sampling weights.
 The default is NULL, in which case no sampling weights are used.}
+
+\item{clustervars}{The name of a variable to cluster standard errors on,
+in addition to \code{idname} (as in \code{did::att_gt()}): one variable,
+constant over time within each unit (e.g. state when units are
+counties). The default is NULL, which clusters at the unit level.
+Clustering applies to analytical standard errors, the multiplier
+bootstrap (one multiplier per cluster) and the empirical bootstrap
+(whole clusters are resampled).}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}
