@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* Fixed standard errors of aggregated parameters (overall ATT, event study,
+  group effects) from `pte_aggte()`, which were slightly off (about 0.3-0.8%
+  on `mpdta`) (#19). The term for estimating the group shares used shares
+  normalized to sum to 1 across treated groups instead of P(G = g). They now
+  match `did::aggte()` exactly. Point estimates are unchanged.
+
 * `overall_weights()` (used for continuous treatments) no longer stops with
   "something's going wrong calculating overall weights" when the weights
   sum to 1 only up to floating-point rounding, which happened with many

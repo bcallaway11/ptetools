@@ -78,11 +78,13 @@ pte_aggte <- function(attgt,
   # each unit's group in units of tname, from the internal .G (never-treated
   # units, including those first treated after the sample, are NA here)
   unit_group <- pte_calendar_time(data, group_weight_data$.G)
+  # pg is the (unnormalized) sample share P(G = g), as in did::aggte(). Do
+  # not normalize it to sum to 1 across treated groups: the aggregation
+  # weights only use ratios of pg, but wif() centers 1{G = g} by pg, which
+  # is the influence function of the share only for P(G = g) itself (#19)
   pg <- sapply(originalglist, function(g) {
     mean(weights.ind * (unit_group %in% g))
   })
-  # normalized so that probabilities sum to 1
-  pg <- pg / sum(pg)
 
   # length of this is equal to number of groups
   pgg <- pg

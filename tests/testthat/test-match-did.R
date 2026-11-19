@@ -3,7 +3,8 @@
 # Description: ATT(g,t), event study and overall ATT from pte_default() must
 #   equal did::att_gt() for both base periods and both control groups, on
 #   mpdta and on unequally spaced periods. Covers #16: with a universal base
-#   period, not-yet-treated controls must be untreated in the base period;
+#   period, not-yet-treated controls must be untreated in the base period
+#   (#16); aggregated standard errors must match too (#19);
 #   anticipation follows did's rules, in units of the time variable.
 # Author: Brant Callaway
 # Last update: 2026-11-19
@@ -25,13 +26,18 @@ diff_from_did <- function(data, yname, gname, tname, idname, base_period,
   )))
   did_att <- stats::setNames(d$att, paste(d$group, d$t))
   dyn <- did::aggte(d, type = "dynamic")
+  grp <- did::aggte(d, type = "group")
+  e_match <- match(a$event_study$egt, dyn$egt)
   c(
     attgt = max(abs(a$att_gt$att -
                       did_att[paste(a$att_gt$group, a$att_gt$t)])),
-    event_study = max(abs(a$event_study$att.egt -
-                            dyn$att.egt[match(a$event_study$egt, dyn$egt)])),
-    overall = abs(a$overall_att$overall.att -
-                    did::aggte(d, type = "group")$overall.att)
+    event_study = max(abs(a$event_study$att.egt - dyn$att.egt[e_match])),
+    overall = abs(a$overall_att$overall.att - grp$overall.att),
+    # standard errors of aggregated parameters (#19); the event-study SE at
+    # a universal reference period is NA in both packages
+    event_study_se = max(abs(a$event_study$se.egt - dyn$se.egt[e_match]),
+                         na.rm = TRUE),
+    overall_se = abs(a$overall_att$overall.se - grp$overall.se)
   )
 }
 
