@@ -1,5 +1,10 @@
 # ptetools 1.0.2
 
+* The empirical bootstrap no longer errors when a bootstrap draw contains no
+  treated units, which happened often with small cohorts (#10). Such draws
+  are dropped, with a warning that says how many, and standard errors use
+  the remaining draws. This also applies to the QTT estimators in qte.
+
 * `pte_default()` with `est_method = "dr"` no longer warns
   "non-integer #successes in a binomial glm!" on every call (#20). The
   overlap check now fits its logit propensity score with `quasibinomial()`

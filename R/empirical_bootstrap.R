@@ -34,6 +34,47 @@ boot_cluster <- function(cl, os = .Platform$OS.type) {
   cl
 }
 
+# --- Internal: bootstrap draws without treated units ------------------------
+# A bootstrap draw can contain no treated unit of any group, especially with
+# small cohorts (a cohort of k units is missed with probability about
+# exp(-k) per draw). Such a draw has no group-time estimates, and running
+# setup and aggregation on it errored (#10). These helpers skip such draws
+# and drop them, with a warning that counts them, as already happens (with
+# a warning) for draws that miss only some groups.
+#
+# draw_has_treated(): TRUE if `bdata` contains a unit of a group in
+#   ptep$glist (groups compared on the user's original scale).
+draw_has_treated <- function(bdata, ptep) {
+  groups <- pte_calendar_time(ptep$data, ptep$glist)
+  any(bdata[[ptep$gname]] %in% groups)
+}
+
+# has_estimates(): TRUE if a list of group-time results (attgt.list from
+#   compute.pte()) has at least one non-missing estimate.
+has_estimates <- function(attgt.list) {
+  att <- unlist(lapply(attgt.list, function(r) r$att))
+  length(att) > 0 && any(!is.na(att))
+}
+
+# drop_empty_draws(): removes NULL results (draws skipped above) from the
+#   list of bootstrap results, warning how many were dropped; errors if all
+#   were.
+drop_empty_draws <- function(boot.res) {
+  empty <- vapply(boot.res, is.null, logical(1))
+  if (all(empty)) {
+    stop("None of the ", length(boot.res), " bootstrap draws contained ",
+         "treated units, so no bootstrap standard errors can be computed.",
+         call. = FALSE)
+  }
+  if (any(empty)) {
+    warning(sum(empty), " of ", length(boot.res), " bootstrap draws had no ",
+            "treated units (or no group-time estimates) and were dropped; ",
+            "standard errors use the remaining ", sum(!empty), " draws.",
+            call. = FALSE)
+  }
+  boot.res[!empty]
+}
+
 # --- Internal: bootstrap resampling ----------------------------------------
 # Returns a function that draws one bootstrap sample of `data`. Panel data
 # are resampled by unit (block bootstrap): the rows of each unit are indexed
@@ -175,6 +216,8 @@ panel_empirical_bootstrap <- function(attgt.list,
   # loop for each nonparametric bootstrap iteration
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
     bdata <- draw_sample()
+    # no treated units in this draw: nothing to estimate (#10)
+    if (!draw_has_treated(bdata, ptep)) return(NULL)
 
     bptep <- setup_pte_fun(
       yname = ptep$yname,
@@ -200,10 +243,15 @@ panel_empirical_bootstrap <- function(attgt.list,
       attgt_fun = attgt_fun,
       ...
     )[c("attgt.list", "extra_gt_returns")] # don't need to carry around ptep
+    if (!has_estimates(bres_gt$attgt.list)) return(NULL)
 
     bres <- aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
     bres
   }, cl = cl)
+  boot.res <- drop_empty_draws(boot.res)
+  # number of usable draws: event times / groups estimated in every one of
+  # them get bootstrap standard errors
+  n_draws <- length(boot.res)
 
   # attgt results
   attgt_results_inner <- bind_rows(BMisc::get_list_element(boot.res, "attgt_results")) |>
@@ -218,7 +266,7 @@ panel_empirical_bootstrap <- function(attgt.list,
     group_by(e) |>
     mutate(length.e = length(e))
   original_elength <- length(unique(dyn_results_inner$e))
-  dyn_results_inner <- subset(dyn_results_inner, length.e == biters)
+  dyn_results_inner <- subset(dyn_results_inner, length.e == n_draws)
   new_elength <- length(unique(dyn_results_inner$e))
   if (new_elength != original_elength) {
     warning("dropping some event times due to small groups")
@@ -237,7 +285,7 @@ panel_empirical_bootstrap <- function(attgt.list,
     group_by(group) |>
     mutate(length.group = length(group))
   original_glength <- length(unique(group_results_inner$group))
-  group_results_inner <- subset(group_results_inner, length.group == biters)
+  group_results_inner <- subset(group_results_inner, length.group == n_draws)
   new_glength <- length(unique(group_results_inner$group))
   if (new_glength != original_glength) {
     warning("dropping some groups due to small groups")
@@ -537,6 +585,8 @@ qtt_empirical_bootstrap <- function(attgt.list,
   draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel)
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
     bdata <- draw_sample()
+    # no treated units in this draw: nothing to estimate (#10)
+    if (!draw_has_treated(bdata, ptep)) return(NULL)
 
     bptep <- setup_pte_fun(
       yname     = ptep$yname,
@@ -560,9 +610,11 @@ qtt_empirical_bootstrap <- function(attgt.list,
       attgt_fun  = attgt_fun,
       ...
     )[c("attgt.list", "extra_gt_returns")]
+    if (!has_estimates(bres_gt$attgt.list)) return(NULL)
 
     aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
   }, cl = cl)
+  boot.res <- drop_empty_draws(boot.res)
 
   alp <- ptep$alp
   z   <- qnorm(1 - alp / 2)
