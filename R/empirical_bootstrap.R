@@ -497,12 +497,75 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 }
 
 
+# --- Internal: exact mixtures of step-function CDFs (#25) -------------------
+# A weighted mixture F = sum_c w_c F_c of step-function CDFs (cell ECDFs,
+# possibly weighted) is itself a step function: its jumps are at the cells'
+# support points y_cj, with masses w_c * p_cj. Stacking these, sorting and
+# taking cumulative sums gives F exactly at every support point, and the
+# quantile at tau is the first point where F >= tau (quantile type 1).
+#
+# This replaces evaluating every cell on a 1,000-point grid of the pooled
+# outcome (BMisc::combine_ecdfs()), which rounded each quantile up to the
+# next grid point and made the QTT depend on the grid, and quantile() on the
+# result, which (stats:::quantile.ecdf) rounds each jump to a multiple of
+# 1/nobs and so is not exact for weighted or mixed CDFs.
+
+# ecdf_masses(): support points and masses of a step-function CDF
+#   (an "ecdf"/"stepfun" object, such as from BMisc::weighted_ecdf()).
+ecdf_masses <- function(cdf) {
+  if (!inherits(cdf, "stepfun")) {
+    stop("QTT aggregation needs each cell's F0 and F1 to be step-function ",
+         "CDFs (e.g. from BMisc::weighted_ecdf()); got an object of class ",
+         class(cdf)[1], ".", call. = FALSE)
+  }
+  x <- stats::knots(cdf)
+  list(x = x, p = diff(c(0, cdf(x))))
+}
+
+# mix_cdf(): the exact mixture of cells with masses `masses` (a list from
+#   ecdf_masses()) and weights `weights`. Cells with zero weight are skipped.
+#   Returns a list: x (sorted unique support points) and cdf (F at x).
+mix_cdf <- function(masses, weights) {
+  use <- which(!is.na(weights) & weights != 0)
+  x <- unlist(lapply(masses[use], `[[`, "x"), use.names = FALSE)
+  p <- unlist(Map(function(m, w) m$p * w, masses[use], weights[use]),
+              use.names = FALSE)
+  o <- order(x)
+  x <- x[o]
+  cdf <- cumsum(p[o])
+  # one value per support point: F at the last of tied points
+  last <- !duplicated(x, fromLast = TRUE)
+  x <- x[last]
+  cdf <- cdf[last]
+  # normalize so F reaches 1 (aggregation weights sum to 1)
+  list(x = x, cdf = cdf / cdf[length(cdf)])
+}
+
+# mix_quantile(): quantiles of a mix_cdf() result: the first support point
+#   where F >= tau, as quantile(type = 1). The small tolerance keeps a
+#   cumulative sum that should equal tau, but is a rounding error below it,
+#   from moving the quantile one point up.
+mix_quantile <- function(mix, probs) {
+  idx <- findInterval(probs - 1e-12, mix$cdf, left.open = TRUE) + 1
+  mix$x[pmin(idx, length(mix$x))]
+}
+
+# mix_ecdf(): a mix_cdf() result as an ecdf-class step function, for the
+#   returned F0_overall / F1_overall
+mix_ecdf <- function(mix) {
+  BMisc::make_dist(mix$x, mix$cdf, sorted = TRUE)
+}
+
+
 #' @title Aggregate Group-Time Quantile Treatment Effects
 #'
 #' @description Aggregate group-time F0/F1 distributions into QTT curves at
-#'  the overall, group, and dynamic level.  CDFs are mixed first using
-#'  \code{BMisc::combine_ecdfs} and then inverted at all quantile levels in
-#'  \code{probs}, avoiding the bias from averaging scalar QTTs.
+#'  the overall, group, and dynamic level.  CDFs are mixed first, with the
+#'  aggregation weights, and the mixtures are then inverted at all quantile
+#'  levels in \code{probs}, avoiding the bias from averaging scalar QTTs.
+#'  The mixtures are computed exactly, from every support point of the
+#'  cells' CDFs, which must be step functions (such as those from
+#'  \code{BMisc::weighted_ecdf()}).
 #'
 #' @inheritParams attgt_pte_aggregations
 #' @inheritParams attgt_if
@@ -518,57 +581,42 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   # get (g,t) aggregation weights
   attgt_res <- attgt_pte_aggregations(attgt.list, ptep = ptep)
 
-  F0_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$F0) # nolint: object_name_linter
-  F1_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$F1) # nolint: object_name_linter
+  # support points and masses of each cell's CDFs, once
+  F0_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
+    ecdf_masses(egr$extra_gt_returns$F0)
+  })
+  F1_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
+    ecdf_masses(egr$extra_gt_returns$F1)
+  })
 
-  yname <- ptep$yname
-  y.seq <- quantile(ptep$data[, yname], probs = seq(0, 1, length.out = 1000))
+  # QTT at probs from the mixtures with weights w
+  mix_qtt <- function(w) {
+    mix_quantile(mix_cdf(F1_gt, w), probs) -
+      mix_quantile(mix_cdf(F0_gt, w), probs)
+  }
 
   # --- overall -----------------------------------------------------------
-  F0_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
-    y.seq = y.seq, ecdflist = F0_gt, weights = attgt_res$overall_weights
-  )
-  F1_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
-    y.seq = y.seq, ecdflist = F1_gt, weights = attgt_res$overall_weights
-  )
-  overall_qtt <- quantile(F1_overall, probs = probs, type = 1) -
-    quantile(F0_overall, probs = probs, type = 1)
+  F0_mix <- mix_cdf(F0_gt, attgt_res$overall_weights) # nolint: object_name_linter
+  F1_mix <- mix_cdf(F1_gt, attgt_res$overall_weights) # nolint: object_name_linter
+  overall_qtt <- mix_quantile(F1_mix, probs) - mix_quantile(F0_mix, probs)
   overall_results <- data.frame(probs = probs, qtt = overall_qtt)
 
   # --- dynamic -----------------------------------------------------------
-  dyn_results_list <- lapply(attgt_res$dyn_weights, function(dw) {
-    F0_e <- BMisc::combine_ecdfs( # nolint: object_name_linter
-      y.seq = y.seq, ecdflist = F0_gt, weights = dw$weights
-    )
-    F1_e <- BMisc::combine_ecdfs( # nolint: object_name_linter
-      y.seq = y.seq, ecdflist = F1_gt, weights = dw$weights
-    )
-    qtt_e <- quantile(F1_e, probs = probs, type = 1) -
-      quantile(F0_e, probs = probs, type = 1)
-    data.frame(e = dw$e, probs = probs, qtt = qtt_e)
-  })
-  dyn_results <- do.call(rbind, dyn_results_list)
+  dyn_results <- do.call(rbind, lapply(attgt_res$dyn_weights, function(dw) {
+    data.frame(e = dw$e, probs = probs, qtt = mix_qtt(dw$weights))
+  }))
 
   # --- group -------------------------------------------------------------
-  group_results_list <- lapply(attgt_res$group_weights, function(gw) {
-    F0_g <- BMisc::combine_ecdfs( # nolint: object_name_linter
-      y.seq = y.seq, ecdflist = F0_gt, weights = gw$weights
-    )
-    F1_g <- BMisc::combine_ecdfs( # nolint: object_name_linter
-      y.seq = y.seq, ecdflist = F1_gt, weights = gw$weights
-    )
-    qtt_g <- quantile(F1_g, probs = probs, type = 1) -
-      quantile(F0_g, probs = probs, type = 1)
-    data.frame(group = gw$g, probs = probs, qtt = qtt_g)
-  })
-  group_results <- do.call(rbind, group_results_list)
+  group_results <- do.call(rbind, lapply(attgt_res$group_weights, function(gw) {
+    data.frame(group = gw$g, probs = probs, qtt = mix_qtt(gw$weights))
+  }))
 
   list(
     overall_results = overall_results,
     dyn_results     = dyn_results,
     group_results   = group_results,
-    F0_overall      = F0_overall, # nolint: object_name_linter
-    F1_overall      = F1_overall  # nolint: object_name_linter
+    F0_overall      = mix_ecdf(F0_mix), # nolint: object_name_linter
+    F1_overall      = mix_ecdf(F1_mix)  # nolint: object_name_linter
   )
 }
 
@@ -663,7 +711,13 @@ qtt_empirical_bootstrap <- function(attgt.list,
     )[c("attgt.list", "extra_gt_returns")]
     if (!has_estimates(bres_gt$attgt.list)) return(NULL)
 
-    aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
+    bres <- aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
+    # only the point estimate's overall CDFs are returned; dropping each
+    # draw's (which hold every support point, #25) keeps memory from growing
+    # with the sample size times biters
+    bres$F0_overall <- NULL # nolint: object_name_linter
+    bres$F1_overall <- NULL # nolint: object_name_linter
+    bres
   }, cl = cl)
   boot.res <- drop_empty_draws(boot.res)
 

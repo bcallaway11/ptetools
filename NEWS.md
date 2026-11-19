@@ -1,5 +1,16 @@
 # ptetools 1.0.2
 
+* Aggregated QTTs (`qtt_pte_aggregations()`) are now exact (#25). The
+  cells' distribution functions used to be mixed on a 1,000-point grid of
+  the pooled outcome, so each quantile was rounded up to a grid point, and
+  `quantile()` on the mixture then rounded its jumps again. Weighted data
+  and the equivalent row-replicated data gave different QTTs. The mixture
+  now uses every support point of the cells' CDFs (one sort), at about the
+  same cost. Reported QTTs change slightly (on `mpdta`, by up to about
+  0.01). The cells' `F0`/`F1` must be step-function CDFs, as those from
+  `BMisc::weighted_ecdf()` are. Bootstrap draws no longer keep their own
+  overall CDFs, so memory does not grow with sample size times `biters`.
+
 * The doubly robust estimator is now `est_method = "aipw"` (augmented
   inverse probability weighting), the new default in `pte_default()`,
   `pte_attgt()` and `did_rcs_attgt()` (#30). `"dr"` still works as a

@@ -25,7 +25,10 @@ named list with elements \code{overall_results},
 }
 \description{
 Aggregate group-time F0/F1 distributions into QTT curves at
-the overall, group, and dynamic level.  CDFs are mixed first using
-\code{BMisc::combine_ecdfs} and then inverted at all quantile levels in
-\code{probs}, avoiding the bias from averaging scalar QTTs.
+the overall, group, and dynamic level.  CDFs are mixed first, with the
+aggregation weights, and the mixtures are then inverted at all quantile
+levels in \code{probs}, avoiding the bias from averaging scalar QTTs.
+The mixtures are computed exactly, from every support point of the
+cells' CDFs, which must be step functions (such as those from
+\code{BMisc::weighted_ecdf()}).
 }
