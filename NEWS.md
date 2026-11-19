@@ -1,5 +1,12 @@
 # ptetools 1.0.2
 
+* New `control_group = "none"`: each group-time cell holds only the group's
+  own units, with no comparison units. This is for estimators that use
+  variation within a group, such as the ACRT with a continuous treatment,
+  which is identified even when no unit is untreated (contdid #5).
+  `process_dose_gt()` then reports only ACRT results; ATT(d) and the
+  overall ATT are `NA`.
+
 * Fixed designs without a never-treated group. `setup_pte()` (and
   `setup_pte_basic()`) removed the smallest group value assuming it was 0,
   so without never-treated units the earliest cohort was silently dropped

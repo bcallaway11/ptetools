@@ -67,30 +67,42 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     bstrap <- ptep$bstrap
     alp <- ptep$alp
 
-    # overall att results
-    overall_att_res <- suppressWarnings(
-        ptetools::pte_default(
-            yname = ptep$yname,
-            gname = ptep$gname,
-            tname = ptep$tname,
-            idname = ptep$idname,
-            data = ptep$data,
-            d_outcome = TRUE,
-            anticipation = ptep$anticipation,
-            base_period = ptep$base_period,
-            control_group = ptep$control_group,
-            weightsname = ptep$weightsname,
-            clustervars = ptep$clustervars,
-            biters = ptep$biters,
-            alp = ptep$alp
-        )
-    )
+    # Without comparison units (control_group = "none"), only the ACRT is
+    # identified: it uses variation in the dose within each group, while
+    # ATT(d) and the overall ATT need untreated comparison units. These are
+    # then NA (contdid #5).
+    no_comparison <- identical(ptep$control_group, "none")
 
-    overall_att <- overall_att_res$overall_att$overall.att
-    overall_att_se <- overall_att_res$overall_att$overall.se
-    overall_att_inffunc <- overall_att_res$overall_att$inf.function[[2]]
-    if (!all.equal(overall_att, weighted.mean(att.overall_gt, w = o_weights$overall_weight))) {
-        stop("failed sanity check: something off with calculating overall att")
+    # overall att results
+    if (no_comparison) {
+        overall_att <- NA_real_
+        overall_att_se <- NA_real_
+        overall_att_inffunc <- NULL
+    } else {
+        overall_att_res <- suppressWarnings(
+            ptetools::pte_default(
+                yname = ptep$yname,
+                gname = ptep$gname,
+                tname = ptep$tname,
+                idname = ptep$idname,
+                data = ptep$data,
+                d_outcome = TRUE,
+                anticipation = ptep$anticipation,
+                base_period = ptep$base_period,
+                control_group = ptep$control_group,
+                weightsname = ptep$weightsname,
+                clustervars = ptep$clustervars,
+                biters = ptep$biters,
+                alp = ptep$alp
+            )
+        )
+
+        overall_att <- overall_att_res$overall_att$overall.att
+        overall_att_se <- overall_att_res$overall_att$overall.se
+        overall_att_inffunc <- overall_att_res$overall_att$inf.function[[2]]
+        if (!all.equal(overall_att, weighted.mean(att.overall_gt, w = o_weights$overall_weight))) {
+            stop("failed sanity check: something off with calculating overall att")
+        }
     }
 
     # overall acrt results
@@ -101,7 +113,11 @@ process_dose_gt <- function(gt_results, ptep, ...) {
                              biters = biters, alp = alp, cluster = cluster)
 
     # point estimates of ATT(d) and ACRT(d)
-    att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
+    att.d <- if (no_comparison) {
+        rep(NA_real_, length(ptep$dvals))
+    } else {
+        BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
+    }
     acrt.d <- BMisc::weighted_combine_list(acrt.d_gt, o_weights$overall_weight)
 
     # values of the dose, and the spline basis (and its derivative) at them
@@ -136,17 +152,6 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     n <- nrow(acrt_gt_inffunc_mat)
     # these are treated observations
     keep_mat <- acrt_gt_inffunc_mat != 0
-    # these are both treated and control observations
-    # (same cells as above, in the same order; drop the reference cells too)
-    overall_gt_inffunc <-
-        overall_att_res$att_gt$inffunc[, has_dose, drop = FALSE]
-    keep_mat2 <- overall_gt_inffunc != 0
-    # these keep track of untreated comparison units
-    keep_mat2 <- keep_mat2 & !keep_mat
-    #
-    comparison_inffunc <- overall_gt_inffunc
-    comparison_inffunc[!keep_mat2] <- 0
-    n0_vec <- colSums(keep_mat2)
     if (!all(colSums(keep_mat) == n1_vec)) {
         stop("Internal check failed: the number of nonzero entries of the ",
              "ACRT(d) influence function does not match the number of ",
@@ -154,48 +159,65 @@ process_dose_gt <- function(gt_results, ptep, ...) {
              "treated units fit the dose regression exactly.", call. = FALSE)
     }
 
-    att.d_gt_inffunc <- lapply(
-        1:length(Xe_gt),
-        function(i) {
-            out_inffunc <- matrix(data = 0, nrow = n, ncol = length(dvals))
-            this_inffunc <- (Xe_gt[[i]] %*% bread_gt[[i]] %*% t(bs_grid))
-            out_inffunc[keep_mat[, i], ] <- (n / n1_vec[i]) * this_inffunc
-            # add comparison group part of the influence function
-            # every d is the same with respect to comparison group
-            # don't rescale the influence function for untreated because these
-            # were already rescaled in the call to pte_default above
-            out_inffunc[keep_mat2[, i], ] <- -replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
-            out_inffunc
-        }
-    )
-
-    att.d_inffunc <- BMisc::weighted_combine_list(att.d_gt_inffunc, o_weights$overall_weight)
     biters <- ptep$biters
     alp <- ptep$alp
     cband <- ptep$cband
-    # ATT(d) and ACRT(d) standard errors come only from the multiplier
-    # bootstrap; with biters = 0 they are NA (and cband is already FALSE,
-    # so the critical values below are pointwise) (#14)
-    if (biters == 0) {
-        message("biters = 0: standard errors of ATT(d) and ACRT(d) ",
-                "require the bootstrap, so they are NA.")
-        boot_res <- list(boot_se = rep(NA_real_, length(dvals)))
+    if (no_comparison) {
+        # ATT(d) is not identified without comparison units
+        att.d_se <- rep(NA_real_, length(ptep$dvals))
+        att.d_crit.val <- NA_real_
+        att.d_inffunc <- NULL
+        att_cband_ok <- TRUE
     } else {
-        boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp,
-                           cband = cband, cluster = cluster)
-    }
-    att.d_se <- boot_res$boot_se
-    att_cband_ok <- FALSE
-    if (cband) {
-        att.d_crit.val <- boot_res$crit_val
-        att.d_crit.val <- crit_val_checks(att.d_crit.val, alp)
-        att_cband_ok <- isTRUE(attr(att.d_crit.val, "cband"))
-        # strip the "cband"/quantile-name attributes now that we've read
-        # them -- a length-1 value carrying extra attributes breaks
-        # data.frame()/cbind.data.frame() recycling in autoplot.dose_obj()
-        att.d_crit.val <- as.numeric(att.d_crit.val)
-    } else {
-        att.d_crit.val <- qnorm(1 - alp / 2)
+        # comparison units in each cell: nonzero in the overall-ATT influence
+        # function (same cells as above, in the same order; drop the reference
+        # cells too) but not treated
+        overall_gt_inffunc <-
+            overall_att_res$att_gt$inffunc[, has_dose, drop = FALSE]
+        keep_mat2 <- overall_gt_inffunc != 0 & !keep_mat
+        comparison_inffunc <- overall_gt_inffunc
+        comparison_inffunc[!keep_mat2] <- 0
+
+        att.d_gt_inffunc <- lapply(
+            1:length(Xe_gt),
+            function(i) {
+                out_inffunc <- matrix(data = 0, nrow = n, ncol = length(dvals))
+                this_inffunc <- (Xe_gt[[i]] %*% bread_gt[[i]] %*% t(bs_grid))
+                out_inffunc[keep_mat[, i], ] <- (n / n1_vec[i]) * this_inffunc
+                # add comparison group part of the influence function
+                # every d is the same with respect to comparison group
+                # don't rescale the influence function for untreated because these
+                # were already rescaled in the call to pte_default above
+                out_inffunc[keep_mat2[, i], ] <- -replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
+                out_inffunc
+            }
+        )
+
+        att.d_inffunc <- BMisc::weighted_combine_list(att.d_gt_inffunc, o_weights$overall_weight)
+        # ATT(d) and ACRT(d) standard errors come only from the multiplier
+        # bootstrap; with biters = 0 they are NA (and cband is already FALSE,
+        # so the critical values below are pointwise) (#14)
+        if (biters == 0) {
+            message("biters = 0: standard errors of ATT(d) and ACRT(d) ",
+                    "require the bootstrap, so they are NA.")
+            boot_res <- list(boot_se = rep(NA_real_, length(dvals)))
+        } else {
+            boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp,
+                               cband = cband, cluster = cluster)
+        }
+        att.d_se <- boot_res$boot_se
+        att_cband_ok <- FALSE
+        if (cband) {
+            att.d_crit.val <- boot_res$crit_val
+            att.d_crit.val <- crit_val_checks(att.d_crit.val, alp)
+            att_cband_ok <- isTRUE(attr(att.d_crit.val, "cband"))
+            # strip the "cband"/quantile-name attributes now that we've read
+            # them -- a length-1 value carrying extra attributes breaks
+            # data.frame()/cbind.data.frame() recycling in autoplot.dose_obj()
+            att.d_crit.val <- as.numeric(att.d_crit.val)
+        } else {
+            att.d_crit.val <- qnorm(1 - alp / 2)
+        }
     }
 
     # influence function for acrt

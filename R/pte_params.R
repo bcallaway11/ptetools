@@ -229,7 +229,10 @@ setup_pte <- function(yname,
   # and the cohort itself is not estimated: it is used as never treated
   # (control_group = "nevertreated", with a warning) or as not yet treated.
   # Previously the earliest cohort was dropped instead.
-  if (!any(G == 0, na.rm = TRUE)) {
+  # (not with control_group = "none": then each cell holds only its own
+  # cohort, and no comparison units are needed, e.g. for ACRT with a
+  # continuous treatment)
+  if (!identical(control_group, "none") && !any(G == 0, na.rm = TRUE)) {
     latest_g <- max(G, na.rm = TRUE)
     keep_rows <- period < latest_g - anticipation
     if (!any(keep_rows) || all(G[keep_rows] == latest_g, na.rm = TRUE)) {
@@ -401,7 +404,12 @@ setup_pte <- function(yname,
 #' @param control_group Which group is used as the comparison group.
 #'  The default choice is "notyettreated", but
 #'  different estimation strategies can implement their own choices
-#'  for the control group
+#'  for the control group.
+#'  \code{"none"} uses no comparison units: each group-time cell then holds
+#'  only the group's own units in the base and current periods. This is only
+#'  for estimators that use variation within a group, such as the average
+#'  causal response to a continuous treatment (ACRT), which is identified
+#'  from comparisons across doses even when no unit is untreated.
 #' @param gt_type which type of group-time effects are computed.
 #'  The default is "att".  Different estimation strategies can implement
 #'  their own choices for `gt_type`
