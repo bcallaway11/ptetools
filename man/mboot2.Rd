@@ -4,7 +4,7 @@
 \alias{mboot2}
 \title{Multiplier Bootstrap}
 \usage{
-mboot2(inffunc, biters = 1000, alp = 0.05)
+mboot2(inffunc, biters = 1000, alp = 0.05, cband = TRUE)
 }
 \arguments{
 \item{inffunc}{influence function matrix}
@@ -17,12 +17,19 @@ from the bootstrap (the empirical bootstrap, dose-specific effects), the
 point estimates are returned with \code{NA} standard errors.}
 
 \item{alp}{significance level; default is 0.05}
+
+\item{cband}{whether to compute the critical value for uniform confidence
+bands (default \code{TRUE}). With \code{FALSE}, only standard errors are
+computed and \code{crit_val} is \code{NA}.}
 }
 \value{
 list with the following elements:
 \itemize{
 \item \code{boot_se}: bootstrap standard errors
-\item \code{crit_val}: critical value for uniform confidence bands
+\item \code{crit_val}: critical value for uniform confidence bands, from the
+sup-t statistic over the parameters with a positive standard error
+(the normal critical value if there is only one; \code{NA} if there
+are none or \code{cband = FALSE})
 }
 }
 \description{

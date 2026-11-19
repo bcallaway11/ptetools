@@ -393,7 +393,8 @@ get_agg_inf_func <- function(att, inffunc1, whichones, weights.agg, wif = NULL) 
 getSE <- function(thisinffunc, bstrap = TRUE, biters = 100, alp = .05) {
   n <- length(thisinffunc)
   if (bstrap) {
-    bout <- mboot2(thisinffunc, biters = biters, alp = alp)
+    # only the standard error is needed here (#3)
+    bout <- mboot2(thisinffunc, biters = biters, alp = alp, cband = FALSE)
     return(bout$boot_se)
   } else {
     return(sqrt(mean((thisinffunc)^2) / n))

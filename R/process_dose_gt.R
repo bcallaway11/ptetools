@@ -147,7 +147,8 @@ process_dose_gt <- function(gt_results, ptep, ...) {
                 "require the bootstrap, so they are NA.")
         boot_res <- list(boot_se = rep(NA_real_, length(dvals)))
     } else {
-        boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp)
+        boot_res <- mboot2(att.d_inffunc, biters = biters, alp = alp,
+                           cband = cband)
     }
     att.d_se <- boot_res$boot_se
     att_cband_ok <- FALSE
@@ -179,7 +180,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     acrt_boot_res <- if (biters == 0) {
         list(boot_se = rep(NA_real_, length(dvals)))
     } else {
-        mboot2(acrt.d_inffunc, biters = biters, alp = alp)
+        mboot2(acrt.d_inffunc, biters = biters, alp = alp, cband = cband)
     }
     acrt.d_se <- acrt_boot_res$boot_se
     acrt_cband_ok <- FALSE

@@ -51,9 +51,9 @@ process_att_gt <- function(att_gt_results, ptep) {
     # multiplier bootstrap results (biters was previously not passed, so
     # ATT(g,t) standard errors always used 1000 draws)
     biters <- if (is.null(ptep$biters)) 1000 else ptep$biters
-    bout <- mboot2(inffunc, biters = biters, alp = alp)
+    bout <- mboot2(inffunc, biters = biters, alp = alp, cband = cband)
     se <- bout$boot_se
-    if (cband) cval <- bout$crit_val
+    if (cband && is.finite(bout$crit_val)) cval <- bout$crit_val
   } else {
     # purely analytical standard errors (clustered at the unit level);
     # only pointwise confidence intervals are supported for this option
@@ -142,14 +142,20 @@ process_att_gt <- function(att_gt_results, ptep) {
 #'  inference
 #'
 #' @param inffunc influence function matrix
+#' @param cband whether to compute the critical value for uniform confidence
+#'  bands (default \code{TRUE}). With \code{FALSE}, only standard errors are
+#'  computed and \code{crit_val} is \code{NA}.
 #' @inheritParams pte
 #'
 #' @return list with the following elements:
 #'   - `boot_se`: bootstrap standard errors
-#'   - `crit_val`: critical value for uniform confidence bands
+#'   - `crit_val`: critical value for uniform confidence bands, from the
+#'     sup-t statistic over the parameters with a positive standard error
+#'     (the normal critical value if there is only one; \code{NA} if there
+#'     are none or \code{cband = FALSE})
 #'
 #' @export
-mboot2 <- function(inffunc, biters = 1000, alp = .05) {
+mboot2 <- function(inffunc, biters = 1000, alp = .05, cband = TRUE) {
   if (!(is.numeric(biters) && length(biters) == 1 && !is.na(biters) &&
           biters >= 1)) {
     stop("mboot2() needs biters >= 1 bootstrap draws.", call. = FALSE)
@@ -181,17 +187,35 @@ mboot2 <- function(inffunc, biters = 1000, alp = .05) {
     }
   ) / sqrt(n)
 
-  # bootstrap t-stat (i.e., sup-t)
-  bT <- apply(bres, 1, function(b) max(abs(b / boot_se), na.rm = TRUE)) / sqrt(n)
+  # Only standard errors are needed (e.g. for a single parameter): skip the
+  # sup-t statistic, which would otherwise warn on every draw for a
+  # parameter with zero standard error (#3).
+  if (!isTRUE(cband)) {
+    return(list(boot_se = boot_se, crit_val = NA_real_))
+  }
 
-  # new critical value for uniform confidence bands
-  crit_val <- quantile(bT, 1 - alp, type = 1, na.rm = T)
+  # Critical value for uniform confidence bands from the bootstrap sup-t
+  # statistic, over the parameters with a positive standard error. A
+  # parameter that is 0 by construction (e.g. a universal reference period)
+  # has standard error 0 and is left out (#3).
+  usable <- is.finite(boot_se) & boot_se > 0
+  if (!any(usable)) {
+    return(list(boot_se = boot_se, crit_val = NA_real_))
+  }
+  if (sum(usable) == 1) {
+    # with one parameter a uniform band is a pointwise interval; use the
+    # normal critical value rather than a noisy bootstrap quantile of it
+    return(list(boot_se = boot_se, crit_val = qnorm(1 - alp / 2)))
+  }
+  bT <- apply(bres[, usable, drop = FALSE], 1,
+              function(b) max(abs(b / boot_se[usable]))) / sqrt(n)
+  crit_val <- quantile(bT, 1 - alp, type = 1, na.rm = TRUE)
   if (crit_val < qnorm(1 - alp / 2)) {
     warning("critical value for uniform confidence band is somehow smaller than
             critical value for pointwise confidence interval...using pointwise
             confidence interal")
-    crit_val <- cval <- qnorm(1 - alp / 2)
+    crit_val <- qnorm(1 - alp / 2)
   }
 
-  return(list(boot_se = boot_se, crit_val = crit_val))
+  list(boot_se = boot_se, crit_val = crit_val)
 }

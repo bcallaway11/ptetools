@@ -1,5 +1,14 @@
 # ptetools 1.0.2
 
+* No more flood of warnings from the multiplier bootstrap with
+  `base_period = "universal"` (#3). The sup-t critical value for uniform
+  confidence bands is computed only when it is used (`cband = TRUE`), and
+  only over parameters with a positive standard error, which leaves out the
+  universal reference period (0 by construction). This removes one warning
+  per bootstrap draw ("no non-missing arguments to max") and spurious
+  "critical value ... somehow smaller" warnings. Results are unchanged.
+  `mboot2()` gains a `cband` argument.
+
 * `cl` now parallelizes the empirical bootstrap on Windows too (#11). A
   numeric `cl` only worked by forking, which Windows does not support, so
   there the bootstrap silently ran serially. On Windows, ptetools now
