@@ -4,7 +4,16 @@
 \alias{pte_qtt}
 \title{Class for QTT Curve Results}
 \usage{
-pte_qtt(overall, dynamic, group, F0_overall = NULL, F1_overall = NULL, ptep)
+pte_qtt(
+  overall,
+  dynamic,
+  group,
+  F0_overall = NULL,
+  F1_overall = NULL,
+  ptep,
+  att = NULL,
+  qtt_minus_att = NULL
+)
 }
 \arguments{
 \item{overall}{data.frame with columns \code{probs}, \code{qtt}, \code{se},
@@ -21,6 +30,17 @@ pte_qtt(overall, dynamic, group, F0_overall = NULL, F1_overall = NULL, ptep)
 \item{F1_overall}{mixture CDF of treated potential outcomes}
 
 \item{ptep}{\code{pte_params} object}
+
+\item{att}{\code{NULL}, or a list with the \code{overall},
+\code{dynamic} and \code{group} ATTs from the same run and bootstrap
+draws: data.frames with columns (\code{e} or \code{group},)
+\code{att}, \code{se}, \code{lower}, \code{upper} (pointwise)}
+
+\item{qtt_minus_att}{\code{NULL}, or a list with the \code{overall},
+\code{dynamic} and \code{group} curves QTT(tau) - ATT, with the same
+columns as the QTT results (value column \code{qtt_minus_att}) plus
+\code{pval}: the bootstrap sup-t p-value of the test that QTT(tau) =
+ATT for every tau in \code{probs}, one per curve (repeated on its rows)}
 }
 \value{
 a \code{pte_qtt} object

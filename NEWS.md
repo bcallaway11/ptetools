@@ -10,6 +10,19 @@
   ATT results were not affected. Found while adding the ATT to QTT runs
   (#27).
 
+* QTT runs (`gt_type = "qtt"` with `qtt_pte_aggregations()`) now also
+  return the ATT, from the same cells, weights and bootstrap draws (#27):
+  `$att` holds the overall, event-time and group ATTs with standard errors
+  and confidence intervals, and `$qtt_minus_att` holds the curves
+  QTT(tau) - ATT with pointwise and uniform bands and the p-value of a
+  sup-t test that QTT(tau) = ATT at every quantile (no distributional
+  effect beyond a location shift). Overlaying a separately estimated ATT
+  on a QTT band is not a valid test of this, since it ignores the
+  estimation error in the ATT and its correlation with the QTT.
+  `summary()` reports the ATTs and the tests, `autoplot()` draws the
+  overall ATT on the QTT curve, and `autoplot(type = "qtt_minus_att")`
+  plots the difference with its band.
+
 * Aggregated QTTs (`qtt_pte_aggregations()`) are now exact (#25). The
   cells' distribution functions used to be mixed on a 1,000-point grid of
   the pooled outcome, so each quantile was rounded up to a grid point, and

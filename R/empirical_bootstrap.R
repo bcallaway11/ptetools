@@ -550,7 +550,11 @@ mix_quantile <- function(cdfs, w, probs) {
 #' @inheritParams attgt_if
 #'
 #' @return named list with elements \code{overall_results},
-#'  \code{dyn_results}, \code{group_results}, \code{F0_overall},
+#'  \code{dyn_results}, \code{group_results} (QTTs), \code{att_results}
+#'  (a list with the \code{overall}, \code{dynamic} and \code{group} ATTs,
+#'  aggregated with the same weights), \code{qtt_minus_att_results} (a
+#'  list with \code{overall}, \code{dynamic} and \code{group} curves
+#'  QTT(tau) - ATT, column \code{qtt_minus_att}), \code{F0_overall} and
 #'  \code{F1_overall}
 #'
 #' @export
@@ -589,12 +593,41 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
     data.frame(group = gw$g, probs = probs, qtt = mix_qtt(gw$weights))
   }))
 
+  # --- ATT, and QTT minus ATT (#27) ----------------------------------------
+  # The cells' ATTs are aggregated with the same weights anyway; keeping
+  # them lets the bootstrap give the ATT and QTT(tau) - ATT from the same
+  # draws, for a test of QTT(tau) = ATT at every tau (no distributional
+  # heterogeneity beyond a location shift).
+  att_results <- list(
+    overall = data.frame(att = attgt_res$overall_results),
+    dynamic = data.frame(e = attgt_res$dyn_results$e,
+                         att = attgt_res$dyn_results$att.e),
+    group   = data.frame(group = attgt_res$group_results$group,
+                         att = attgt_res$group_results$att.g)
+  )
+  minus_att <- function(qtt_df, att_df, key) {
+    m <- merge(qtt_df, att_df, by = key)
+    m <- m[order(m[[key]], m$probs), , drop = FALSE]
+    out <- m[c(key, "probs")]
+    out$qtt_minus_att <- m$qtt - m$att
+    rownames(out) <- NULL
+    out
+  }
+  qtt_minus_att_results <- list(
+    overall = data.frame(probs = probs,
+                         qtt_minus_att = overall_qtt - att_results$overall$att),
+    dynamic = minus_att(dyn_results, att_results$dynamic, "e"),
+    group   = minus_att(group_results, att_results$group, "group")
+  )
+
   list(
-    overall_results = overall_results,
-    dyn_results     = dyn_results,
-    group_results   = group_results,
-    F0_overall      = F0_overall, # nolint: object_name_linter
-    F1_overall      = F1_overall  # nolint: object_name_linter
+    overall_results       = overall_results,
+    dyn_results           = dyn_results,
+    group_results         = group_results,
+    att_results           = att_results,
+    qtt_minus_att_results = qtt_minus_att_results,
+    F0_overall            = F0_overall, # nolint: object_name_linter
+    F1_overall            = F1_overall  # nolint: object_name_linter
   )
 }
 
@@ -641,17 +674,31 @@ qtt_empirical_bootstrap <- function(attgt.list,
   if (biters == 0) {
     message("biters = 0: standard errors require the bootstrap here, ",
             "so they are NA.")
-    without_se <- function(res) {
-      res[c("se", "lower_pw", "upper_pw", "lower_ub", "upper_ub")] <- NA_real_
+    without_se <- function(res, cols = c("se", "lower_pw", "upper_pw",
+                                         "lower_ub", "upper_ub")) {
+      res[cols] <- NA_real_
       res
     }
+    att <- if (!is.null(aggte$att_results)) {
+      lapply(aggte$att_results, without_se,
+             cols = c("se", "lower", "upper"))
+    }
+    qma <- if (!is.null(aggte$qtt_minus_att_results)) {
+      lapply(aggte$qtt_minus_att_results, function(r) {
+        r <- without_se(r)
+        r$pval <- NA_real_
+        r
+      })
+    }
     return(pte_qtt( # nolint: object_usage_linter
-      overall    = without_se(aggte$overall_results),
-      dynamic    = without_se(aggte$dyn_results),
-      group      = without_se(aggte$group_results),
-      F0_overall = aggte$F0_overall, # nolint: object_name_linter
-      F1_overall = aggte$F1_overall, # nolint: object_name_linter
-      ptep       = ptep
+      overall       = without_se(aggte$overall_results),
+      dynamic       = without_se(aggte$dyn_results),
+      group         = without_se(aggte$group_results),
+      att           = att,
+      qtt_minus_att = qma,
+      F0_overall    = aggte$F0_overall, # nolint: object_name_linter
+      F1_overall    = aggte$F1_overall, # nolint: object_name_linter
+      ptep          = ptep
     ))
   }
 
@@ -702,98 +749,156 @@ qtt_empirical_bootstrap <- function(attgt.list,
   alp <- ptep$alp
   z   <- qnorm(1 - alp / 2)
 
-  # Compute uniform critical value from a bootstrap matrix and point estimates.
-  # Uses IQR-based scale (more robust when some QTTs are near zero), following
-  # the same approach as computeSE() in the qte package. Returns a scalar c
-  # such that qtt +/- c * se gives a simultaneous band across quantiles.
-  # Both pointwise and uniform CIs are always computed; cband is a plotting
-  # choice, not a computation choice.
-  qtt_crit_val <- function(boot_mat, qtt_est) {
+  # Sup-t over quantiles, from a bootstrap matrix (draws x quantiles) and
+  # point estimates: the uniform critical value, and the p-value of the test
+  # that the curve is 0 at every quantile. Uses an IQR-based scale (more
+  # robust when some QTTs are near zero), following the same approach as
+  # computeSE() in the qte package. qtt +/- cval * se gives a simultaneous
+  # band across quantiles. Both pointwise and uniform CIs are always
+  # computed; cband is a plotting choice, not a computation choice.
+  sup_t <- function(boot_mat, est) {
     sigmahalf <- (apply(boot_mat, 2, function(b) quantile(b, 0.75, type = 1)) -
                   apply(boot_mat, 2, function(b) quantile(b, 0.25, type = 1))) /
                  (qnorm(0.75) - qnorm(0.25))
     if (any(sigmahalf == 0)) {
       sigmahalf <- pmax(apply(boot_mat, 2, sd), 1e-9)
     }
-    cb <- apply(boot_mat, 1, function(q) max(abs((q - qtt_est) / sigmahalf)))
-    as.numeric(quantile(cb, 1 - alp, type = 1))
+    cb <- apply(boot_mat, 1, function(q) max(abs((q - est) / sigmahalf)))
+    stat <- max(abs(est) / sigmahalf)
+    list(cval = as.numeric(quantile(cb, 1 - alp, type = 1)),
+         pval = mean(cb >= stat))
   }
 
-  # --- overall SE --------------------------------------------------------
-  overall_boot_mat <- do.call(rbind, lapply(boot.res, function(br) br$overall_results$qtt))
-  overall_se   <- apply(overall_boot_mat, 2, sd)
-  overall_cval <- qtt_crit_val(overall_boot_mat, aggte$overall_results$qtt)
-  overall_results           <- aggte$overall_results
-  overall_results$se        <- overall_se
-  overall_results$lower_pw  <- overall_results$qtt - z            * overall_se
-  overall_results$upper_pw  <- overall_results$qtt + z            * overall_se
-  overall_results$lower_ub  <- overall_results$qtt - overall_cval * overall_se
-  overall_results$upper_ub  <- overall_results$qtt + overall_cval * overall_se
-
-  # --- dynamic and group SE ------------------------------------------------
-  # Each QTT curve's standard errors use the draws in which it is estimated;
-  # if it is missing from more than 10% of the draws (small cohorts), its
-  # standard errors and bounds are NA, but the estimates are kept (#22).
+  # Each curve's standard errors use the draws in which it is estimated; if
+  # it is missing from more than 10% of the draws (small cohorts), its
+  # standard errors, bounds and p-value are NA, but the estimates are kept
+  # (#22).
   n_draws <- length(boot.res)
-  curve_se <- function(results_name, key, key_vals) {
-    out <- lapply(key_vals, function(this_k) {
+  min_draws <- max(2, 0.9 * n_draws)
+
+  # boot_curves(): bootstrap inference for the curves in `est` (a data.frame
+  #   with columns `key` (NULL for a single curve), probs and `value`); each
+  #   draw's curves are boot.res[[b]] indexed by `path`. Adds se, pointwise
+  #   (lower_pw, upper_pw) and uniform (lower_ub, upper_ub) bounds and, with
+  #   pval = TRUE, the sup-t p-value of "the curve is 0 at every quantile".
+  boot_curves <- function(est, path, value, key = NULL, pval = FALSE,
+                          label = NULL) {
+    draw_df <- function(br) Reduce(function(x, nm) x[[nm]], path, br)
+    keys <- if (is.null(key)) NA else unique(est[[key]])
+    rows_for <- function(df, k) {
+      if (is.null(key)) rep(TRUE, nrow(df)) else df[[key]] == k
+    }
+    out <- lapply(keys, function(k) {
+      this_est <- est[[value]][rows_for(est, k)]
       boot_rows <- lapply(boot.res, function(br) {
-        res <- br[[results_name]]
-        vals <- res$qtt[res[[key]] == this_k]
-        if (length(vals) != length(probs)) NULL else vals
+        d <- draw_df(br)
+        if (is.null(d)) return(NULL)
+        vals <- d[[value]][rows_for(d, k)]
+        if (length(vals) != length(this_est)) NULL else vals
       })
-      n_complete <- sum(!vapply(boot_rows, is.null, logical(1)))
-      if (n_complete < max(2, 0.9 * n_draws)) {
-        se <- NA_real_
-        this_cval <- NA_real_
+      ok <- !vapply(boot_rows, is.null, logical(1))
+      if (sum(ok) < min_draws) {
+        res <- list(se = NA_real_, cval = NA_real_, pval = NA_real_)
       } else {
-        boot_mat  <- do.call(rbind, Filter(Negate(is.null), boot_rows))
-        qtt_est   <- aggte[[results_name]]$qtt[aggte[[results_name]][[key]] ==
-                                                 this_k]
-        se        <- unname(apply(boot_mat, 2, sd))
-        this_cval <- qtt_crit_val(boot_mat, qtt_est)
+        boot_mat <- do.call(rbind, boot_rows[ok])
+        st <- sup_t(boot_mat, this_est)
+        res <- list(se = unname(apply(boot_mat, 2, sd)), cval = st$cval,
+                    pval = st$pval)
       }
-      df <- data.frame(probs = probs, se = se, cval = this_cval)
-      df[[key]] <- this_k
-      attr(df, "n_complete") <- n_complete
-      df
+      res$n_complete <- sum(ok)
+      res$rows <- which(rows_for(est, k))
+      res
     })
-    n_complete <- vapply(out, function(df) attr(df, "n_complete"), numeric(1))
-    label <- if (key == "e") "event-time" else key
-    dropped <- n_complete < max(2, 0.9 * n_draws)
-    if (any(dropped)) {
-      warning("Bootstrap standard errors for ", sum(dropped), " ", label,
-              " QTT curve(s) are NA: missing from more than 10% of the ",
-              n_draws, " bootstrap draws (small cohorts).", call. = FALSE)
+    if (!is.null(label)) {
+      n_complete <- vapply(out, `[[`, numeric(1), "n_complete")
+      dropped <- n_complete < min_draws
+      if (any(dropped)) {
+        warning("Bootstrap standard errors for ", sum(dropped), " ", label,
+                " QTT curve(s) are NA: missing from more than 10% of the ",
+                n_draws, " bootstrap draws (small cohorts).", call. = FALSE)
+      }
+      partial <- !dropped & n_complete < n_draws
+      if (any(partial)) {
+        warning("Bootstrap standard errors for ", sum(partial), " ", label,
+                " QTT curve(s) use only the draws in which they are ",
+                "estimated (at least ", min(n_complete[partial]), " of ",
+                n_draws, "; small cohorts).", call. = FALSE)
+      }
     }
-    partial <- !dropped & n_complete < n_draws
-    if (any(partial)) {
-      warning("Bootstrap standard errors for ", sum(partial), " ", label,
-              " QTT curve(s) use only the draws in which they are estimated ",
-              "(at least ", min(n_complete[partial]), " of ", n_draws,
-              "; small cohorts).", call. = FALSE)
+    est$se <- NA_real_
+    cval <- rep(NA_real_, nrow(est))
+    if (pval) est$pval <- NA_real_
+    for (r in out) {
+      est$se[r$rows] <- r$se
+      cval[r$rows] <- r$cval
+      if (pval) est$pval[r$rows] <- r$pval
     }
-    se_df <- do.call(rbind, out)
-    res <- merge(aggte[[results_name]], se_df, by = c(key, "probs"),
-                 all.x = TRUE)
-    res$lower_pw <- res$qtt - z        * res$se
-    res$upper_pw <- res$qtt + z        * res$se
-    res$lower_ub <- res$qtt - res$cval * res$se
-    res$upper_ub <- res$qtt + res$cval * res$se
-    res$cval     <- NULL
-    res
+    v <- est[[value]]
+    est$lower_pw <- v - z * est$se
+    est$upper_pw <- v + z * est$se
+    est$lower_ub <- v - cval * est$se
+    est$upper_ub <- v + cval * est$se
+    if (pval) est <- est[c(setdiff(names(est), "pval"), "pval")]
+    est
   }
-  dyn_results <- curve_se("dyn_results", "e", unique(aggte$dyn_results$e))
-  group_results <- curve_se("group_results", "group",
-                            unique(aggte$group_results$group))
+
+  # --- QTT curves ----------------------------------------------------------
+  overall_results <- boot_curves(aggte$overall_results, "overall_results",
+                                 "qtt")
+  dyn_results <- boot_curves(aggte$dyn_results, "dyn_results", "qtt", "e",
+                             label = "event-time")
+  group_results <- boot_curves(aggte$group_results, "group_results", "qtt",
+                               "group", label = "group")
+
+  # --- ATT and QTT minus ATT, from the same draws (#27) --------------------
+  # Only when aggte_fun returns them (qtt_pte_aggregations() does; other
+  # aggregation functions may not).
+  att <- NULL
+  qtt_minus_att <- NULL
+  if (!is.null(aggte$att_results)) {
+    # ATTs are single parameters: standard errors and pointwise intervals
+    att_se <- function(est, level, key = NULL) {
+      keys <- if (is.null(key)) NA else est[[key]]
+      est$se <- vapply(keys, function(k) {
+        vals <- unlist(lapply(boot.res, function(br) {
+          d <- br$att_results[[level]]
+          v <- if (is.null(key)) d$att else d$att[d[[key]] == k]
+          if (length(v) == 1) v else NULL
+        }))
+        if (length(vals) < min_draws) NA_real_ else stats::sd(vals)
+      }, numeric(1))
+      est$lower <- est$att - z * est$se
+      est$upper <- est$att + z * est$se
+      est
+    }
+    att <- list(
+      overall = att_se(aggte$att_results$overall, "overall"),
+      dynamic = att_se(aggte$att_results$dynamic, "dynamic", "e"),
+      group   = att_se(aggte$att_results$group, "group", "group")
+    )
+  }
+  if (!is.null(aggte$qtt_minus_att_results)) {
+    qma <- aggte$qtt_minus_att_results
+    path <- function(level) c("qtt_minus_att_results", level)
+    qtt_minus_att <- list(
+      overall = boot_curves(qma$overall, path("overall"), "qtt_minus_att",
+                            pval = TRUE),
+      dynamic = boot_curves(qma$dynamic, path("dynamic"), "qtt_minus_att",
+                            "e", pval = TRUE),
+      group   = boot_curves(qma$group, path("group"), "qtt_minus_att",
+                            "group", pval = TRUE)
+    )
+  }
 
   pte_qtt( # nolint: object_usage_linter
-    overall    = overall_results,
-    dynamic    = dyn_results,
-    group      = group_results,
-    F0_overall = aggte$F0_overall, # nolint: object_name_linter
-    F1_overall = aggte$F1_overall, # nolint: object_name_linter
-    ptep       = ptep
+    overall       = overall_results,
+    dynamic       = dyn_results,
+    group         = group_results,
+    att           = att,
+    qtt_minus_att = qtt_minus_att,
+    F0_overall    = aggte$F0_overall, # nolint: object_name_linter
+    F1_overall    = aggte$F1_overall, # nolint: object_name_linter
+    ptep          = ptep
   )
 }
 

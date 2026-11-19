@@ -149,7 +149,7 @@ test_that("QOTT aggregation is exact, also with negative outcomes", {
 })
 
 
-# --- Aggregation weights ----------------------------------------------------
+# --- ATT and QTT minus ATT from the same draws (#27) -------------------------
 # local ATT and QTT: post-period treated vs comparison units (randomized
 # design below, so this is enough to test the inference)
 qtt_att_cell <- function(gt_data, ...) {
@@ -171,6 +171,69 @@ qtt_att_data <- function(effect) {
   d$y <- rnorm(nrow(d)) + ifelse(treated, effect(sum(treated)), 0)
   d
 }
+
+run_qtt_att <- function(d, biters = 100) {
+  set.seed(6)
+  suppressWarnings(suppressMessages(pte(
+    yname = "y", gname = "grp", tname = "period", idname = "id", data = d,
+    setup_pte_fun = setup_pte, subset_fun = two_by_two_subset,
+    attgt_fun = qtt_att_cell, aggte_fun = qtt_pte_aggregations,
+    gt_type = "qtt", boot_type = "empirical",
+    probs = seq(0.1, 0.9, 0.1), biters = biters
+  )))
+}
+
+test_that("QTT runs keep the ATT and QTT - ATT from the same draws", {
+  d <- qtt_att_data(function(n) 1)
+  res <- run_qtt_att(d)
+  # the ATT is the usual aggregation of the cells' ATTs
+  ptep <- setup_pte(yname = "y", gname = "grp", tname = "period",
+                    idname = "id", data = d, gt_type = "qtt",
+                    probs = seq(0.1, 0.9, 0.1))
+  gt <- compute.pte(ptep, two_by_two_subset, qtt_att_cell)
+  agg <- attgt_pte_aggregations(gt$attgt.list, ptep)
+  expect_equal(res$att$overall$att, agg$overall_results)
+  expect_equal(res$att$dynamic$att, agg$dyn_results$att.e)
+  expect_equal(res$qtt_minus_att$overall$qtt_minus_att,
+               res$overall$qtt - res$att$overall$att)
+  dyn0 <- res$dynamic[res$dynamic$e == 0, ]
+  qma0 <- res$qtt_minus_att$dynamic[res$qtt_minus_att$dynamic$e == 0, ]
+  expect_equal(qma0$qtt_minus_att,
+               dyn0$qtt - res$att$dynamic$att[res$att$dynamic$e == 0])
+  expect_true(all(res$att$overall$se > 0))
+  expect_true(all(res$qtt_minus_att$overall$se > 0))
+
+  # a pure location shift: QTT(tau) = ATT, so the test should not reject
+  expect_gt(res$qtt_minus_att$overall$pval[1], 0.05)
+  # a scale change: QTT varies over tau around the ATT, so it should
+  scale <- run_qtt_att(qtt_att_data(function(n) 1 + 2 * rnorm(n)))
+  expect_lt(scale$qtt_minus_att$overall$pval[1], 0.05)
+  # one p-value per curve
+  p_e <- tapply(scale$qtt_minus_att$dynamic$pval,
+                scale$qtt_minus_att$dynamic$e, function(v) length(unique(v)))
+  expect_true(all(p_e == 1))
+})
+
+test_that("ATT results without the bootstrap, in summary and plots", {
+  d <- qtt_att_data(function(n) 1)
+  res0 <- run_qtt_att(d, biters = 0)
+  expect_true(is.na(res0$att$overall$se))
+  expect_true(all(is.na(res0$qtt_minus_att$overall$pval)))
+
+  res <- run_qtt_att(d, biters = 50)
+  s <- summary(res)
+  expect_equal(s$att$Parameter[1], "Overall")
+  out <- capture.output(print(res))
+  expect_true(any(grepl("QTT\\(tau\\) = ATT", out)))
+  expect_no_error(ggplot2::ggplot_build(autoplot(res)))
+  expect_no_error(ggplot2::ggplot_build(autoplot(res, type = "qtt_minus_att")))
+
+  # objects without ATT results (other aggregation functions) still work
+  res$att <- NULL
+  res$qtt_minus_att <- NULL
+  expect_null(summary(res)$att)
+  expect_error(autoplot(res, type = "qtt_minus_att"), "no QTT - ATT")
+})
 
 # The weight vectors were in the row order of an internal table that
 # merge() sorts by group, not in the order of the cells, so the QTT and

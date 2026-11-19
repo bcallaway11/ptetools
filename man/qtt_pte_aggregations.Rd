@@ -20,7 +20,11 @@ potentially useful for debugging.}
 }
 \value{
 named list with elements \code{overall_results},
-\code{dyn_results}, \code{group_results}, \code{F0_overall},
+\code{dyn_results}, \code{group_results} (QTTs), \code{att_results}
+(a list with the \code{overall}, \code{dynamic} and \code{group} ATTs,
+aggregated with the same weights), \code{qtt_minus_att_results} (a
+list with \code{overall}, \code{dynamic} and \code{group} curves
+QTT(tau) - ATT, column \code{qtt_minus_att}), \code{F0_overall} and
 \code{F1_overall}
 }
 \description{

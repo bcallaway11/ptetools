@@ -529,6 +529,15 @@ summary.pte_emp_boot <- function(object, ...) {
 #'  \code{se}, \code{lower_pw}, \code{upper_pw}, \code{lower_ub}, \code{upper_ub}
 #' @param group data.frame with columns \code{group}, \code{probs}, \code{qtt},
 #'  \code{se}, \code{lower_pw}, \code{upper_pw}, \code{lower_ub}, \code{upper_ub}
+#' @param att \code{NULL}, or a list with the \code{overall},
+#'  \code{dynamic} and \code{group} ATTs from the same run and bootstrap
+#'  draws: data.frames with columns (\code{e} or \code{group},)
+#'  \code{att}, \code{se}, \code{lower}, \code{upper} (pointwise)
+#' @param qtt_minus_att \code{NULL}, or a list with the \code{overall},
+#'  \code{dynamic} and \code{group} curves QTT(tau) - ATT, with the same
+#'  columns as the QTT results (value column \code{qtt_minus_att}) plus
+#'  \code{pval}: the bootstrap sup-t p-value of the test that QTT(tau) =
+#'  ATT for every tau in \code{probs}, one per curve (repeated on its rows)
 #' @param F0_overall mixture CDF of untreated potential outcomes
 #' @param F1_overall mixture CDF of treated potential outcomes
 #' @param ptep \code{pte_params} object
@@ -541,14 +550,18 @@ pte_qtt <- function(overall,
                     group,
                     F0_overall = NULL, # nolint: object_name_linter
                     F1_overall = NULL, # nolint: object_name_linter
-                    ptep) {
+                    ptep,
+                    att = NULL,
+                    qtt_minus_att = NULL) {
   out <- list(
-    overall    = overall,
-    dynamic    = dynamic,
-    group      = group,
-    F0_overall = F0_overall, # nolint: object_name_linter
-    F1_overall = F1_overall, # nolint: object_name_linter
-    ptep       = ptep
+    overall       = overall,
+    dynamic       = dynamic,
+    group         = group,
+    att           = att,
+    qtt_minus_att = qtt_minus_att,
+    F0_overall    = F0_overall, # nolint: object_name_linter
+    F1_overall    = F1_overall, # nolint: object_name_linter
+    ptep          = ptep
   )
   class(out) <- "pte_qtt"
   out
@@ -558,7 +571,10 @@ pte_qtt <- function(overall,
 #' @title summary.pte_qtt
 #'
 #' @description Summary for a \code{pte_qtt} object: the overall QTT curve,
-#'  and the event-study and group QTTs at selected quantiles. Confidence bands
+#'  and the event-study and group QTTs at selected quantiles. When the
+#'  object holds the ATTs from the same run (\code{qtt_pte_aggregations()}),
+#'  also the overall and event-study ATTs, with the p-value of the test that
+#'  QTT(tau) = ATT at every estimated quantile. Confidence bands
 #'  are uniform over quantiles (for each curve) when \code{cband = TRUE} was
 #'  used for estimation, and pointwise otherwise.
 #'
@@ -610,6 +626,32 @@ summary.pte_qtt <- function(object, probs = 0.5, ...) {
   }
   dyn <- at_probs(object$dynamic)
   grp <- at_probs(object$group)
+
+  # ATTs from the same run, with the p-value of the test that QTT(tau) =
+  # ATT for every tau (#27): overall, then by event time
+  att_table <- function(object) {
+    if (is.null(object$att) || is.null(object$qtt_minus_att)) return(NULL)
+    pval_of <- function(df, key, k) {
+      if (is.null(key)) df$pval[1] else df$pval[df[[key]] == k][1]
+    }
+    a_o <- object$att$overall
+    a_d <- object$att$dynamic
+    rows <- data.frame(
+      Parameter = c("Overall", paste("Event time", a_d$e)),
+      ATT = c(a_o$att, a_d$att),
+      se = c(a_o$se, a_d$se),
+      lower = c(a_o$lower, a_d$lower),
+      upper = c(a_o$upper, a_d$upper),
+      pval = c(pval_of(object$qtt_minus_att$overall, NULL),
+               vapply(a_d$e, function(k) {
+                 pval_of(object$qtt_minus_att$dynamic, "e", k)
+               }, numeric(1)))
+    )
+    rows[-1] <- lapply(rows[-1], function(v) round(v, 4))
+    colnames(rows) <- c("Parameter", "ATT", "Std. Error", "Lower", "Upper",
+                        "p (QTT = ATT)")
+    rows
+  }
   one_prob <- length(probs) == 1
 
   out <- list(
@@ -624,6 +666,7 @@ summary.pte_qtt <- function(object, probs = 0.5, ...) {
     } else {
       qtt_table(grp, c("group", "probs"), c("Group", "Quantile"))
     },
+    att = att_table(object),
     probs = probs,
     alp = alp,
     cband = cband
@@ -665,10 +708,22 @@ print.summary.pte_qtt <- function(x, ...) {
   print_table("Overall QTT curve:", x$overall)
   print_table(paste0("Dynamic effects", at, ":"), x$dynamic)
   print_table(paste0("Group effects", at, ":"), x$group)
+  if (!is.null(x$att)) {
+    cat("ATT, and test of QTT(tau) = ATT for all quantiles:\n")
+    tab <- x$att
+    colnames(tab)[4] <- paste0("[", 100 * (1 - x$alp), "% Pointwise")
+    colnames(tab)[5] <- "Conf. Int.]"
+    print(tab, row.names = FALSE)
+    cat("\n")
+  }
   cat("---\n")
   cat("Signif. codes: `*' confidence band does not cover 0\n")
   if (x$cband) {
     cat("Simultaneous bands are uniform over quantiles, for each QTT curve.\n")
+  }
+  if (!is.null(x$att)) {
+    cat("p (QTT = ATT): bootstrap sup-t test, from the same draws, that",
+        "QTT(tau) - ATT = 0\nat every estimated quantile.\n")
   }
   invisible(x)
 }

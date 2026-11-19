@@ -21,7 +21,10 @@ method
 }
 \description{
 Summary for a \code{pte_qtt} object: the overall QTT curve,
-and the event-study and group QTTs at selected quantiles. Confidence bands
+and the event-study and group QTTs at selected quantiles. When the
+object holds the ATTs from the same run (\code{qtt_pte_aggregations()}),
+also the overall and event-study ATTs, with the p-value of the test that
+QTT(tau) = ATT at every estimated quantile. Confidence bands
 are uniform over quantiles (for each curve) when \code{cband = TRUE} was
 used for estimation, and pointwise otherwise.
 }

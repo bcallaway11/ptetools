@@ -14,7 +14,14 @@
 #'
 #' @description Plot a \code{pte_qtt} object.
 #'
-#' For \code{type = "overall"}: QTT curve with quantile on the x-axis.
+#' For \code{type = "overall"}: QTT curve with quantile on the x-axis. When
+#'   the object holds the overall ATT from the same run, it is drawn as a
+#'   horizontal line, with its pointwise confidence interval shaded
+#'   (\code{show_att}).
+#'
+#' For \code{type = "qtt_minus_att"}: the overall curve QTT(tau) - ATT, with
+#'   its band from the same bootstrap draws. A band that excludes 0 at some
+#'   quantile rejects QTT(tau) = ATT for all tau.
 #'
 #' For \code{type = "dynamic"}: event-study plot with event time on the x-axis.
 #'   Each selected quantile is a separate colored line. CIs are shown by default
@@ -27,7 +34,7 @@
 #'
 #' @param object a \code{pte_qtt} object
 #' @param type which aggregation to plot: \code{"overall"} (default),
-#'   \code{"dynamic"} or \code{"group"}.
+#'   \code{"dynamic"}, \code{"group"} or \code{"qtt_minus_att"}.
 #' @param cband logical; if \code{TRUE} (default), show uniform confidence band;
 #'   if \code{FALSE}, show pointwise intervals. Applies when CIs are displayed.
 #' @param plot_probs numeric vector of quantile levels to show in the dynamic
@@ -36,21 +43,60 @@
 #' @param plot_ci logical or \code{NULL}. If \code{NULL} (default), CIs are
 #'   shown when \code{length(plot_probs) == 1} and suppressed otherwise. Set
 #'   \code{TRUE} to always show CIs, \code{FALSE} to never show them.
+#' @param show_att logical; for \code{type = "overall"}, whether to draw the
+#'   overall ATT (default \code{TRUE}, when available).
 #' @param ... unused
 #'
 #' @return a \code{ggplot} object
 #' @export
 autoplot.pte_qtt <- function(object, type = "overall", cband = TRUE,
-                             plot_probs = 0.5, plot_ci = NULL, ...) {
+                             plot_probs = 0.5, plot_ci = NULL,
+                             show_att = TRUE, ...) {
   lower_col <- if (cband) "lower_ub" else "lower_pw"
   upper_col <- if (cband) "upper_ub" else "upper_pw"
+
+  if (type == "qtt_minus_att") {
+    # QTT(tau) - ATT, from the same bootstrap draws (#27)
+    df <- object$qtt_minus_att$overall
+    if (is.null(df)) {
+      stop("This object has no QTT - ATT results (they come from ",
+           "qtt_pte_aggregations()).", call. = FALSE)
+    }
+    has_ci <- !anyNA(df[[lower_col]]) && !anyNA(df[[upper_col]])
+    p <- ggplot(df, aes(x = probs, y = qtt_minus_att)) +
+      geom_hline(yintercept = 0, color = "gray50") +
+      geom_line() +
+      geom_point() +
+      scale_x_continuous("Quantile", limits = c(0, 1)) +
+      scale_y_continuous("QTT - ATT") +
+      theme_bw()
+    if (has_ci) {
+      p <- p +
+        geom_line(aes(y = .data[[lower_col]]), linetype = "dashed") +
+        geom_line(aes(y = .data[[upper_col]]), linetype = "dashed")
+    }
+    return(p)
+  }
 
   if (type == "overall") {
     df <- object$overall
     has_ci <- !anyNA(df[[lower_col]]) && !anyNA(df[[upper_col]])
 
     p <- ggplot(df, aes(x = probs, y = qtt)) +
-      geom_hline(yintercept = 0, color = "gray50") +
+      geom_hline(yintercept = 0, color = "gray50")
+
+    # overall ATT from the same run (#27), with its pointwise interval
+    att <- object$att$overall
+    if (isTRUE(show_att) && !is.null(att)) {
+      if (!anyNA(c(att$lower, att$upper))) {
+        p <- p + annotate("rect", xmin = -Inf, xmax = Inf, ymin = att$lower,
+                          ymax = att$upper, alpha = 0.15, fill = "steelblue")
+      }
+      p <- p + geom_hline(yintercept = att$att, color = "steelblue",
+                          linetype = "dotdash")
+    }
+
+    p <- p +
       geom_line() +
       geom_point() +
       scale_x_continuous("Quantile", limits = c(0, 1)) +
