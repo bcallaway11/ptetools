@@ -101,12 +101,7 @@ bootstrap (one multiplier per cluster) and the empirical bootstrap
 \item{control_group}{Which group is used as the comparison group.
 The default choice is "notyettreated", but
 different estimation strategies can implement their own choices
-for the control group.
-\code{"none"} uses no comparison units: each group-time cell then holds
-only the group's own units in the base and current periods. This is only
-for estimators that use variation within a group, such as the average
-causal response to a continuous treatment (ACRT), which is identified
-from comparisons across doses even when no unit is untreated.}
+for the control group.}
 
 \item{gt_type}{which type of group-time effects are computed.
 The default is "att".  Different estimation strategies can implement

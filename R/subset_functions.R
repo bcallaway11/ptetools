@@ -158,12 +158,11 @@ gt_cell_data <- function(data, g, tp, base.period, control_group,
     if (control_group == "notyettreated") {
       # NA calendar time for G == 0 is harmless: G == 0 is TRUE there
       G == g | G == 0 | pte_calendar_time(data, G) > threshold
-    } else if (control_group == "none") {
-      # no comparison units: only group g's own units
-      G == g
-    } else {
-      # use never treated group
+    } else if (control_group == "nevertreated") {
       G == g | G == 0
+    } else {
+      stop("control_group must be \"notyettreated\" or \"nevertreated\".",
+           call. = FALSE)
     }
   }
 

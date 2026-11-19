@@ -229,17 +229,32 @@ test_that("no comparison units at all gives a clear error", {
   )
 })
 
-test_that("control_group = 'none' builds cells from the group's own units", {
-  # all units treated at the same time: allowed with control_group = "none"
+test_that("require_comparison = FALSE allows no comparison units", {
+  # every unit treated in one of two periods, none untreated: estimators
+  # that use only within-group variation (contdid's ACRT) need setup to
+  # keep every group (contdid #5)
   set.seed(1)
   n <- 50
   d <- data.frame(id = rep(seq_len(n), each = 3), period = rep(1:3, n),
                   grp = rep(c(2, 3), length.out = n)[rep(seq_len(n), each = 3)])
   d$y <- rnorm(nrow(d))
   ptep <- setup_pte(yname = "y", gname = "grp", tname = "period",
-                    idname = "id", data = d, control_group = "none")
+                    idname = "id", data = d, require_comparison = FALSE)
   expect_setequal(ptep$glist, c(2, 3))
-  cell <- two_by_two_subset(ptep$data, g = 2, tp = 3, control_group = "none")
-  expect_true(all(cell$gt_data$G == 2))
-  expect_true(all(cell$gt_data$D == 1))
+  expect_false(ptep$require_comparison)
+  # by default, without never-treated units the latest cohort is the
+  # comparison group (as in did)
+  expect_equal(setup_pte(yname = "y", gname = "grp", tname = "period",
+                         idname = "id", data = d)$glist, 2)
+})
+
+test_that("an invalid control_group gives an error", {
+  skip_if_not_installed("did")
+  # any other value used to be treated as never treated, silently
+  expect_error(
+    pte_default(yname = "lemp", gname = "first.treat", tname = "year",
+                idname = "countyreal", data = did::mpdta,
+                control_group = "notyettreatd", biters = 0),
+    "control_group must be"
+  )
 })

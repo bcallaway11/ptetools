@@ -16,6 +16,7 @@ setup_pte(
   base_period = "varying",
   control_group = "notyettreated",
   clustervars = NULL,
+  require_comparison = TRUE,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -67,12 +68,7 @@ identification strategies.}
 \item{control_group}{Which group is used as the comparison group.
 The default choice is "notyettreated", but
 different estimation strategies can implement their own choices
-for the control group.
-\code{"none"} uses no comparison units: each group-time cell then holds
-only the group's own units in the base and current periods. This is only
-for estimators that use variation within a group, such as the average
-causal response to a continuous treatment (ACRT), which is identified
-from comparisons across doses even when no unit is untreated.}
+for the control group.}
 
 \item{clustervars}{The name of a variable to cluster standard errors on,
 in addition to \code{idname} (as in \code{did::att_gt()}): one variable,
@@ -81,6 +77,13 @@ counties). The default is NULL, which clusters at the unit level.
 Clustering applies to analytical standard errors, the multiplier
 bootstrap (one multiplier per cluster) and the empirical bootstrap
 (whole clusters are resampled).}
+
+\item{require_comparison}{Whether the design must have comparison units
+(default \code{TRUE}). \code{FALSE} is for estimators that use only
+variation within each group and build their own group-time cells without
+comparison units, such as contdid's average causal response (ACRT) when
+no unit is untreated: setup then does not check for comparison units, and
+every group is estimated. Estimators of ATT(g,t) need comparison units.}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}

@@ -67,11 +67,11 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     bstrap <- ptep$bstrap
     alp <- ptep$alp
 
-    # Without comparison units (control_group = "none"), only the ACRT is
-    # identified: it uses variation in the dose within each group, while
-    # ATT(d) and the overall ATT need untreated comparison units. These are
-    # then NA (contdid #5).
-    no_comparison <- identical(ptep$control_group, "none")
+    # Without comparison units (setup_pte(require_comparison = FALSE)), only
+    # the ACRT is identified: it uses variation in the dose within each
+    # group, while ATT(d) and the overall ATT need untreated comparison
+    # units. These are then NA (contdid #5).
+    no_comparison <- isFALSE(ptep$require_comparison)
 
     # overall att results
     if (no_comparison) {

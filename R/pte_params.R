@@ -123,6 +123,12 @@ setup_pte_basic <- function(yname,
 #' @inheritParams pte_params
 #' @param required_pre_periods The number of required pre-treatment periods to implement
 #'  the estimation strategy.  Default is 1.
+#' @param require_comparison Whether the design must have comparison units
+#'  (default \code{TRUE}). \code{FALSE} is for estimators that use only
+#'  variation within each group and build their own group-time cells without
+#'  comparison units, such as contdid's average causal response (ACRT) when
+#'  no unit is untreated: setup then does not check for comparison units, and
+#'  every group is estimated. Estimators of ATT(g,t) need comparison units.
 #' @param ... additional arguments
 #'
 #' @return \code{pte_params} object
@@ -139,6 +145,7 @@ setup_pte <- function(yname,
                       base_period = "varying",
                       control_group = "notyettreated",
                       clustervars = NULL,
+                      require_comparison = TRUE,
                       cband = TRUE,
                       alp = 0.05,
                       boot_type = "multiplier",
@@ -152,6 +159,14 @@ setup_pte <- function(yname,
                       call = NULL,
                       ...) {
   data <- as.data.frame(data)
+
+  # comparison group: any other value used to be treated as never treated
+  # without a warning, so a typo silently changed the results
+  if (!(is.character(control_group) && length(control_group) == 1 &&
+          control_group %in% c("notyettreated", "nevertreated"))) {
+    stop("control_group must be \"notyettreated\" or \"nevertreated\".",
+         call. = FALSE)
+  }
 
   # setup data
   G <- data[, gname]
@@ -229,10 +244,10 @@ setup_pte <- function(yname,
   # and the cohort itself is not estimated: it is used as never treated
   # (control_group = "nevertreated", with a warning) or as not yet treated.
   # Previously the earliest cohort was dropped instead.
-  # (not with control_group = "none": then each cell holds only its own
-  # cohort, and no comparison units are needed, e.g. for ACRT with a
-  # continuous treatment)
-  if (!identical(control_group, "none") && !any(G == 0, na.rm = TRUE)) {
+  # (not with require_comparison = FALSE, for estimators that use only
+  # variation within each group and need no comparison units, such as
+  # contdid's ACRT)
+  if (isTRUE(require_comparison) && !any(G == 0, na.rm = TRUE)) {
     latest_g <- max(G, na.rm = TRUE)
     keep_rows <- period < latest_g - anticipation
     if (!any(keep_rows) || all(G[keep_rows] == latest_g, na.rm = TRUE)) {
@@ -344,6 +359,9 @@ setup_pte <- function(yname,
     cl = cl,
     call = call
   )
+  # whether group-time cells have comparison units (used by
+  # process_dose_gt())
+  params$require_comparison <- require_comparison
 
   params
 }
@@ -405,11 +423,6 @@ setup_pte <- function(yname,
 #'  The default choice is "notyettreated", but
 #'  different estimation strategies can implement their own choices
 #'  for the control group.
-#'  \code{"none"} uses no comparison units: each group-time cell then holds
-#'  only the group's own units in the base and current periods. This is only
-#'  for estimators that use variation within a group, such as the average
-#'  causal response to a continuous treatment (ACRT), which is identified
-#'  from comparisons across doses even when no unit is untreated.
 #' @param gt_type which type of group-time effects are computed.
 #'  The default is "att".  Different estimation strategies can implement
 #'  their own choices for `gt_type`
