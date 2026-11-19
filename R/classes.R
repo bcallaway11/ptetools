@@ -411,7 +411,11 @@ gt_data_frame <- function(data) {
 #'  for each value of \code{e} corresponding to the dynamic treatment
 #'  effect parameters.
 #' @param group_weights list containing weights on underlying ATT(g,t)
-#'  corresponding to deliver averaged group-specific treatment effects
+#'  corresponding to deliver averaged group-specific treatment effects.
+#'  All weight vectors from \code{attgt_pte_aggregations()} are in the order
+#'  of the group-time cells as computed (\code{attgt.list}, and so
+#'  \code{extra_gt_returns}), with 0 for cells dropped as \code{NA}; this is
+#'  not necessarily the row order of \code{attgt_results}.
 #'
 #' @param ptep \code{pte_params} object, stored for reference in the result.
 #'

@@ -388,6 +388,13 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 
   # turn results into a data.frame
   attgt.results <- do.call("rbind.data.frame", attgt.list)
+  # each cell's position in attgt.list (and so in extra_gt_returns): the
+  # weight vectors returned below are indexed by it. merge() below re-sorts
+  # the rows by group, and dropping NA cells shifts them, so weights built
+  # in this table's row order were applied to the wrong cells' F0/F1 in
+  # the QTT and QOTT aggregations (#27)
+  n_cells <- nrow(attgt.results)
+  attgt.results$.cell <- seq_len(n_cells)
 
   # this drop na att(g,t) due to violations of overlap conditions
   attgt.results <- attgt.results[complete.cases(attgt.results), ]
@@ -483,6 +490,22 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 
   # store dynamic effects results
   dyn.results <- cbind.data.frame(e = eseq, att.e = att.e)
+
+  # weights in the order of attgt.list, 0 for cells dropped above (#27)
+  by_cell <- function(w) {
+    full <- numeric(n_cells)
+    full[attgt.results$.cell] <- w
+    full
+  }
+  weights.overall <- by_cell(weights.overall)
+  weights.e <- lapply(weights.e, function(we) {
+    we$weights <- by_cell(we$weights)
+    we
+  })
+  weights.g <- lapply(weights.g, function(wg) {
+    wg$weights <- by_cell(wg$weights)
+    wg
+  })
 
   # return pte_emp_boot object
   pte_emp_boot(

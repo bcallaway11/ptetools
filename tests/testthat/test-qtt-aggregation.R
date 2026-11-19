@@ -147,3 +147,59 @@ test_that("QOTT aggregation is exact, also with negative outcomes", {
   # effects are about -20, far below -max(y) (about 47)
   expect_lt(unname(qott_by_hand(d, 0.5)$agg$overall_results), -15)
 })
+
+
+# --- Aggregation weights ----------------------------------------------------
+# local ATT and QTT: post-period treated vs comparison units (randomized
+# design below, so this is enough to test the inference)
+qtt_att_cell <- function(gt_data, ...) {
+  post <- gt_data[gt_data$name == "post", ]
+  y1 <- post$Y[post$D == 1]
+  y0 <- post$Y[post$D == 0]
+  attgt_noif(attgt = mean(y1) - mean(y0),
+             extra_gt_returns = list(F0 = BMisc::weighted_ecdf(y0),
+                                     F1 = BMisc::weighted_ecdf(y1)))
+}
+
+qtt_att_data <- function(effect) {
+  set.seed(5)
+  n <- 600
+  grp <- sample(c(0, 2, 3), n, replace = TRUE)
+  d <- expand.grid(id = seq_len(n), period = 1:3)
+  d$grp <- grp[d$id]
+  treated <- d$grp > 0 & d$period >= d$grp
+  d$y <- rnorm(nrow(d)) + ifelse(treated, effect(sum(treated)), 0)
+  d
+}
+
+# The weight vectors were in the row order of an internal table that
+# merge() sorts by group, not in the order of the cells, so the QTT and
+# QOTT aggregations mixed the wrong cells' distributions (found with #27).
+test_that("aggregation weights follow the order of the cells", {
+  d <- qtt_att_data(function(n) 1)
+  ptep <- setup_pte(yname = "y", gname = "grp", tname = "period",
+                    idname = "id", data = d, gt_type = "qtt")
+  check <- function(attgt_fun) {
+    gt <- compute.pte(ptep, two_by_two_subset, attgt_fun)
+    cells <- do.call(rbind, lapply(gt$attgt.list, as.data.frame))
+    agg <- attgt_pte_aggregations(gt$attgt.list, ptep)
+    att <- ifelse(is.na(cells$att), 0, cells$att)
+    expect_equal(length(agg$overall_weights), nrow(cells))
+    expect_equal(sum(agg$overall_weights * att), agg$overall_results)
+    for (dw in agg$dyn_weights) {
+      expect_equal(sum(dw$weights * att),
+                   agg$dyn_results$att.e[agg$dyn_results$e == dw$e])
+    }
+    # no weight on pre-treatment or dropped cells
+    expect_true(all(agg$overall_weights[cells$time.period < cells$group |
+                                          is.na(cells$att)] == 0))
+  }
+  check(qtt_att_cell)
+  # a cell dropped as NA (e.g. an overlap failure) shifted later weights
+  check(function(gt_data, ...) {
+    res <- qtt_att_cell(gt_data)
+    post <- gt_data[gt_data$name == "post", ]
+    if (unique(post$period) == 2) res$attgt <- NA
+    res
+  })
+})

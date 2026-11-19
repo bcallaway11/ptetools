@@ -1,5 +1,15 @@
 # ptetools 1.1.0
 
+* Bug fix: aggregated QTTs and QOTTs mixed the wrong cells' distributions.
+  `attgt_pte_aggregations()` returned its weight vectors in the order of an
+  internal table that `merge()` sorts by group, while the cells' `F0`/`F1`
+  are in the order the cells were computed. With more than one group, the
+  overall, event-time and group QTTs could put weight on pre-treatment
+  cells and none on some post-treatment cells. Cells dropped as `NA` also
+  shifted later weights. The weights now follow the order of the cells.
+  ATT results were not affected. Found while adding the ATT to QTT runs
+  (#27).
+
 * Aggregated QTTs (`qtt_pte_aggregations()`) are now exact (#25). The
   cells' distribution functions used to be mixed on a 1,000-point grid of
   the pooled outcome, so each quantile was rounded up to a grid point, and
