@@ -1,3 +1,13 @@
+# =============================================================================
+# Title: Tests against the did package
+# Description: Checks that ptetools estimators (pte() with did_attgt,
+#   pte_default()) reproduce did::att_gt() results, including year-coded time
+#   periods and a group column named G.
+# Author: Brant Callaway
+# Last update: 2026-11-19
+# Date created: 2023-07-06
+# =============================================================================
+
 #------------------------------------------------------------------------
 #  Some tests for `did`
 #------------------------------------------------------------------------
@@ -132,9 +142,10 @@ test_that("periods that look like years works ok and unbalanced groups", {
   # 1. Year-like time periods (non-consecutive integers e.g. 2003/2004/2006/2007)
   #    that get remapped internally via orig2t/t2orig.
   # 2. A data column literally named "G" (matching ptetools' internal column name),
-  #    which can cause masking bugs if setup_pte does not rename carefully.
-  # Skipped pending verification of hardcoded expected values. See dev/NOTES.md.
-  skip("expected values need verification; see dev/NOTES.md for context")
+  #    which can cause masking bugs if setup_pte does not rename carefully (#13).
+  # Expected values verified against did::att_gt() with xformla = ~lpop
+  # (est_method = "dr", control_group = "notyettreated"): overall ATT -0.0323,
+  # event time 0 -0.0201.
   data(mpdta)
   res <- suppressWarnings(
     pte(

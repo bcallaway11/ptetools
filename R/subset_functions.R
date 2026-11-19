@@ -69,18 +69,26 @@ two_by_two_subset <- function(data,
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }
 
-# --- Internal: calendar time ---------------------------------------------
-# setup_pte() recodes time periods and groups to 1..T (.period, .G) and keeps
-# the original time periods as attribute "pte_time_periods" of the data.
-# Anticipation and base periods are defined in units of the time variable
-# (calendar time), as in did::att_gt(), so comparisons that involve
-# anticipation map period indices back to calendar time here. Data from
-# setups that do not recode periods (setup_pte_basic()) have no attribute;
-# their periods already are calendar time.
-#
-# Arguments: data (full data from a setup function), p (period indices;
-#   0, the never-treated group, maps to NA).
-# Returns: calendar times of p.
+# --- Calendar time and base periods ----------------------------------------
+# Exported so that custom subset functions (e.g. in qte) can follow the same
+# rules as two_by_two_subset() without relying on ptetools internals.
+
+#' @title Calendar Time of Internal Periods
+#'
+#' @description [setup_pte()] recodes time periods and groups to 1, ..., T
+#'  (the internal columns \code{.period} and \code{.G}). Anticipation and
+#'  base periods are defined in units of the time variable (calendar time),
+#'  as in \code{did::att_gt()}, so custom subset functions that compare
+#'  periods with anticipation should map them back with this function.
+#'
+#' @param data the full data from a setup function (e.g. \code{ptep$data})
+#' @param p internal period indices (e.g. values of \code{.period} or
+#'  \code{.G}); 0, the never-treated group, maps to \code{NA}
+#'
+#' @return the calendar times of \code{p}. For data whose periods were not
+#'  recoded (e.g. from [setup_pte_basic()]), \code{p} itself.
+#'
+#' @export
 pte_calendar_time <- function(data, p) {
   cal <- attr(data, "pte_time_periods")
   if (is.null(cal)) {
@@ -92,14 +100,26 @@ pte_calendar_time <- function(data, p) {
   out
 }
 
-# Returns the base period (a period index) for the cell of group g in period
-# tp, as in did::att_gt():
-#   - post-treatment cells (t >= g - anticipation, in calendar time) and all
-#     cells with a universal base period use the last period p with
-#     p + anticipation < g;
-#   - pre-treatment cells with a varying base period use the period just
-#     before tp.
-# NA if group g has no period early enough to serve as its base period.
+#' @title Base Period of a Group-Time Cell
+#'
+#' @description The base period for the cell of group \code{g} in period
+#'  \code{tp}, as in \code{did::att_gt()}. Post-treatment cells (\code{tp}
+#'  at least \code{g - anticipation}, in calendar time) and all cells with a
+#'  universal base period use the last period \code{p} with
+#'  \code{p + anticipation < g}; pre-treatment cells with a varying base
+#'  period use the period just before \code{tp}. Used by
+#'  [two_by_two_subset()]; useful for custom subset functions.
+#'
+#' @inheritParams pte_calendar_time
+#' @param g the group (internal period index of first treatment)
+#' @param tp the current period (internal period index)
+#' @param anticipation anticipation, in units of the time variable
+#' @param base_period \code{"varying"} or \code{"universal"}
+#'
+#' @return the base period as an internal period index, or \code{NA} if
+#'  group \code{g} has no period early enough to serve as its base period
+#'
+#' @export
 pte_base_period <- function(data, g, tp, anticipation = 0,
                             base_period = "varying") {
   cal <- attr(data, "pte_time_periods")

@@ -19,6 +19,11 @@
   results can change even with consecutive periods, because of the
   comparison-group rule.
 
+* New exported helpers for custom subset functions: `pte_base_period()`
+  gives the base period of a group-time cell as in `did::att_gt()`, and
+  `pte_calendar_time()` maps internal period indices back to the time
+  variable. `two_by_two_subset()` uses them.
+
 * Fixed pre-treatment `ATT(g,t)` with `base_period = "universal"` and
   not-yet-treated controls (the default) (#16). The comparison group could
   include units already treated in the base period, which comes after the
