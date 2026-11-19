@@ -1,5 +1,14 @@
 # ptetools 1.0.2
 
+* Fixed designs without a never-treated group. `setup_pte()` (and
+  `setup_pte_basic()`) removed the smallest group value assuming it was 0,
+  so without never-treated units the earliest cohort was silently dropped
+  and estimation could then fail. Now, as in `did::att_gt()`, the latest
+  cohort serves as the comparison group (as never treated with
+  `control_group = "nevertreated"`, with a warning) and periods from its
+  treatment date on are dropped. If every unit is treated in the same
+  period, there is now a clear error that no comparison units exist.
+
 * Fixed the empirical-bootstrap aggregation with `weightsname`: cohorts
   were combined by unweighted unit counts instead of weighted shares, so
   overall and event-study results were wrong whenever average weights

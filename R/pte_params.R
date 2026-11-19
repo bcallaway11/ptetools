@@ -77,8 +77,10 @@ setup_pte_basic <- function(yname,
   time.periods <- sort(unique(data$.period))
   groups <- unique(data$.G)
 
-  # drop never treated group
-  groups <- sort(groups)[-1]
+  # treated groups (all values except 0, the never-treated group); dropping
+  # the smallest value instead dropped a real cohort when no unit is never
+  # treated
+  groups <- sort(setdiff(groups, 0))
 
   # sort the time periods and drop the first period
   time.periods <- sort(time.periods)[-1]
@@ -221,10 +223,35 @@ setup_pte <- function(yname,
   # even known. Only the internal .G changes; the user's column is untouched.
   G[!is.na(G) & G > max(time.periods) + anticipation] <- 0
 
-  groups <- unique(G)
+  # No never-treated units: as in did::att_gt(), the latest-treated cohort
+  # serves as the comparison group. Periods from its treatment date (net of
+  # anticipation) on are dropped, since no comparison units remain there,
+  # and the cohort itself is not estimated: it is used as never treated
+  # (control_group = "nevertreated", with a warning) or as not yet treated.
+  # Previously the earliest cohort was dropped instead.
+  if (!any(G == 0, na.rm = TRUE)) {
+    latest_g <- max(G, na.rm = TRUE)
+    keep_rows <- period < latest_g - anticipation
+    if (!any(keep_rows) || all(G[keep_rows] == latest_g, na.rm = TRUE)) {
+      stop("There are no comparison units: every unit is first treated in ",
+           "the same period and there is no never-treated group, so no ",
+           "group-time effects can be estimated.", call. = FALSE)
+    }
+    if (identical(control_group, "nevertreated")) {
+      warning("No never-treated group is available. The last treated ",
+              "cohort (", latest_g, ") is used as the never-treated ",
+              "comparison group, and periods from ", latest_g - anticipation,
+              " on are dropped.", call. = FALSE)
+    }
+    data <- data[keep_rows, , drop = FALSE]
+    G <- G[keep_rows]
+    period <- period[keep_rows]
+    G[G == latest_g] <- 0
+    time.periods <- sort(unique(period))
+  }
 
-  # drop never treated group
-  groups <- sort(groups)[-1]
+  # treated groups (all values except 0, the never-treated group)
+  groups <- sort(setdiff(unique(G), 0))
 
   # do some recoding to make sure time periods are 1 unit apart
   # and then put these back together at the end

@@ -197,3 +197,34 @@ test_that("no group with a base period gives a clear error", {
     "No treated group has a base period"
   )
 })
+
+# --- No never-treated group -------------------------------------------------
+# As in did::att_gt(), the latest cohort serves as the comparison group and
+# periods from its treatment date on are dropped. setup_pte() used to drop
+# the earliest cohort instead (it removed the smallest group value, assuming
+# it was 0).
+test_that("pte_default() matches did::att_gt() without never-treated units", {
+  skip_if_not_installed("did")
+  data <- did::mpdta[did::mpdta$first.treat != 0, ]
+  for (i in seq_len(nrow(settings))) {
+    diffs <- suppressWarnings(diff_from_did(
+      data, "lemp", "first.treat", "year", "countyreal",
+      settings$base_period[i], settings$control_group[i]
+    ))
+    expect_lt(max(diffs, na.rm = TRUE), 1e-10,
+              label = paste(settings[i, ], collapse = "/"))
+  }
+})
+
+test_that("no comparison units at all gives a clear error", {
+  set.seed(1)
+  n <- 100
+  d <- data.frame(id = rep(seq_len(n), each = 2), period = rep(1:2, n),
+                  grp = 2)
+  d$y <- rnorm(nrow(d))
+  expect_error(
+    pte_default(yname = "y", gname = "grp", tname = "period", idname = "id",
+                data = d, biters = 0),
+    "no comparison units"
+  )
+})
