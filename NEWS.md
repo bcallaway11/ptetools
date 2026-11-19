@@ -1,5 +1,13 @@
 # ptetools 1.0.2
 
+* `cl` now parallelizes the empirical bootstrap on Windows too (#11). A
+  numeric `cl` only worked by forking, which Windows does not support, so
+  there the bootstrap silently ran serially. On Windows, ptetools now
+  creates a cluster with `cl` workers (reproducible with `set.seed()`) and
+  stops it afterwards. `cl` can also be a cluster object from
+  `parallel::makeCluster()`, on any platform. The documentation of `cl` now
+  says what it does.
+
 * The pre-test of parallel trends is now reported with
   `base_period = "universal"` (#18). The reference cells, which are 0 by
   construction, made the covariance matrix singular. Cells with zero

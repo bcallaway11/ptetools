@@ -20,6 +20,7 @@ Imports:
     ggplot2,
     DRDID,
     dplyr,
+    parallel,
     pbapply,
     splines2
 Suggests:

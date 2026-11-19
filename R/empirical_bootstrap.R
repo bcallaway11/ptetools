@@ -8,6 +8,32 @@
 # Date created: 2021-05-19
 # =============================================================================
 
+# --- Internal: parallel bootstrap cluster ---------------------------------
+# pbapply::pblapply() runs a numeric `cl` in parallel only by forking, which
+# Windows does not support, so there a numeric cl was silently ignored and
+# the bootstrap ran serially (#11). On Windows, a numeric cl > 1 is turned
+# into a PSOCK cluster with that many workers; its random number streams are
+# seeded from the current session, so set.seed() still makes results
+# reproducible. A cluster object passed as cl is used as is, on any platform.
+#
+# Arguments: cl (number of workers or a cluster object), os (platform; an
+#   argument so the Windows path can be tested elsewhere).
+# Returns: the cl to pass to pblapply(). If it is not identical to the input,
+#   it is a cluster created here, and the caller must stop it.
+boot_cluster <- function(cl, os = .Platform$OS.type) {
+  if (is.numeric(cl) && length(cl) == 1 && cl > 1 && os == "windows") {
+    cluster <- parallel::makePSOCKcluster(cl)
+    parallel::clusterSetRNGStream(cluster,
+                                  sample.int(.Machine$integer.max, 1))
+    # attach ptetools on the workers: an attgt_fun defined in the user's
+    # workspace typically calls ptetools functions (e.g. attgt_if()) without
+    # the ptetools:: prefix, as it can in the main session
+    parallel::clusterEvalQ(cluster, library(ptetools))
+    return(cluster)
+  }
+  cl
+}
+
 # --- Internal: bootstrap resampling ----------------------------------------
 # Returns a function that draws one bootstrap sample of `data`. Panel data
 # are resampled by unit (block bootstrap): the rows of each unit are indexed
@@ -93,7 +119,6 @@ panel_empirical_bootstrap <- function(attgt.list,
   idname <- ptep$idname
   boot_type <- ptep$boot_type
   biters <- ptep$biters
-  cl <- ptep$cl
   gt_type <- ptep$gt_type
   ret_quantile <- ptep$ret_quantile
 
@@ -137,6 +162,10 @@ panel_empirical_bootstrap <- function(attgt.list,
       ptep = ptep
     ))
   }
+
+  # parallel workers for the bootstrap (a PSOCK cluster on Windows, #11)
+  cl <- boot_cluster(ptep$cl)
+  if (!identical(cl, ptep$cl)) on.exit(parallel::stopCluster(cl), add = TRUE)
 
   # bootstrap
   # draws bootstrap samples; panel data are resampled by unit while repeated
@@ -502,7 +531,9 @@ qtt_empirical_bootstrap <- function(attgt.list,
     ))
   }
 
-  # bootstrap
+  # bootstrap; parallel workers as in panel_empirical_bootstrap() (#11)
+  cl <- boot_cluster(ptep$cl)
+  if (!identical(cl, ptep$cl)) on.exit(parallel::stopCluster(cl), add = TRUE)
   draw_sample <- make_boot_sampler(data, ptep$idname, ptep$panel)
   boot.res <- pbapply::pblapply(seq_len(biters), function(b) {
     bdata <- draw_sample()
@@ -531,7 +562,7 @@ qtt_empirical_bootstrap <- function(attgt.list,
     )[c("attgt.list", "extra_gt_returns")]
 
     aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
-  }, cl = ptep$cl)
+  }, cl = cl)
 
   alp <- ptep$alp
   z   <- qnorm(1 - alp / 2)
