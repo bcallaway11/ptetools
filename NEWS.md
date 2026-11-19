@@ -1,5 +1,10 @@
 # ptetools 1.0.2
 
+* `setup_pte()` now stores `control_group` in the `pte_params` object, so
+  later steps (the overall ATT for continuous treatments) use the requested
+  comparison group instead of always the default. Continuous-treatment
+  results (`process_dose_gt()`) now work with `base_period = "universal"`.
+
 * Covariate formulas can now transform variables, e.g.
   `xformula = ~ factor(state) + I(x^2) + log(z)`, in `pte_default()` /
   `pte_attgt()`, `did_attgt()` and `covid_attgt()` (#5). Such terms failed

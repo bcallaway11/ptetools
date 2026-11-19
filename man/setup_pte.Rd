@@ -14,6 +14,7 @@ setup_pte(
   required_pre_periods = 1,
   anticipation = 0,
   base_period = "varying",
+  control_group = "notyettreated",
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -61,6 +62,11 @@ where the base period is fixed in pre-treatment periods to be the period
 right before the treatment starts.  "Universal" is commonly used in
 difference-in-differences applications, but can be unnatural for other
 identification strategies.}
+
+\item{control_group}{Which group is used as the comparison group.
+The default choice is "notyettreated", but
+different estimation strategies can implement their own choices
+for the control group}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}

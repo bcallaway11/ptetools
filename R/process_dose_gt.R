@@ -42,6 +42,16 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     }
 
     inner_extra_gt_returns <- BMisc::get_list_element(all_extra_gt_returns, "extra_gt_returns")
+
+    # With a universal base period, the reference cells are 0 by construction
+    # and have no dose-specific results. They are pre-treatment, so they get
+    # no weight in the overall parameters; leave them out so the per-cell
+    # results, weights and influence-function columns stay aligned.
+    has_dose <- !vapply(inner_extra_gt_returns, is.null, logical(1))
+    inner_extra_gt_returns <- inner_extra_gt_returns[has_dose]
+    o_weights <- o_weights[has_dose, , drop = FALSE]
+    groups <- groups[has_dose]
+    time.periods <- time.periods[has_dose]
     att.d_gt <- BMisc::get_list_element(inner_extra_gt_returns, "att.d")
     acrt.d_gt <- BMisc::get_list_element(inner_extra_gt_returns, "acrt.d")
     att.overall_gt <- unlist(BMisc::get_list_element(inner_extra_gt_returns, "att.overall"))
@@ -50,7 +60,7 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     bread_gt <- BMisc::get_list_element(inner_extra_gt_returns, "bread")
     Xe_gt <- BMisc::get_list_element(inner_extra_gt_returns, "Xe")
 
-    acrt_gt_inffunc_mat <- gt_results$inffunc
+    acrt_gt_inffunc_mat <- gt_results$inffunc[, has_dose, drop = FALSE]
     biters <- ptep$biters
     bstrap <- ptep$bstrap
     alp <- ptep$alp
@@ -124,11 +134,14 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     # these are treated observations
     keep_mat <- acrt_gt_inffunc_mat != 0
     # these are both treated and control observations
-    keep_mat2 <- overall_att_res$att_gt$inffunc != 0
+    # (same cells as above, in the same order; drop the reference cells too)
+    overall_gt_inffunc <-
+        overall_att_res$att_gt$inffunc[, has_dose, drop = FALSE]
+    keep_mat2 <- overall_gt_inffunc != 0
     # these keep track of untreated comparison units
     keep_mat2 <- keep_mat2 & !keep_mat
     #
-    comparison_inffunc <- overall_att_res$att_gt$inffunc
+    comparison_inffunc <- overall_gt_inffunc
     comparison_inffunc[!keep_mat2] <- 0
     n0_vec <- colSums(keep_mat2)
     if (!all(colSums(keep_mat) == n1_vec)) {
