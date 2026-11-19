@@ -185,6 +185,12 @@ setup_pte <- function(yname,
   }
 
 
+  # Units first treated more than `anticipation` time units after the last
+  # period are untreated (and not anticipating) throughout the sample; treat
+  # them as never treated, as did::att_gt() does. Usually their timing is not
+  # even known. Only the internal .G changes; the user's column is untouched.
+  G[!is.na(G) & G > max(time.periods) + anticipation] <- 0
+
   groups <- unique(G)
 
   # drop never treated group
@@ -208,24 +214,28 @@ setup_pte <- function(yname,
     stop("Every value of gname must be 0 (never treated) or one of the time periods in tname.")
   }
 
-  t_adjust <- 0
-  # sort the time periods and drop the first
-  # \code{required_pre_periods} time periods
-  # these are the ones we loop over below
-  if (base_period == "universal") {
-    time.periods <- sort(time.periods)
-    groups <- groups[groups %in% time.periods[-1]]
-    # account for anticipation
-    groups <- groups[groups >= (min(time.periods + 1) + anticipation)]
-    # drop early treated groups
-    data <- data[!(data$.G %in% seq(1, required_pre_periods + anticipation)), ]
-  } else {
-    time.periods <- sort(time.periods)[-seq(1, required_pre_periods)]
-    groups <- groups[groups %in% time.periods]
-    # account for anticipation
-    groups <- groups[groups >= (min(time.periods) + anticipation)]
-    # drop early treated groups
-    data <- data[!(data$.G %in% seq(1, required_pre_periods + anticipation)), ]
+  # Groups need at least `required_pre_periods` periods before treatment,
+  # counting only periods p with p + anticipation < g in units of tname (as
+  # in did::att_gt()); earlier-treated groups are dropped, units and all.
+  all_groups <- setdiff(unique(data$.G), 0)
+  n_pre <- vapply(all_groups, function(gg) {
+    sum(original_time.periods + anticipation < original_time.periods[gg])
+  }, numeric(1))
+  early_groups <- all_groups[n_pre < required_pre_periods]
+  groups <- groups[!(groups %in% early_groups)]
+  data <- data[!(data$.G %in% early_groups), ]
+  if (length(groups) == 0) {
+    stop("No treated group has a base period: each group needs ",
+         required_pre_periods, " period(s) more than anticipation = ",
+         anticipation, " before it is first treated.", call. = FALSE)
+  }
+
+  # time periods to loop over: all of them with a universal base period;
+  # with a varying base period, drop the first required_pre_periods, which
+  # have no earlier base period
+  time.periods <- sort(time.periods)
+  if (base_period != "universal") {
+    time.periods <- time.periods[-seq(1, required_pre_periods)]
   }
 
   # Sort panel data by (id, period). Downstream code lines up unit-level
@@ -242,6 +252,8 @@ setup_pte <- function(yname,
   # two_by_two_subset() can build each (g,t) cell by position instead of
   # scanning the full data for every cell.
   attr(data, "pte_period_rows") <- split(seq_len(nrow(data)), data$.period)
+  # original time periods, to map .period / .G back to calendar time
+  attr(data, "pte_time_periods") <- original_time.periods
   attr(data, "pte_ids") <- unique(data$.id)
 
 
@@ -300,8 +312,12 @@ setup_pte <- function(yname,
 #'  requested, `ptetools` falls back to pointwise intervals with a warning.
 #'  Analytical standard errors are not currently supported for continuous
 #'  treatment (`gt_type = "dose"`); see `dev/NOTES.md`.
-#' @param anticipation how many periods before the treatment actually takes
-#'  place that it can have an effect on outcomes
+#' @param anticipation how long before the treatment actually takes place it
+#'  can already affect outcomes, in units of the time variable \code{tname}
+#'  (e.g., years), as in \code{did::att_gt()}. With unequally spaced periods
+#'  this is not the same as a number of periods. Units first treated more
+#'  than \code{anticipation} after the last period are treated as never
+#'  treated.
 #' @param base_period The type of base period to use.  This only affects
 #'  the numeric value of results in pre-treatment periods.  Results in
 #'  post-treatment periods are not affected by this choice.  The default

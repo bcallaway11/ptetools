@@ -33,7 +33,7 @@ compute.pte <- function(ptep,
   data <- ptep$data
   panel <- ptep$panel
   base_period <- ptep$base_period
-  anticipation <- ptep$anticipation
+  anticipation <- if (is.null(ptep$anticipation)) 0 else ptep$anticipation
   global_fun <- ptep$global_fun
 
 
@@ -70,7 +70,9 @@ compute.pte <- function(ptep,
     # loop over all groups
     for (g in groups) {
       if (isTRUE(base_period == "universal")) {
-        if (tp == (g - 1 - anticipation)) {
+        # the base period itself: ATT(g, base period) is 0 by construction
+        if (isTRUE(tp == pte_base_period(data, g, tp, anticipation,
+                                         "universal"))) {
           attgt.list[[counter]] <- list(
             att = 0,
             group = g,

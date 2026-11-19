@@ -1,5 +1,24 @@
 # ptetools 1.0.2
 
+* `anticipation` now follows `did::att_gt()`: it is measured in units of the
+  time variable (e.g., years), not in number of periods, which matters when
+  periods are not one unit apart. Specifically:
+  * the base period is the last period at least `anticipation` before
+    treatment, and cells with `t >= g - anticipation` are post-treatment;
+  * not-yet-treated comparison units must not be anticipating treatment in
+    either period of the cell (first treated more than `anticipation` after
+    both periods), so units about to anticipate are no longer used as
+    controls;
+  * the pre-test leaves out anticipation periods;
+  * units first treated more than `anticipation` after the last period are
+    treated as never treated (previously an error);
+  * a clear error is given when no group has a period early enough to serve
+    as its base period.
+
+  Results with `anticipation = 0` are unchanged. With `anticipation > 0`,
+  results can change even with consecutive periods, because of the
+  comparison-group rule.
+
 * Fixed pre-treatment `ATT(g,t)` with `base_period = "universal"` and
   not-yet-treated controls (the default) (#16). The comparison group could
   include units already treated in the base period, which comes after the

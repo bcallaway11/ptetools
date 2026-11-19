@@ -59,8 +59,12 @@ Default is FALSE.}
 \item{est_method}{Which type of estimation method to use. Default is "dr" for
 doubly robust.  The other option is "reg" for regression adjustment.}
 
-\item{anticipation}{how many periods before the treatment actually takes
-place that it can have an effect on outcomes}
+\item{anticipation}{how long before the treatment actually takes place it
+can already affect outcomes, in units of the time variable \code{tname}
+(e.g., years), as in \code{did::att_gt()}. With unequally spaced periods
+this is not the same as a number of periods. Units first treated more
+than \code{anticipation} after the last period are treated as never
+treated.}
 
 \item{base_period}{The type of base period to use.  This only affects
 the numeric value of results in pre-treatment periods.  Results in

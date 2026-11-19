@@ -63,8 +63,12 @@ process_att_gt <- function(att_gt_results, ptep) {
   #-----------------------------------------------------------------------------
   # compute Wald pre-test
   #-----------------------------------------------------------------------------
-  # select which periods are pre-treatment
-  pre <- which(group > time.period)
+  # select which periods are pre-treatment; periods in the anticipation
+  # window (g - anticipation <= t < g, in units of tname) are not, as in
+  # did::att_gt()
+  anticipation <- if (is.null(ptep$anticipation)) 0 else ptep$anticipation
+  pre <- which(pte_calendar_time(ptep$data, group) - anticipation >
+                 pte_calendar_time(ptep$data, time.period))
 
   # pseudo-atts in pre-treatment periods
   preatt <- as.matrix(att[pre])

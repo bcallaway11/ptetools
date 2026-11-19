@@ -68,8 +68,12 @@ requested, \code{ptetools} falls back to pointwise intervals with a warning.
 Analytical standard errors are not currently supported for continuous
 treatment (\code{gt_type = "dose"}); see \code{dev/NOTES.md}.}
 
-\item{anticipation}{how many periods before the treatment actually takes
-place that it can have an effect on outcomes}
+\item{anticipation}{how long before the treatment actually takes place it
+can already affect outcomes, in units of the time variable \code{tname}
+(e.g., years), as in \code{did::att_gt()}. With unequally spaced periods
+this is not the same as a number of periods. Units first treated more
+than \code{anticipation} after the last period are treated as never
+treated.}
 
 \item{base_period}{The type of base period to use.  This only affects
 the numeric value of results in pre-treatment periods.  Results in

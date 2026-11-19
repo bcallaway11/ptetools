@@ -4,7 +4,7 @@
 #   treatment effects into overall, group, and dynamic (event-study)
 #   parameters, with multiplier-bootstrap or analytical inference.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2023-02-14
 # =============================================================================
 
@@ -51,7 +51,6 @@ pte_aggte <- function(attgt,
   biters <- ptep$biters
   data <- ptep$data
   tname <- ptep$tname
-  gname <- ptep$gname
   glist <- sort(unique(group))
   tlist <- sort(unique(time.period))
 
@@ -76,7 +75,12 @@ pte_aggte <- function(attgt,
   weights.ind <- group_weight_data$.w / mean(group_weight_data$.w)
 
   # relative group sizes for all ever-treated groups
-  pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))
+  # each unit's group in units of tname, from the internal .G (never-treated
+  # units, including those first treated after the sample, are NA here)
+  unit_group <- pte_calendar_time(data, group_weight_data$.G)
+  pg <- sapply(originalglist, function(g) {
+    mean(weights.ind * (unit_group %in% g))
+  })
   # normalized so that probabilities sum to 1
   pg <- pg / sum(pg)
 
@@ -90,7 +94,8 @@ pte_aggte <- function(attgt,
   keepers <- which(group <= time.period & time.period <= (group + max_e)) ### added second condition to allow for limit on longest period included in att
 
   # n x 1 vector of group variable
-  G <- orig2t(group_weight_data[, gname], originaltlist)
+  # (0 for never-treated units)
+  G <- match(unit_group, originaltlist, nomatch = 0)
 
   if (type == "group") {
     # get group specific ATTs
@@ -425,7 +430,6 @@ overall_weights <- function(attgt,
   biters <- ptep$biters
   data <- ptep$data
   tname <- ptep$tname
-  gname <- ptep$gname
   glist <- sort(unique(group))
   tlist <- sort(unique(time.period))
 
@@ -450,7 +454,12 @@ overall_weights <- function(attgt,
   weights.ind <- group_weight_data$.w / mean(group_weight_data$.w)
 
   # relative group sizes for all ever-treated groups
-  pg <- sapply(originalglist, function(g) mean(weights.ind * (group_weight_data[, gname] == g)))
+  # each unit's group in units of tname, from the internal .G (never-treated
+  # units, including those first treated after the sample, are NA here)
+  unit_group <- pte_calendar_time(data, group_weight_data$.G)
+  pg <- sapply(originalglist, function(g) {
+    mean(weights.ind * (unit_group %in% g))
+  })
   # normalized so that probabilities sum to 1
   pg <- pg / sum(pg)
 

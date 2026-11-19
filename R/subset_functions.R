@@ -41,32 +41,15 @@ two_by_two_subset <- function(data,
                               anticipation = 0,
                               base_period = "varying",
                               ...) {
-  # get the correct "base" period for this group
-  main.base.period <- g - anticipation - 1
+  # base period for this cell: the period just before tp in pre-treatment
+  # cells with a varying base period, otherwise the last period at least
+  # `anticipation` time units before g (as in did::att_gt())
+  base.period <- pte_base_period(data, g, tp, anticipation, base_period)
 
-  #----------------------------------------------------
-  if (base_period == "varying") {
-    # if it's a pre-treatment time period (used for the
-    # pre-test, we need to adjust the base period)
-
-    # group not treated yet
-    if (tp < (g - anticipation)) {
-      # move to earlier period
-      # not going to include anticipation here
-      base.period <- tp - 1
-    } else {
-      # this is a post-treatment period
-      base.period <- main.base.period
-    }
-  } else {
-    base.period <- main.base.period
-  }
-  #----------------------------------------------------
-
-  #----------------------------------------------------
   # collect the right subset of the data: group g plus the comparison group
   # (not-yet-treated or never-treated), in the current and base periods
-  this.data <- gt_cell_data(data, g, tp, base.period, control_group)
+  this.data <- gt_cell_data(data, g, tp, base.period, control_group,
+                            anticipation)
 
   # variable to keep track of pre/post periods
   this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
@@ -86,25 +69,75 @@ two_by_two_subset <- function(data,
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }
 
+# --- Internal: calendar time ---------------------------------------------
+# setup_pte() recodes time periods and groups to 1..T (.period, .G) and keeps
+# the original time periods as attribute "pte_time_periods" of the data.
+# Anticipation and base periods are defined in units of the time variable
+# (calendar time), as in did::att_gt(), so comparisons that involve
+# anticipation map period indices back to calendar time here. Data from
+# setups that do not recode periods (setup_pte_basic()) have no attribute;
+# their periods already are calendar time.
+#
+# Arguments: data (full data from a setup function), p (period indices;
+#   0, the never-treated group, maps to NA).
+# Returns: calendar times of p.
+pte_calendar_time <- function(data, p) {
+  cal <- attr(data, "pte_time_periods")
+  if (is.null(cal)) {
+    return(ifelse(p > 0, p, NA_real_))
+  }
+  out <- rep(NA_real_, length(p))
+  pos <- !is.na(p) & p > 0
+  out[pos] <- cal[p[pos]]
+  out
+}
+
+# Returns the base period (a period index) for the cell of group g in period
+# tp, as in did::att_gt():
+#   - post-treatment cells (t >= g - anticipation, in calendar time) and all
+#     cells with a universal base period use the last period p with
+#     p + anticipation < g;
+#   - pre-treatment cells with a varying base period use the period just
+#     before tp.
+# NA if group g has no period early enough to serve as its base period.
+pte_base_period <- function(data, g, tp, anticipation = 0,
+                            base_period = "varying") {
+  cal <- attr(data, "pte_time_periods")
+  periods <- if (is.null(cal)) sort(unique(data$.period)) else seq_along(cal)
+  cal_periods <- pte_calendar_time(data, periods)
+  cal_g <- pte_calendar_time(data, g)
+
+  post <- pte_calendar_time(data, tp) >= cal_g - anticipation
+  candidates <- if (base_period == "varying" && !post) {
+    periods[periods < tp]
+  } else {
+    periods[cal_periods + anticipation < cal_g]
+  }
+  if (length(candidates) == 0) NA else max(candidates)
+}
+
 # --- Internal: rows of a 2x2 cell ----------------------------------------
 # Returns the rows of `data` for group g and its comparison group in periods
 # tp and base.period, in their original order (the same rows as
 # subset(data, <group condition> & <period condition>)).
 #
-# Not-yet-treated comparison units must be untreated in *both* periods of the
-# cell, so they are units first treated after max(tp, base.period), as in
-# did::att_gt(). With a universal base period, the base period (g - 1) comes
-# after tp in pre-treatment cells; selecting on G > tp alone would use units
-# that are already treated in the base period as controls (#16).
+# Not-yet-treated comparison units must be untreated, and not yet
+# anticipating treatment, in *both* periods of the cell: units first treated
+# more than `anticipation` time units after max(tp, base.period), as in
+# did::att_gt(). With a universal base period, the base period comes after
+# tp in pre-treatment cells; selecting on G > tp alone would use units that
+# are already treated in the base period as controls (#16).
 #
 # When `data` comes from setup_pte(), it carries the row indices of each
 # period ("pte_period_rows"), so only the rows of the two periods are
 # examined and copied; otherwise this falls back to scanning all rows.
-gt_cell_data <- function(data, g, tp, base.period, control_group) {
-  last_period <- max(tp, base.period)
+gt_cell_data <- function(data, g, tp, base.period, control_group,
+                         anticipation = 0) {
+  threshold <- pte_calendar_time(data, max(tp, base.period)) + anticipation
   in_group <- function(G) {
     if (control_group == "notyettreated") {
-      G == g | G > last_period | G == 0
+      # NA calendar time for G == 0 is harmless: G == 0 is TRUE there
+      G == g | G == 0 | pte_calendar_time(data, G) > threshold
     } else {
       # use never treated group
       G == g | G == 0
@@ -145,20 +178,11 @@ two_by_two_rcs_subset <- function(data,
                                   anticipation = 0,
                                   base_period = "varying",
                                   ...) {
-  # get the correct "base" period for this group
-  main.base.period <- g - anticipation - 1
+  # base period as in two_by_two_subset()
+  base.period <- pte_base_period(data, g, tp, anticipation, base_period)
 
-  if (base_period == "varying") {
-    if (tp < (g - anticipation)) {
-      base.period <- tp - 1
-    } else {
-      base.period <- main.base.period
-    }
-  } else {
-    base.period <- main.base.period
-  }
-
-  this.data <- gt_cell_data(data, g, tp, base.period, control_group)
+  this.data <- gt_cell_data(data, g, tp, base.period, control_group,
+                            anticipation)
   this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
   this.data$D <- 1 * (this.data$.G == g)
   this.data <- gt_data_frame(this.data)
