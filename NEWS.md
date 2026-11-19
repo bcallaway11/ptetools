@@ -1,5 +1,11 @@
 # ptetools 1.0.2
 
+* `pte_default()` with `est_method = "dr"` no longer warns
+  "non-integer #successes in a binomial glm!" on every call (#20). The
+  overlap check now fits its logit propensity score with `quasibinomial()`
+  and weights normalized to mean 1; fitted values, and so results, are
+  unchanged.
+
 * No more flood of warnings from the multiplier bootstrap with
   `base_period = "universal"` (#3). The sup-t critical value for uniform
   confidence bands is computed only when it is used (`cband = TRUE`), and

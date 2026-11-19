@@ -61,3 +61,20 @@ test_that("overall weights tolerate floating-point rounding", {
   expect_equal(sum(w$overall_weight), 1)
   expect_true(all(w$overall_weight >= 0))
 })
+
+# pte_attgt()'s overlap check fitted a binomial glm() with weights that were
+# never whole numbers, so every est_method = "dr" call warned "non-integer
+# #successes in a binomial glm!" (#20).
+test_that("doubly robust estimation does not warn about non-integer weights", {
+  skip_if_not_installed("did")
+  data <- did::mpdta
+  set.seed(1)
+  data$w <- rep(runif(500, 1, 100), each = 5)
+  for (wname in list(NULL, "w")) {
+    expect_no_warning(pte_default(
+      yname = "lemp", gname = "first.treat", tname = "year",
+      idname = "countyreal", data = data, d_outcome = TRUE,
+      xformula = ~lpop, est_method = "dr", weightsname = wname, biters = 0
+    ))
+  }
+})

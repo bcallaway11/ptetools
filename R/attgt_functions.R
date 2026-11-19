@@ -223,7 +223,13 @@ pte_attgt <- function(
 
   # if group is too small, switch to reg adjustment
   if (est_method == "dr") {
-    pscore_est <- glm(D ~ covmat, family = binomial(link = "logit"), weights = (.w / sum(.w)))
+    # Overlap check: logit propensity scores. quasibinomial() fits the same
+    # model with the same algorithm (identical fitted values) but, unlike
+    # binomial(), does not warn "non-integer #successes" for non-integer
+    # weights; only fitted values are used here (#20). Weights normalized to
+    # mean 1; the fitted values do not depend on their scale.
+    pscore_est <- glm(D ~ covmat, family = quasibinomial(link = "logit"),
+                      weights = .w / mean(.w))
     pscore <- predict(pscore_est, type = "response")
     if (max(pscore) > 0.99) {
       est_method <- "reg"
@@ -240,7 +246,7 @@ pte_attgt <- function(
       y0 = rep(0, length(Y)),
       D = D,
       covariates = covmat,
-      i.weights = (.w / sum(.w)),
+      i.weights = .w / mean(.w), # DRDID rescales to mean 1 anyway
       inffunc = TRUE
     )
   } else if (est_method == "reg") {
@@ -249,7 +255,7 @@ pte_attgt <- function(
       y0 = rep(0, length(Y)),
       D = D,
       covariates = covmat,
-      i.weights = (.w / sum(.w)),
+      i.weights = .w / mean(.w), # DRDID rescales to mean 1 anyway
       inffunc = TRUE
     )
   } else {
