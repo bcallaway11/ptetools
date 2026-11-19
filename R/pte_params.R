@@ -163,9 +163,10 @@ setup_pte <- function(yname,
   # comparison group: any other value used to be treated as never treated
   # without a warning, so a typo silently changed the results
   if (!(is.character(control_group) && length(control_group) == 1 &&
-          control_group %in% c("notyettreated", "nevertreated"))) {
-    stop("control_group must be \"notyettreated\" or \"nevertreated\".",
-         call. = FALSE)
+          control_group %in% c("notyettreated", "nevertreated",
+                               "eventuallytreated"))) {
+    stop("control_group must be \"notyettreated\", \"nevertreated\" or ",
+         "\"eventuallytreated\".", call. = FALSE)
   }
 
   # setup data
@@ -231,6 +232,26 @@ setup_pte <- function(yname,
     stop("time periods must be positive integers (numeric, integer-valued, and > 0).")
   }
 
+
+  # Eventually-treated comparison units (#29): units treated at some point
+  # but not yet treated (net of anticipation) in both periods of the cell,
+  # i.e. not-yet-treated units other than the never treated. They are
+  # implemented by dropping the never-treated units here and then using
+  # not-yet-treated comparisons; with no never-treated units left, the
+  # latest-treated cohort becomes the comparison group below. Dropping them
+  # first keeps units first treated after the sample ends, which are
+  # eventually treated, as comparison units.
+  if (identical(control_group, "eventuallytreated")) {
+    keep_rows <- is.na(G) | G != 0
+    data <- data[keep_rows, , drop = FALSE]
+    G <- G[keep_rows]
+    period <- period[keep_rows]
+    if (nrow(data) == 0) {
+      stop("control_group = \"eventuallytreated\" needs units that are ",
+           "treated at some point.", call. = FALSE)
+    }
+    time.periods <- sort(unique(period))
+  }
 
   # Units first treated more than `anticipation` time units after the last
   # period are untreated (and not anticipating) throughout the sample; treat
@@ -420,9 +441,13 @@ setup_pte <- function(yname,
 #'  bootstrap (one multiplier per cluster) and the empirical bootstrap
 #'  (whole clusters are resampled).
 #' @param control_group Which group is used as the comparison group.
-#'  The default choice is "notyettreated", but
-#'  different estimation strategies can implement their own choices
-#'  for the control group.
+#'  The default choice is "notyettreated" (units not yet treated in either
+#'  period of a group-time comparison, including never-treated units).
+#'  "nevertreated" uses only never-treated units, and "eventuallytreated"
+#'  uses not-yet-treated units excluding the never treated (as in
+#'  \code{setup_pte()}; units first treated after the last period count as
+#'  eventually treated). Different estimation strategies can implement
+#'  their own choices for the control group.
 #' @param gt_type which type of group-time effects are computed.
 #'  The default is "att".  Different estimation strategies can implement
 #'  their own choices for `gt_type`

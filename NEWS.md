@@ -1,5 +1,13 @@
 # ptetools 1.0.2
 
+* New `control_group = "eventuallytreated"` (#29): the comparison units are
+  units that are treated at some point but not yet treated (net of
+  anticipation) in either period of a group-time comparison, i.e. the
+  not-yet-treated units other than the never treated. The latest-treated
+  cohort then serves only as a comparison group, and periods from its
+  treatment date on are dropped, as without a never-treated group. Units
+  first treated after the last period count as eventually treated.
+
 * QTT results (`pte_qtt`), e.g. from qte's estimators (#26):
   * `summary()` now returns a `summary.pte_qtt` object instead of printing,
     so the table no longer appears twice at the console;
@@ -17,9 +25,9 @@
   (contdid #5). `process_dose_gt()` then reports only ACRT results; ATT(d)
   and the overall ATT are `NA`.
 
-* `control_group` is now checked: it must be `"notyettreated"` or
-  `"nevertreated"`. Any other value, including a typo, used to be treated
-  as `"nevertreated"` without a warning.
+* `control_group` is now checked: it must be `"notyettreated"`,
+  `"nevertreated"` or `"eventuallytreated"`. Any other value, including a
+  typo, used to be treated as `"nevertreated"` without a warning.
 
 * Fixed designs without a never-treated group. `setup_pte()` (and
   `setup_pte_basic()`) removed the smallest group value assuming it was 0,

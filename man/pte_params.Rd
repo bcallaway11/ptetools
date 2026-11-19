@@ -99,9 +99,13 @@ bootstrap (one multiplier per cluster) and the empirical bootstrap
 (whole clusters are resampled).}
 
 \item{control_group}{Which group is used as the comparison group.
-The default choice is "notyettreated", but
-different estimation strategies can implement their own choices
-for the control group.}
+The default choice is "notyettreated" (units not yet treated in either
+period of a group-time comparison, including never-treated units).
+"nevertreated" uses only never-treated units, and "eventuallytreated"
+uses not-yet-treated units excluding the never treated (as in
+\code{setup_pte()}; units first treated after the last period count as
+eventually treated). Different estimation strategies can implement
+their own choices for the control group.}
 
 \item{gt_type}{which type of group-time effects are computed.
 The default is "att".  Different estimation strategies can implement

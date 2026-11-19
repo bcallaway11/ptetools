@@ -6,7 +6,8 @@
 #   period, not-yet-treated controls must be untreated in the base period
 #   (#16); aggregated standard errors (#19) and the pre-test (#18) must
 #   match too;
-#   anticipation follows did's rules, in units of the time variable.
+#   anticipation follows did's rules, in units of the time variable;
+#   control_group = "eventuallytreated" (#29).
 # Author: Brant Callaway
 # Last update: 2026-11-19
 # Date created: 2026-11-19
@@ -256,5 +257,60 @@ test_that("an invalid control_group gives an error", {
                 idname = "countyreal", data = did::mpdta,
                 control_group = "notyettreatd", biters = 0),
     "control_group must be"
+  )
+})
+
+
+# --- Eventually-treated comparison units (#29) ------------------------------
+# control_group = "eventuallytreated" uses not-yet-treated units other than
+# the never treated: the same as "notyettreated" on the data without the
+# never-treated units (which is checked against did::att_gt() above). Units
+# first treated after the sample ends are eventually treated and stay in.
+eventually_vs_notyet <- function(data, base_period) {
+  run <- function(d, cg) {
+    suppressWarnings(pte_default(
+      yname = "lemp", gname = "first.treat", tname = "year",
+      idname = "countyreal", data = d, d_outcome = TRUE,
+      base_period = base_period, control_group = cg, biters = 0
+    ))
+  }
+  a <- run(data, "eventuallytreated")
+  b <- run(data[data$first.treat != 0, ], "notyettreated")
+  expect_equal(a$att_gt$att, b$att_gt$att, tolerance = 1e-10)
+  expect_equal(a$att_gt$se, b$att_gt$se, tolerance = 1e-10)
+  expect_equal(a$event_study$att.egt, b$event_study$att.egt,
+               tolerance = 1e-10)
+  expect_equal(a$event_study$se.egt, b$event_study$se.egt, tolerance = 1e-10)
+  expect_equal(a$overall_att$overall.se, b$overall_att$overall.se,
+               tolerance = 1e-10)
+  a
+}
+
+test_that("eventuallytreated drops the never treated, then is not-yet", {
+  skip_if_not_installed("did")
+  for (bp in c("varying", "universal")) {
+    a <- eventually_vs_notyet(did::mpdta, bp)
+    # the latest cohort (2007) is the comparison group, not estimated
+    expect_false(2007 %in% a$att_gt$group)
+  }
+})
+
+test_that("eventuallytreated keeps units first treated after the sample", {
+  skip_if_not_installed("did")
+  d <- did::mpdta
+  d$first.treat[d$first.treat == 0 & d$countyreal %% 2 == 0] <- 2010
+  a <- eventually_vs_notyet(d, "varying")
+  # with the 2010 units as comparisons, the 2007 cohort is estimated
+  expect_true(2007 %in% a$att_gt$group)
+})
+
+test_that("eventuallytreated with one treated cohort gives a clear error", {
+  skip_if_not_installed("did")
+  d <- did::mpdta[did::mpdta$first.treat %in% c(0, 2006), ]
+  expect_error(
+    pte_default(yname = "lemp", gname = "first.treat", tname = "year",
+                idname = "countyreal", data = d,
+                control_group = "eventuallytreated", biters = 0),
+    "no comparison units"
   )
 })

@@ -728,6 +728,8 @@ summary.aggte_obj <- function(object, ...) {
     control_group_text <- "Never Treated"
   } else if (control_group == "notyettreated") {
     control_group_text <- "Not Yet Treated"
+  } else if (control_group == "eventuallytreated") {
+    control_group_text <- "Eventually Treated"
   }
 
   if (!is.null(control_group)) {

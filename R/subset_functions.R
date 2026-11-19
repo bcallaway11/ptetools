@@ -20,8 +20,8 @@
 #' @param data the full dataset
 #' @param g the current group
 #' @param tp the current time period
-#' @param control_group whether to use "notyettreated" (default) or
-#'  "nevertreated"
+#' @param control_group whether to use "notyettreated" (default),
+#'  "nevertreated" or "eventuallytreated" (see \code{\link{pte_params}})
 #' @param anticipation the number of periods of anticipation (i.e., number
 #'  of periods before the treatment happens where the treatment can "already"
 #'  affect the outcome)
@@ -155,14 +155,18 @@ gt_cell_data <- function(data, g, tp, base.period, control_group,
                          anticipation = 0) {
   threshold <- pte_calendar_time(data, max(tp, base.period)) + anticipation
   in_group <- function(G) {
-    if (control_group == "notyettreated") {
-      # NA calendar time for G == 0 is harmless: G == 0 is TRUE there
+    if (control_group %in% c("notyettreated", "eventuallytreated")) {
+      # NA calendar time for G == 0 is harmless: G == 0 is TRUE there.
+      # For "eventuallytreated", setup_pte() has already dropped the never
+      # treated; G == 0 is then the latest cohort (or units first treated
+      # after the sample ends), which are never treated within the sample
+      # that remains (#29).
       G == g | G == 0 | pte_calendar_time(data, G) > threshold
     } else if (control_group == "nevertreated") {
       G == g | G == 0
     } else {
-      stop("control_group must be \"notyettreated\" or \"nevertreated\".",
-           call. = FALSE)
+      stop("control_group must be \"notyettreated\", \"nevertreated\" or ",
+           "\"eventuallytreated\".", call. = FALSE)
     }
   }
 
