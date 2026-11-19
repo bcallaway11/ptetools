@@ -4,7 +4,7 @@
 #   two_by_two_subset (panel), two_by_two_rcs_subset (repeated cross
 #   sections), keep_all_untreated_subset and keep_all_pretreatment_subset.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-17
 # =============================================================================
 
@@ -69,19 +69,19 @@ two_by_two_subset <- function(data,
   this.data <- gt_cell_data(data, g, tp, base.period, control_group)
 
   # variable to keep track of pre/post periods
-  this.data$name <- ifelse(this.data$period == tp, "post", "pre")
+  this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
 
   # variable to indicate local treatment status
-  this.data$D <- 1 * (this.data$G == g)
+  this.data$D <- 1 * (this.data$.G == g)
 
   # make this.data into gt_data_frame object
   this.data <- gt_data_frame(this.data)
 
   # number of observations used for this (g,t)
-  n1 <- length(unique(this.data$id))
+  n1 <- length(unique(this.data$.id))
   all_ids <- attr(data, "pte_ids")
-  if (is.null(all_ids)) all_ids <- unique(data$id)
-  disidx <- all_ids %in% unique(this.data$id)
+  if (is.null(all_ids)) all_ids <- unique(data$.id)
+  disidx <- all_ids %in% unique(this.data$.id)
 
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }
@@ -99,7 +99,7 @@ gt_cell_data <- function(data, g, tp, base.period, control_group) {
   if (!is.null(period_rows) && sum(lengths(period_rows)) == nrow(data)) {
     rows <- sort(c(period_rows[[as.character(tp)]],
                    period_rows[[as.character(base.period)]]))
-    G <- data$G[rows]
+    G <- data$.G[rows]
     in_cell <- if (control_group == "notyettreated") {
       G == g | G > tp | G == 0
     } else {
@@ -109,13 +109,15 @@ gt_cell_data <- function(data, g, tp, base.period, control_group) {
     return(data[rows[which(in_cell)], , drop = FALSE])
   }
 
-  if (control_group == "notyettreated") {
-    this.data <- subset(data, G == g | G > tp | G == 0)
+  G <- data$.G
+  in_group <- if (control_group == "notyettreated") {
+    G == g | G > tp | G == 0
   } else {
     # use never treated group
-    this.data <- subset(data, G == g | G == 0)
+    G == g | G == 0
   }
-  subset(this.data, period == tp | period == base.period)
+  in_period <- data$.period == tp | data$.period == base.period
+  data[which(in_group & in_period), , drop = FALSE]
 }
 
 #' @title Two Period Two Group Repeated Cross Sections Subset
@@ -154,8 +156,8 @@ two_by_two_rcs_subset <- function(data,
   }
 
   this.data <- gt_cell_data(data, g, tp, base.period, control_group)
-  this.data$name <- ifelse(this.data$period == tp, "post", "pre")
-  this.data$D <- 1 * (this.data$G == g)
+  this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
+  this.data$D <- 1 * (this.data$.G == g)
   this.data <- gt_data_frame(this.data)
 
   n1 <- nrow(this.data)
@@ -192,8 +194,10 @@ keep_all_untreated_subset <- function(data, g, tp, ...) {
   # drop post-treatment observations that are not in group g
   # this creates the same sort of unbalanced panel data set
   # used in imputation papers.
-  data$.treat <- 1 * ((data$G <= data$period) & (data$G != 0))
-  this.data <- subset(data, (.treat == 0) | (G == g))
+  G <- data$.G
+  period <- data$.period
+  treated_now <- (G <= period) & (G != 0)
+  keep <- !treated_now | (G == g)
 
   # This line drops any periods after the "current" period too (even
   # if these are untreated) for group g.
@@ -201,14 +205,16 @@ keep_all_untreated_subset <- function(data, g, tp, ...) {
   # where it seems ambiguous/confusing what exactly to do and rules
   # out that later periods will be used to estimate the model for untreated
   # potential outcomes using group g.
-  this.data <- subset(this.data, !(G == g & period > tp))
+  keep <- keep & !(G == g & period > tp)
+  this.data <- data[which(keep), , drop = FALSE]
 
   # variable to keep track of pre/post periods
-  this.data$name <- ifelse(this.data$period == tp, "post", "pre")
+  this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
 
-  this.data$D <- 1 * ((this.data$G == g) & this.data$period >= tp)
-  n1 <- length(unique(this.data$id))
-  disidx <- unique(data$id) %in% unique(this.data$id)
+  this.data$D <- 1 * ((this.data$.G == g) & this.data$.period >= tp)
+  this.data <- gt_data_frame(this.data)
+  n1 <- length(unique(this.data$.id))
+  disidx <- unique(data$.id) %in% unique(this.data$.id)
 
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }
@@ -237,16 +243,18 @@ keep_all_untreated_subset <- function(data, g, tp, ...) {
 #'
 #' @export
 keep_all_pretreatment_subset <- function(data, g, tp, ...) {
-  this.data <- subset(data, period <= tp)
-  # keep group g, not-yet-treated groups, and never-treated group
-  this.data <- subset(this.data, (G == g) | (G > tp) | (G == 0))
+  G <- data$.G
+  # periods up to tp; group g, not-yet-treated groups, and never-treated group
+  keep <- (data$.period <= tp) & ((G == g) | (G > tp) | (G == 0))
+  this.data <- data[which(keep), , drop = FALSE]
 
   # variable to keep track of pre/post periods
-  this.data$name <- ifelse(this.data$period == tp, "post", "pre")
+  this.data$name <- ifelse(this.data$.period == tp, "post", "pre")
 
-  this.data$D <- 1 * ((this.data$G == g) & this.data$period >= tp)
-  n1 <- length(unique(this.data$id))
-  disidx <- unique(data$id) %in% unique(this.data$id)
+  this.data$D <- 1 * ((this.data$.G == g) & this.data$.period >= tp)
+  this.data <- gt_data_frame(this.data)
+  n1 <- length(unique(this.data$.id))
+  disidx <- unique(data$.id) %in% unique(this.data$.id)
 
   list(gt_data = this.data, n1 = n1, disidx = disidx)
 }

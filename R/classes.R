@@ -4,7 +4,7 @@
 #   result types: group_time_att, pte_results, pte_emp_boot, pte_qtt,
 #   pte_dose_results, attgt_if, attgt_noif, gt_data_frame.
 # Author: Brant Callaway
-# Last update: 2026-05-18
+# Last update: 2026-11-19
 # Date created: 2021-05-17
 # =============================================================================
 
@@ -343,22 +343,51 @@ attgt_noif <- function(attgt, extra_gt_returns = NULL) {
 
 #' @title Convert Data to Usable Format
 #'
-#' @description Checks and converts data to satisfy criteria to be used in internal
-#'  `ptetools` functions.  In particular,
-#'  the function takes in a data.frame, checks if it has the right
-#'  columns to be used to calculate a group-time average treatment effect,
-#'  and sets the class of the data.frame to include \code{gt_data_frame}
+#' @description Turns the rows selected for one group-time cell into the
+#'  data that an \code{attgt_fun} receives, and sets its class to include
+#'  \code{gt_data_frame}. Every \code{subset_fun} should finish by calling it.
 #'
-#' @param data data that will be checked to see if has right format for
-#'  computing group-time average treatment effects
+#'  Setup functions such as [setup_pte()] store their internal columns under
+#'  dot-prefixed names (\code{.G}, \code{.id}, \code{.period}, \code{.Y}), so
+#'  they never overwrite the user's own columns. \code{gt_data_frame()}
+#'  copies these to the plain names \code{G}, \code{id}, \code{period} and
+#'  \code{Y} that \code{attgt_fun}s use. The \code{subset_fun} must already
+#'  have added \code{name} (\code{"pre"}/\code{"post"}) and the local
+#'  treatment indicator \code{D}.
 #'
-#' @return \code{gt_data_frame} object
+#' @param data rows of the full data (from a setup function) for one
+#'  group-time cell, including the columns \code{.G}, \code{.id},
+#'  \code{.period}, \code{.Y}, \code{name} and \code{D}
+#'
+#' @return \code{gt_data_frame} object, with columns \code{G}, \code{id},
+#'  \code{period}, \code{Y}, \code{name} and \code{D} in addition to the
+#'  columns of \code{data}
 #'
 #' @export
 gt_data_frame <- function(data) {
-  cnames <- colnames(data)
-  if (!all(c("G", "id", "period", "name", "Y", "D") %in% cnames)) {
-    warning("group-time subset of data does not contain correct column names")
+  internal_cols <- c(".G", ".id", ".period", ".Y")
+  missing_cols <- setdiff(internal_cols, colnames(data))
+  if (length(missing_cols) > 0) {
+    stop(
+      "gt_data_frame() needs the columns ",
+      paste(internal_cols, collapse = ", "),
+      ", created by setup_pte(); missing: ",
+      paste(missing_cols, collapse = ", "),
+      ". A custom setup function must create these dot-prefixed columns.",
+      call. = FALSE
+    )
+  }
+
+  # plain names for attgt functions; inside a cell these copies may replace
+  # user columns with the same name, which is harmless because aggregation
+  # reads the user's columns from the full data, not from the cell
+  data$G <- data$.G
+  data$id <- data$.id
+  data$period <- data$.period
+  data$Y <- data$.Y
+
+  if (!all(c("name", "D") %in% colnames(data))) {
+    warning("group-time subset of data does not contain columns name and D")
   }
 
   if (!("gt_data_frame" %in% class(data))) {

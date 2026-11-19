@@ -1,1 +1,1 @@
-utils::globalVariables(c("e", "post", "ciu", "cil", "G", "Y", "att", "id", "name", "period", "att.e", "att.g", "group", "length.e", "length.group", "time.period", ".treat", "est", "crit", "se", "probs", "qtt"))
+utils::globalVariables(c("e", "post", "ciu", "cil", "G", "Y", "att", "id", "name", "period", "att.e", "att.g", "group", "length.e", "length.group", "time.period", "est", "crit", "se", "probs", "qtt"))

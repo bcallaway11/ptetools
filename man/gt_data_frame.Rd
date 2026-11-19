@@ -7,16 +7,25 @@
 gt_data_frame(data)
 }
 \arguments{
-\item{data}{data that will be checked to see if has right format for
-computing group-time average treatment effects}
+\item{data}{rows of the full data (from a setup function) for one
+group-time cell, including the columns \code{.G}, \code{.id},
+\code{.period}, \code{.Y}, \code{name} and \code{D}}
 }
 \value{
-\code{gt_data_frame} object
+\code{gt_data_frame} object, with columns \code{G}, \code{id},
+\code{period}, \code{Y}, \code{name} and \code{D} in addition to the
+columns of \code{data}
 }
 \description{
-Checks and converts data to satisfy criteria to be used in internal
-\code{ptetools} functions.  In particular,
-the function takes in a data.frame, checks if it has the right
-columns to be used to calculate a group-time average treatment effect,
-and sets the class of the data.frame to include \code{gt_data_frame}
+Turns the rows selected for one group-time cell into the
+data that an \code{attgt_fun} receives, and sets its class to include
+\code{gt_data_frame}. Every \code{subset_fun} should finish by calling it.
+
+Setup functions such as \code{\link[=setup_pte]{setup_pte()}} store their internal columns under
+dot-prefixed names (\code{.G}, \code{.id}, \code{.period}, \code{.Y}), so
+they never overwrite the user's own columns. \code{gt_data_frame()}
+copies these to the plain names \code{G}, \code{id}, \code{period} and
+\code{Y} that \code{attgt_fun}s use. The \code{subset_fun} must already
+have added \code{name} (\code{"pre"}/\code{"post"}) and the local
+treatment indicator \code{D}.
 }

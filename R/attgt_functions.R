@@ -3,7 +3,7 @@
 # Description: Estimators for a single (g,t) cell (did_attgt, did_rcs_attgt,
 #   pte_attgt) and internal helpers that put a 2x2 panel cell in wide form.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-18
 # =============================================================================
 
@@ -12,7 +12,7 @@
 # rows reordered to match the pre rows by id. Everything per-unit (outcomes,
 # covariates, weights, D) is then taken from rows in the same order, whatever
 # the order of gt_data (#9). Units are in the order of the pre rows, which
-# for data from setup_pte() is the order of unique(data$id), as compute.pte()
+# for data from setup_pte() is the order of unique(data$.id), as compute.pte()
 # expects for the influence function.
 gt_pre_post <- function(gt_data) {
   pre <- gt_data[gt_data$name == "pre", , drop = FALSE]

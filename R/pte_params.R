@@ -3,7 +3,7 @@
 # Description: Functions for setting up pte_params objects used throughout
 #   the ptetools pipeline: setup_pte_basic, setup_pte, and pte_params.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -65,16 +65,17 @@ setup_pte_basic <- function(yname,
     id <- seq_len(nrow(data))
   }
 
-  data$G <- G
-  data$id <- id
-  n <- length(unique(data$id))
-  data$period <- period
-  data$Y <- data[, yname]
+  # internal columns are dot-prefixed so they never overwrite the user's
+  # columns (see setup_pte() for the column contract)
+  data$.G <- G
+  data$.id <- id
+  data$.period <- period
+  data$.Y <- data[, yname]
   data$.w <- rep(1, nrow(data))
   data$.rowid <- seq_len(nrow(data))
 
-  time.periods <- sort(unique(data$period))
-  groups <- unique(data$G)
+  time.periods <- sort(unique(data$.period))
+  groups <- unique(data$.G)
 
   # drop never treated group
   groups <- sort(groups)[-1]
@@ -165,10 +166,15 @@ setup_pte <- function(yname,
     .w <- data[, weightsname]
   }
 
-  data$G <- G
-  data$id <- id
-  n <- length(unique(data$id))
-  data$Y <- data[, yname]
+  # Internal columns are dot-prefixed (.G, .id, .period, .Y, .w, .rowid) so
+  # they never overwrite the user's columns. Later steps (aggregation,
+  # mapping results back to the original time scale, the empirical bootstrap)
+  # read the user's columns by name and need their original values (#13).
+  # Subset functions read only the dot columns; gt_data_frame() then gives
+  # each (g,t) cell the plain names (G, id, period, Y) that attgt functions
+  # use.
+  data$.id <- id
+  data$.Y <- data[, yname]
   data$.w <- .w
 
   time.periods <- sort(unique(period))
@@ -179,7 +185,7 @@ setup_pte <- function(yname,
   }
 
 
-  groups <- unique(data$G)
+  groups <- unique(G)
 
   # drop never treated group
   groups <- sort(groups)[-1]
@@ -196,9 +202,9 @@ setup_pte <- function(yname,
   groups <- BMisc::orig2t(original_groups, original_time.periods)
 
   # put the period in new time scale
-  data$period <- BMisc::orig2t(period, original_time.periods)
-  data$G <- BMisc::orig2t(G, original_time.periods)
-  if (is.list(data$G) || anyNA(data$G)) {
+  data$.period <- BMisc::orig2t(period, original_time.periods)
+  data$.G <- BMisc::orig2t(G, original_time.periods)
+  if (is.list(data$.G) || anyNA(data$.G)) {
     stop("Every value of gname must be 0 (never treated) or one of the time periods in tname.")
   }
 
@@ -212,22 +218,22 @@ setup_pte <- function(yname,
     # account for anticipation
     groups <- groups[groups >= (min(time.periods + 1) + anticipation)]
     # drop early treated groups
-    data <- data[!(data$G %in% seq(1, required_pre_periods + anticipation)), ]
+    data <- data[!(data$.G %in% seq(1, required_pre_periods + anticipation)), ]
   } else {
     time.periods <- sort(time.periods)[-seq(1, required_pre_periods)]
     groups <- groups[groups %in% time.periods]
     # account for anticipation
     groups <- groups[groups >= (min(time.periods) + anticipation)]
     # drop early treated groups
-    data <- data[!(data$G %in% seq(1, required_pre_periods + anticipation)), ]
+    data <- data[!(data$.G %in% seq(1, required_pre_periods + anticipation)), ]
   }
 
   # Sort panel data by (id, period). Downstream code lines up unit-level
-  # vectors by position: the influence-function rows follow unique(data$id),
+  # vectors by position: the influence-function rows follow unique(data$.id),
   # and the 2x2 cells and first-period group weights follow row order. With
   # this order they all agree regardless of how the input was sorted (#9).
   if (isTRUE(panel)) {
-    data <- data[order(data$id, data$period), , drop = FALSE]
+    data <- data[order(data$.id, data$.period), , drop = FALSE]
   }
 
   data$.rowid <- seq_len(nrow(data))
@@ -235,8 +241,8 @@ setup_pte <- function(yname,
   # Row indices by period and the unit ids, computed once here so that
   # two_by_two_subset() can build each (g,t) cell by position instead of
   # scanning the full data for every cell.
-  attr(data, "pte_period_rows") <- split(seq_len(nrow(data)), data$period)
-  attr(data, "pte_ids") <- unique(data$id)
+  attr(data, "pte_period_rows") <- split(seq_len(nrow(data)), data$.period)
+  attr(data, "pte_ids") <- unique(data$.id)
 
 
   params <- pte_params(

@@ -1,5 +1,21 @@
 # ptetools 1.0.2
 
+* Fixed estimates when a column named in `gname`, `tname`, `idname` or
+  `yname` is called `G`, `period`, `id` or `Y` (#13). With `gname = "G"` or
+  `tname = "period"` and groups coded as calendar years, the overall ATT and
+  event study were silently `NaN`. `setup_pte()` and `setup_pte_basic()` now
+  store their internal columns as `.G`, `.id`, `.period` and `.Y`, and never
+  modify the user's columns.
+
+* **Breaking change for custom setup and subset functions.** The full data
+  from a setup function now has the internal columns `.G`, `.id`, `.period`,
+  `.Y`, `.w` and `.rowid`, not `G`, `id`, `period` and `Y`. Subset functions
+  should select rows using the dot columns and finish with
+  `gt_data_frame()`, which gives each group-time cell the columns `G`, `id`,
+  `period` and `Y` (`attgt_fun`s are unchanged). `gt_data_frame()` now
+  errors if the dot columns are missing. `keep_all_untreated_subset()` and
+  `keep_all_pretreatment_subset()` now also return `gt_data_frame` cells.
+
 * Fixed the standard errors of `ATT(d)` and `ACRT(d)` from
   `process_dose_gt()` (used by `contdid`) when `dvals` does not span
   exactly the range of the positive doses: the influence functions were

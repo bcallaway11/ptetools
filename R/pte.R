@@ -3,7 +3,7 @@
 # Description: compute.pte (inner loop over groups/time periods) and pte
 #   (main user-facing function) for computing panel treatment effects.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-14
 # =============================================================================
 
@@ -31,10 +31,6 @@ compute.pte <- function(ptep,
   # unpack ptep
   #-----------------------------------------------------------------------------
   data <- ptep$data
-  yname <- ptep$yname
-  gname <- ptep$gname
-  idname <- ptep$idname
-  tname <- ptep$tname
   panel <- ptep$panel
   base_period <- ptep$base_period
   anticipation <- ptep$anticipation
@@ -43,15 +39,9 @@ compute.pte <- function(ptep,
 
   data <- as.data.frame(data)
 
-  # setup data
-  G <- data[, gname]
-  if (isTRUE(panel)) {
-    id <- data[, idname]
-  } else {
-    id <- data$.rowid
-  }
-  period <- data[, tname]
-  n <- if (isTRUE(panel)) length(unique(data$id)) else nrow(data)
+  # number of units (panel) or observations (repeated cross sections); the
+  # influence function has one row for each
+  n <- if (isTRUE(panel)) length(unique(data$.id)) else nrow(data)
 
   # pick up all time periods
   time.periods <- ptep$tlist

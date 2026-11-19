@@ -4,7 +4,7 @@
 #   SE routines), plus aggregation functions attgt_pte_aggregations,
 #   qtt_pte_aggregations, and qott_pte_aggregations.
 # Author: Brant Callaway
-# Last update: 2026-11-14
+# Last update: 2026-11-19
 # Date created: 2021-05-19
 # =============================================================================
 
@@ -21,7 +21,6 @@ make_boot_sampler <- function(data, idname, panel) {
     return(function() {
       bdata <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
       bdata$.rowid <- seq_len(nrow(bdata))
-      bdata$id <- bdata$.rowid
       bdata
     })
   }
