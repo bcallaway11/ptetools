@@ -6,7 +6,8 @@
   `quantile()` on the mixture then rounded its jumps again. Weighted data
   and the equivalent row-replicated data gave different QTTs. The mixture
   now uses every support point of the cells' CDFs (one sort), at about the
-  same cost. Reported QTTs change slightly (on `mpdta`, by up to about
+  same cost, through `BMisc::combine_ecdfs()`, which computes mixtures
+  exactly in BMisc 1.4.11 (now required). Reported QTTs change slightly (on `mpdta`, by up to about
   0.01). The cells' `F0`/`F1` must be step-function CDFs, as those from
   `BMisc::weighted_ecdf()` are. Bootstrap draws no longer keep their own
   overall CDFs, so memory does not grow with sample size times `biters`.

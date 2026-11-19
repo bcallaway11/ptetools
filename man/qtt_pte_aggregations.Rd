@@ -29,6 +29,7 @@ the overall, group, and dynamic level.  CDFs are mixed first, with the
 aggregation weights, and the mixtures are then inverted at all quantile
 levels in \code{probs}, avoiding the bias from averaging scalar QTTs.
 The mixtures are computed exactly, from every support point of the
-cells' CDFs, which must be step functions (such as those from
+cells' CDFs (\code{BMisc::combine_ecdfs()} without \code{y.seq}), which
+must be step functions (such as those from
 \code{BMisc::weighted_ecdf()}).
 }

@@ -15,7 +15,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 Imports:
-    BMisc (>= 1.4.8),
+    BMisc (>= 1.4.11),
     Matrix,
     ggplot2,
     DRDID,

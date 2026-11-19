@@ -1,8 +1,8 @@
 # =============================================================================
 # Title: Tests for exact QTT aggregation
 # Description: qtt_pte_aggregations() mixes the cells' CDFs exactly, from
-#   every support point, rather than on a 1,000-point grid of the pooled
-#   outcome (#25). Checked against a brute-force mixture, and integer weights
+#   every support point (BMisc::combine_ecdfs()), rather than on a
+#   1,000-point grid of the pooled outcome (#25). Checked against a brute-force mixture, and integer weights
 #   must give the same QTTs as the equivalent row-replicated data.
 # Author: Brant Callaway
 # Last update: 2026-11-19
@@ -25,20 +25,14 @@ test_that("mixtures of weighted CDFs are exact", {
   )
   w <- c(0.5, 0.3, 0.2)
   probs <- c(0.01, seq(0.05, 0.95, 0.05), 0.99, 1)
-  mix <- mix_cdf(lapply(cdfs, ecdf_masses), w)
-  expect_equal(mix_quantile(mix, probs), brute_quantile(cdfs, w, probs))
-  # the returned step function is the mixture
-  expect_equal(mix_ecdf(mix)(mix$x),
-               Reduce(`+`, Map(function(f, ww) ww * f(mix$x), cdfs, w)))
+  expect_equal(mix_quantile(cdfs, w, probs), brute_quantile(cdfs, w, probs))
   # cells with zero weight are skipped
-  expect_equal(mix_quantile(mix_cdf(lapply(cdfs, ecdf_masses), c(0.6, 0.4, 0)),
-                            probs),
+  expect_equal(mix_quantile(cdfs, c(0.6, 0.4, 0), probs),
                brute_quantile(cdfs[1:2], c(0.6, 0.4), probs))
   # an exact quantile at a jump (F = tau exactly) is that point, as type 1
   two <- list(BMisc::weighted_ecdf(c(1, 2, 3, 4)))
-  expect_equal(mix_quantile(mix_cdf(lapply(two, ecdf_masses), 1),
-                            c(0.25, 0.5, 0.75)), c(1, 2, 3))
-  expect_error(ecdf_masses(function(y) y), "step-function CDFs")
+  expect_equal(mix_quantile(two, 1, c(0.25, 0.5, 0.75)), c(1, 2, 3))
+  expect_error(mix_quantile(list(function(y) y), 1, 0.5), "not ecdf objects")
 })
 
 # local QTT: F1 from the treated, F0 from the comparison units, in the post

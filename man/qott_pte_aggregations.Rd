@@ -25,6 +25,7 @@ potentially useful for debugging.}
 Aggregate group-time distribution of the treatment effect into
 overall, group, and dynamic effects, at the quantile
 \code{ptep$ret_quantile}. The distributions are mixed exactly, from
-every support point of the cells' CDFs (\code{Fte}), which must be step
-functions (such as those from \code{BMisc::weighted_ecdf()}).
+every support point of the cells' CDFs (\code{Fte}), with
+\code{BMisc::combine_ecdfs()}; they must be step functions (such as
+those from \code{BMisc::weighted_ecdf()}).
 }

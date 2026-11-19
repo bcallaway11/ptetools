@@ -497,63 +497,18 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
 }
 
 
-# --- Internal: exact mixtures of step-function CDFs (#25) -------------------
-# A weighted mixture F = sum_c w_c F_c of step-function CDFs (cell ECDFs,
-# possibly weighted) is itself a step function: its jumps are at the cells'
-# support points y_cj, with masses w_c * p_cj. Stacking these, sorting and
-# taking cumulative sums gives F exactly at every support point, and the
-# quantile at tau is the first point where F >= tau (quantile type 1).
-#
-# This replaces evaluating every cell on a 1,000-point grid of the pooled
-# outcome (BMisc::combine_ecdfs()), which rounded each quantile up to the
-# next grid point and made the QTT depend on the grid, and quantile() on the
-# result, which (stats:::quantile.ecdf) rounds each jump to a multiple of
-# 1/nobs and so is not exact for weighted or mixed CDFs.
-
-# ecdf_masses(): support points and masses of a step-function CDF
-#   (an "ecdf"/"stepfun" object, such as from BMisc::weighted_ecdf()).
-ecdf_masses <- function(cdf) {
-  if (!inherits(cdf, "stepfun")) {
-    stop("QTT aggregation needs each cell's F0 and F1 to be step-function ",
-         "CDFs (e.g. from BMisc::weighted_ecdf()); got an object of class ",
-         class(cdf)[1], ".", call. = FALSE)
-  }
-  x <- stats::knots(cdf)
-  list(x = x, p = diff(c(0, cdf(x))))
-}
-
-# mix_cdf(): the exact mixture of cells with masses `masses` (a list from
-#   ecdf_masses()) and weights `weights`. Cells with zero weight are skipped.
-#   Returns a list: x (sorted unique support points) and cdf (F at x).
-mix_cdf <- function(masses, weights) {
-  use <- which(!is.na(weights) & weights != 0)
-  x <- unlist(lapply(masses[use], `[[`, "x"), use.names = FALSE)
-  p <- unlist(Map(function(m, w) m$p * w, masses[use], weights[use]),
-              use.names = FALSE)
-  o <- order(x)
-  x <- x[o]
-  cdf <- cumsum(p[o])
-  # one value per support point: F at the last of tied points
-  last <- !duplicated(x, fromLast = TRUE)
-  x <- x[last]
-  cdf <- cdf[last]
-  # normalize so F reaches 1 (aggregation weights sum to 1)
-  list(x = x, cdf = cdf / cdf[length(cdf)])
-}
-
-# mix_quantile(): quantiles of a mix_cdf() result: the first support point
-#   where F >= tau, as quantile(type = 1). The small tolerance keeps a
-#   cumulative sum that should equal tau, but is a rounding error below it,
-#   from moving the quantile one point up.
-mix_quantile <- function(mix, probs) {
-  idx <- findInterval(probs - 1e-12, mix$cdf, left.open = TRUE) + 1
-  mix$x[pmin(idx, length(mix$x))]
-}
-
-# mix_ecdf(): a mix_cdf() result as an ecdf-class step function, for the
-#   returned F0_overall / F1_overall
-mix_ecdf <- function(mix) {
-  BMisc::make_dist(mix$x, mix$cdf, sorted = TRUE)
+# --- Internal: exact quantiles of mixtures of CDFs (#25) -------------------
+# mix_quantile(): quantiles at `probs` of the mixture sum_c w_c F_c of the
+#   step-function CDFs in `cdfs` with weights `w`. BMisc::combine_ecdfs()
+#   without y.seq mixes them exactly (from every support point, with one
+#   sort; zero-weight cells skipped), and quantile() of the result
+#   (BMisc_dist) inverts it exactly, as quantile(type = 1). This replaces
+#   evaluating every cell on a 1,000-point grid, which rounded each quantile
+#   up to a grid point and made the QTT depend on the grid, and
+#   stats:::quantile.ecdf(), which rounds jumps to multiples of 1/nobs.
+mix_quantile <- function(cdfs, w, probs) {
+  stats::quantile(BMisc::combine_ecdfs(ecdflist = cdfs, weights = w), probs,
+                  names = FALSE)
 }
 
 
@@ -564,7 +519,8 @@ mix_ecdf <- function(mix) {
 #'  aggregation weights, and the mixtures are then inverted at all quantile
 #'  levels in \code{probs}, avoiding the bias from averaging scalar QTTs.
 #'  The mixtures are computed exactly, from every support point of the
-#'  cells' CDFs, which must be step functions (such as those from
+#'  cells' CDFs (\code{BMisc::combine_ecdfs()} without \code{y.seq}), which
+#'  must be step functions (such as those from
 #'  \code{BMisc::weighted_ecdf()}).
 #'
 #' @inheritParams attgt_pte_aggregations
@@ -581,24 +537,23 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   # get (g,t) aggregation weights
   attgt_res <- attgt_pte_aggregations(attgt.list, ptep = ptep)
 
-  # support points and masses of each cell's CDFs, once
-  F0_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
-    ecdf_masses(egr$extra_gt_returns$F0)
-  })
-  F1_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
-    ecdf_masses(egr$extra_gt_returns$F1)
-  })
+  F0_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$F0) # nolint: object_name_linter
+  F1_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$F1) # nolint: object_name_linter
 
   # QTT at probs from the mixtures with weights w
   mix_qtt <- function(w) {
-    mix_quantile(mix_cdf(F1_gt, w), probs) -
-      mix_quantile(mix_cdf(F0_gt, w), probs)
+    mix_quantile(F1_gt, w, probs) - mix_quantile(F0_gt, w, probs)
   }
 
   # --- overall -----------------------------------------------------------
-  F0_mix <- mix_cdf(F0_gt, attgt_res$overall_weights) # nolint: object_name_linter
-  F1_mix <- mix_cdf(F1_gt, attgt_res$overall_weights) # nolint: object_name_linter
-  overall_qtt <- mix_quantile(F1_mix, probs) - mix_quantile(F0_mix, probs)
+  F0_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
+    ecdflist = F0_gt, weights = attgt_res$overall_weights
+  )
+  F1_overall <- BMisc::combine_ecdfs( # nolint: object_name_linter
+    ecdflist = F1_gt, weights = attgt_res$overall_weights
+  )
+  overall_qtt <- stats::quantile(F1_overall, probs, names = FALSE) -
+    stats::quantile(F0_overall, probs, names = FALSE)
   overall_results <- data.frame(probs = probs, qtt = overall_qtt)
 
   # --- dynamic -----------------------------------------------------------
@@ -615,8 +570,8 @@ qtt_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
     overall_results = overall_results,
     dyn_results     = dyn_results,
     group_results   = group_results,
-    F0_overall      = mix_ecdf(F0_mix), # nolint: object_name_linter
-    F1_overall      = mix_ecdf(F1_mix)  # nolint: object_name_linter
+    F0_overall      = F0_overall, # nolint: object_name_linter
+    F1_overall      = F1_overall  # nolint: object_name_linter
   )
 }
 
@@ -825,8 +780,9 @@ qtt_empirical_bootstrap <- function(attgt.list,
 #' @description Aggregate group-time distribution of the treatment effect into
 #'  overall, group, and dynamic effects, at the quantile
 #'  \code{ptep$ret_quantile}. The distributions are mixed exactly, from
-#'  every support point of the cells' CDFs (\code{Fte}), which must be step
-#'  functions (such as those from \code{BMisc::weighted_ecdf()}).
+#'  every support point of the cells' CDFs (\code{Fte}), with
+#'  \code{BMisc::combine_ecdfs()}; they must be step functions (such as
+#'  those from \code{BMisc::weighted_ecdf()}).
 #'
 #' @inheritParams attgt_pte_aggregations
 #' @inheritParams attgt_if
@@ -841,25 +797,22 @@ qott_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
   # the weights here.
   attgt_res <- attgt_pte_aggregations(attgt.list, ptep = ptep)
 
-  # support points and masses of each cell's distribution of the treatment
-  # effect, once. The mixtures are exact, as for the QTT (#25); they used to
-  # be evaluated on 1,000 points of [-max(y), max(y)], which rounded the
-  # quantiles, missed effects below -max(y) and ran backwards when every
-  # outcome was negative.
-  Fte_gt <- lapply(extra_gt_returns, function(egr) { # nolint: object_name_linter
-    ecdf_masses(egr$extra_gt_returns$Fte)
-  })
+  # The mixtures are exact, as for the QTT (#25); they used to be evaluated
+  # on 1,000 points of [-max(y), max(y)], which rounded the quantiles,
+  # missed effects below -max(y) and ran backwards when every outcome was
+  # negative.
+  Fte_gt <- lapply(extra_gt_returns, function(egr) egr$extra_gt_returns$Fte) # nolint: object_name_linter
   # quantile names as quantile() gives them ("50%"), kept for compatibility
   qname <- paste0(formatC(100 * ret_quantile, format = "fg", width = 1,
                           digits = 7), "%")
   mix_qott <- function(w) {
-    stats::setNames(mix_quantile(mix_cdf(Fte_gt, w), ret_quantile), qname)
+    stats::setNames(mix_quantile(Fte_gt, w, ret_quantile), qname)
   }
 
-  # each cell's own QOTT (exact, unlike quantile() on a weighted ECDF)
-  qott_gt <- vapply(Fte_gt, function(m) {
-    mix_quantile(mix_cdf(list(m), 1), ret_quantile)
-  }, numeric(1))
+  # each cell's own QOTT (exact, unlike stats:::quantile.ecdf() on a
+  # weighted ECDF)
+  qott_gt <- vapply(Fte_gt, function(f) mix_quantile(list(f), 1, ret_quantile),
+                    numeric(1))
   groups <- unlist(BMisc::get_list_element(attgt.list, "group"))
   time.periods <- unlist(BMisc::get_list_element(attgt.list, "time.period"))
 
