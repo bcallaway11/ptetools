@@ -5,7 +5,7 @@
 #   for the dose case are always computed via the multiplier bootstrap;
 #   analytical standard errors are not yet supported here (see dev/NOTES.md).
 # Author: Brant Callaway
-# Last update: 2026-07-25
+# Last update: 2026-11-18
 # Date created: 2025-01-11
 # =============================================================================
 
@@ -89,19 +89,16 @@ process_dose_gt <- function(gt_results, ptep, ...) {
     att.d <- BMisc::weighted_combine_list(att.d_gt, o_weights$overall_weight)
     acrt.d <- BMisc::weighted_combine_list(acrt.d_gt, o_weights$overall_weight)
 
-    # values of the dose
+    # values of the dose, and the spline basis (and its derivative) at them
     dvals <- ptep$dvals
-    degree <- ptep$degree
-    knots <- ptep$knots
-    # the boundary knots of the basis the dose regressions were fitted with
-    # (the range of the positive doses); without them bSpline() and dbs() use
-    # the range of dvals, which gives a different basis
-    boundary_knots <- ptep$boundary_knots
-    if (is.null(boundary_knots)) boundary_knots <- range(dvals)
-    bs_grid <- splines2::bSpline(dvals, degree = degree, knots = knots, Boundary.knots = boundary_knots)
-    bs_grid <- cbind(1, bs_grid) # add intercept
-    bs_deriv <- splines2::dbs(dvals, degree = degree, knots = knots, Boundary.knots = boundary_knots)
-    bs_deriv <- cbind(0, bs_deriv) # intercept doesn't matter here, just placeholder to get dimensions right
+    basis <- dose_spline_basis(
+        dvals = dvals,
+        degree = ptep$degree,
+        knots = ptep$knots,
+        boundary_knots = ptep$boundary_knots
+    )
+    bs_grid <- basis$bs_grid
+    bs_deriv <- basis$bs_deriv
 
     # since we are picking dvals over a grid, the only randomness comes from
     # estimating the \beta's
@@ -204,6 +201,38 @@ process_dose_gt <- function(gt_results, ptep, ...) {
         acrt.d_crit.val = acrt.d_crit.val,
         acrt.d_inffunc = acrt.d_inffunc,
         pte_params = ptep
+    )
+}
+
+# --- Internal: dose spline basis ---------------------------------------------
+# B-spline basis (with an intercept column) and its derivative, evaluated at
+# `dvals`. These must be the same basis the dose regressions were fitted with,
+# since the influence functions of ATT(d) and ACRT(d) are linear in the
+# fitted coefficients. The fitted basis has boundary knots at the range of the
+# positive doses (stored by callers such as contdid in
+# `ptep$boundary_knots`); bSpline() and dbs() would otherwise default to
+# range(dvals), which gives a different basis whenever dvals does not span
+# exactly the positive doses (ptetools #7, contdid #16). If `boundary_knots`
+# is NULL, falls back to range(dvals), the behavior before ptetools 1.0.2.
+#
+# Arguments: dvals (doses to evaluate at), degree, knots (interior knots),
+#   boundary_knots (length-2 numeric or NULL).
+# Returns: list with bs_grid and bs_deriv, each length(dvals) x (1 + basis dim).
+dose_spline_basis <- function(dvals, degree, knots, boundary_knots = NULL) {
+    if (is.null(boundary_knots)) boundary_knots <- range(dvals)
+    bs_grid <- splines2::bSpline(
+        dvals,
+        degree = degree, knots = knots, Boundary.knots = boundary_knots
+    )
+    bs_deriv <- splines2::dbs(
+        dvals,
+        degree = degree, knots = knots, Boundary.knots = boundary_knots
+    )
+    list(
+        bs_grid = cbind(1, bs_grid), # add intercept
+        # intercept doesn't affect the derivative; the zero column only keeps
+        # dimensions aligned with bs_grid and the coefficient vector
+        bs_deriv = cbind(0, bs_deriv)
     )
 }
 

@@ -1,5 +1,13 @@
 # ptetools 1.0.2
 
+* Fixed the standard errors of `ATT(d)` and `ACRT(d)` from
+  `process_dose_gt()` (used by `contdid`) when `dvals` does not span
+  exactly the range of the positive doses: the influence functions were
+  built with a different B-spline basis than the one the dose regression
+  was fitted with. `process_dose_gt()` now uses the boundary knots in
+  `ptep$boundary_knots` when present, and otherwise keeps the previous
+  behavior (#7; thanks to @AsadGudzevic94).
+
 * Fixed `pte_attgt()`, `did_attgt()` and `covid_attgt()` (and so
   `pte_default()`) giving wrong estimates with covariates or sampling weights
   when the data were not sorted by id within each period: covariates and
