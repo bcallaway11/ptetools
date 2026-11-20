@@ -20,6 +20,11 @@
     - Each kind of warning is given once per call, listing the group-time
       cells (in the original group and period codes) instead of once per
       cell, and not again for every empirical bootstrap draw.
+* New `unsupported_covariates()` flags, for each predicted unit, the
+  covariates that were dropped for collinearity in the fitting sample but
+  matter for that unit's prediction (#34). It is the check behind
+  `pte_attgt()`'s dropped-covariate warning, exported so that other
+  `attgt_fun`s can apply the same rule.
 * New `pte_cell_warning()` lets any `attgt_fun` report problems this way:
   `pte()` collects the warnings across group-time cells and reports each
   kind once, listing the cells.

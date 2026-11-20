@@ -54,6 +54,7 @@ reference:
   - title: Diagnostics
     contents:
       - check_overlap
+      - unsupported_covariates
 
   - title: Functions for dealing with a continuous treatment
     contents:
