@@ -6,10 +6,23 @@
   covariate range (including the lagged outcome with
   `lagged_outcome_cov = TRUE`) and, where it can be estimated, the share
   with a propensity score above 0.9 and 0.999. Shares are reported weighted
-  too when `weightsname` is given. When `pte_attgt()` switches from AIPW to
-  regression adjustment, the warning now says why: too few treated units
-  for the number of covariates, or propensity scores near 1 for a given
-  share of treated units (it used to say "small group size" either way).
+  too when `weightsname` is given.
+* `pte_attgt()` (used by `pte_default()`) warns more usefully:
+    - When it switches from AIPW to regression adjustment, the warning now
+      says why: too few treated units for the number of covariates, or
+      propensity scores near 1 for a given share of treated units (it used
+      to say "small group size" either way).
+    - It now warns when it drops a covariate that does not vary among
+      comparison units but does among treated units, such as a dummy for a
+      region with treated units only. The estimates then extrapolate for
+      those treated units. Dropping covariates that are redundant for
+      treated units too (duplicates, empty factor levels) stays silent.
+    - Each kind of warning is given once per call, listing the group-time
+      cells (in the original group and period codes) instead of once per
+      cell, and not again for every empirical bootstrap draw.
+* New `pte_cell_warning()` lets any `attgt_fun` report problems this way:
+  `pte()` collects the warnings across group-time cells and reports each
+  kind once, listing the cells.
 * Bug fix: uniform confidence bands for QTT curves (and QTT minus ATT)
   could be absurdly wide when the outcome has a mass point, such as zero
   earnings (#33). The critical value standardized the bootstrap draws by

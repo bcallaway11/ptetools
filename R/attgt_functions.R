@@ -203,6 +203,45 @@ did_rcs_attgt <- function(gt_data, xformula = ~1, est_method = "aipw", ...) {
 }
 
 
+# --- Internal: covariates dropped for collinearity --------------------------
+# pte_attgt() drops covariates that are collinear among comparison units.
+# That is harmless when a dropped column is the same linear combination of
+# the kept columns among treated units too (duplicates, a factor level no
+# unit in the cell has). Otherwise, e.g. a dummy for a region with treated
+# units only, the outcome regression implicitly sets its coefficient to
+# zero and extrapolates for those treated units. This signals a cell
+# warning naming each such column and the share of treated units affected.
+#
+# Arguments: covmat (covariates, all units in the cell), D (treatment
+#   indicator), keep_covs (indices of the kept columns).
+warn_dropped_covariates <- function(covmat, D, keep_covs) {
+  dropped <- setdiff(seq_len(ncol(covmat)), keep_covs)
+  if (length(dropped) == 0 || sum(D) == 0) return(invisible(NULL))
+  x0 <- covmat[D == 0, keep_covs, drop = FALSE]
+  x1 <- covmat[D == 1, keep_covs, drop = FALSE]
+  qr0 <- qr(x0)
+  shares <- vapply(dropped, function(j) {
+    # the dropped column as a combination of the kept ones among comparison
+    # units, applied to the treated units
+    b <- qr.coef(qr0, covmat[D == 0, j])
+    b[is.na(b)] <- 0
+    resid <- covmat[D == 1, j] - drop(x1 %*% b)
+    tol <- 1e-7 * max(1, abs(covmat[, j]))
+    mean(abs(resid) > tol)
+  }, numeric(1))
+  bad <- shares > 0
+  if (!any(bad)) return(invisible(NULL))
+  nms <- colnames(covmat)[dropped][bad]
+  pte_cell_warning(
+    paste0("Covariates dropped because they do not vary among comparison ",
+           "units (given the other covariates) but do among treated units; ",
+           "the estimates extrapolate for those treated units (see ",
+           "check_overlap())"),
+    paste0(nms, " (", round(100 * shares[bad], 1), "% of treated units)",
+           collapse = ", ")
+  )
+}
+
 #' @title General ATT(g,t)
 #'
 #' @description `pte_attgt` takes a "local" data.frame and computes
@@ -250,9 +289,6 @@ pte_attgt <- function(
   # pre and post rows, matched by unit
   pp <- gt_pre_post(gt_data)
 
-  this.g <- unique(pp$post$G[pp$post$D == 1])
-  this.tp <- unique(pp$post$period)
-
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
@@ -277,11 +313,15 @@ pte_attgt <- function(
   # DRDID::drdid_panel is for panel data, but we can hack it
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
-  covmat2 <- covmat[D == 0, ]
+  # drop covariates that are collinear among comparison units: their
+  # coefficients in the comparison-group outcome regression are not
+  # identified
+  covmat2 <- covmat[D == 0, , drop = FALSE]
   n_unt <- sum(1 - D)
   precheck_reg <- qr(t(covmat2) %*% covmat2 / n_unt)
-  keep_covs <- precheck_reg$pivot[1:precheck_reg$rank]
-  covmat <- covmat[, keep_covs]
+  keep_covs <- precheck_reg$pivot[seq_len(precheck_reg$rank)]
+  warn_dropped_covariates(covmat, D, keep_covs)
+  covmat <- covmat[, keep_covs, drop = FALSE]
 
   # if group is too small, switch to reg adjustment
   if (est_method == "aipw") {
@@ -297,19 +337,24 @@ pte_attgt <- function(
       est_method <- "reg"
       # say which problem it is: with no more treated units than covariates
       # the logit separates whatever the overlap; otherwise some treated
-      # units have no comparable comparison units (#28)
+      # units have no comparable comparison units (#28). Reported once per
+      # call, with the cells, by compute.pte().
       n_treated <- sum(D)
-      reason <- if (n_treated <= ncol(covmat)) {
-        paste0("too few treated units (", n_treated, ") for ",
-               ncol(covmat), " covariates")
+      if (n_treated <= ncol(covmat)) {
+        pte_cell_warning(
+          paste0("Switched from AIPW to regression adjustment: too few ",
+                 "treated units to estimate the propensity score"),
+          paste0(n_treated, " treated units, ", ncol(covmat), " covariates")
+        )
       } else {
         share <- mean(pscore[D == 1] > 0.99)
-        paste0("the propensity score is above 0.99 for ",
-               round(100 * share, 1), "% of treated units (limited ",
-               "overlap; see check_overlap())")
+        pte_cell_warning(
+          paste0("Switched from AIPW to regression adjustment: propensity ",
+                 "score above 0.99 for some treated units (limited ",
+                 "overlap; see check_overlap())"),
+          paste0(round(100 * share, 1), "% of treated units")
+        )
       }
-      warning("Switching to regression adjustment for group ", this.g,
-              " in time period ", this.tp, ": ", reason, ".", call. = FALSE)
     }
   }
 

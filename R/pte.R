@@ -3,9 +3,104 @@
 # Description: compute.pte (inner loop over groups/time periods) and pte
 #   (main user-facing function) for computing panel treatment effects.
 # Author: Brant Callaway
-# Last update: 2026-11-19
+# Last update: 2026-11-20
 # Date created: 2021-05-14
 # =============================================================================
+
+# --- Warnings collected across (g,t) cells ---------------------------------
+# An attgt_fun runs once per (g,t) cell (and again in every empirical
+# bootstrap draw), so a plain warning() in it can fire dozens of times, and
+# it only knows the internal coding of the group and period. Instead it
+# signals pte_cell_warning(): compute.pte() collects these, labels each with
+# its cell in units of tname, and reports one warning per kind of problem.
+
+#' @title Warn about a problem in one group-time cell
+#'
+#' @description For use inside an \code{attgt_fun}. Signals a warning that
+#'   \code{compute.pte()} (and so \code{pte()}) collects across group-time
+#'   cells instead of issuing one warning per cell. After the loop over
+#'   cells, it gives one warning per distinct \code{summary}, listing each
+#'   affected cell (with the group and period in the original coding of
+#'   \code{gname} and \code{tname}) and its \code{detail}. Warnings are
+#'   reported for the original sample only, not again for each empirical
+#'   bootstrap draw.
+#'
+#'   Called outside \code{compute.pte()}, it is an ordinary warning with
+#'   message \code{"<summary>: <detail>"}. The condition has class
+#'   \code{"pte_cell_warning"}.
+#'
+#' @param summary one line describing the kind of problem. Cells with the
+#'   same \code{summary} are reported together, so it should not depend on
+#'   the cell.
+#' @param detail what happened in this cell, e.g. a share of treated units
+#'   or the names of covariates.
+#'
+#' @return Called for its side effect (a warning); returns \code{NULL}
+#'   invisibly when the warning is muffled.
+#'
+#' @examples
+#' my_attgt <- function(gt_data, ...) {
+#'   n_treated <- sum(gt_data$D[gt_data$name == "post"])
+#'   if (n_treated < 50) {
+#'     pte_cell_warning("Few treated units", paste(n_treated, "treated units"))
+#'   }
+#'   pte_attgt(gt_data, xformula = ~1, d_outcome = TRUE)
+#' }
+#' if (requireNamespace("did", quietly = TRUE)) {
+#'   # one warning, listing the cells of the 2004 and 2006 cohorts
+#'   res <- pte(
+#'     yname = "lemp", gname = "first.treat", tname = "year",
+#'     idname = "countyreal", data = did::mpdta, setup_pte_fun = setup_pte,
+#'     subset_fun = two_by_two_subset, attgt_fun = my_attgt, biters = 0
+#'   )
+#' }
+#'
+#' @export
+pte_cell_warning <- function(summary, detail) {
+  cond <- structure(
+    class = c("pte_cell_warning", "warning", "condition"),
+    list(message = paste0(summary, ": ", detail), call = NULL,
+         summary = summary, detail = detail)
+  )
+  warning(cond)
+  invisible(NULL)
+}
+
+# Reports warnings collected by compute.pte(): one warning per summary,
+# listing the cells (at most max_cells of them). Signals class
+# pte_cell_summary, which bootstrap draws muffle (the problems are reported
+# for the original sample).
+#
+# Arguments: collected (list of list(summary, detail, cell)), max_cells.
+report_cell_warnings <- function(collected, max_cells = 10) {
+  if (length(collected) == 0) return(invisible(NULL))
+  summaries <- vapply(collected, function(x) x$summary, "")
+  for (s in unique(summaries)) {
+    these <- collected[summaries == s]
+    lines <- vapply(these, function(x) paste0(x$cell, ": ", x$detail), "")
+    more <- if (length(lines) > max_cells) {
+      paste0("\n  ... and ", length(lines) - max_cells, " more")
+    } else {
+      ""
+    }
+    msg <- paste0(s, " (", length(these),
+                  if (length(these) == 1) " cell" else " cells", "):\n  ",
+                  paste(utils::head(lines, max_cells), collapse = "\n  "),
+                  more)
+    warning(structure(
+      class = c("pte_cell_summary", "warning", "condition"),
+      list(message = msg, call = NULL)
+    ))
+  }
+  invisible(NULL)
+}
+
+# Evaluates expr without reporting collected cell warnings (bootstrap draws).
+quiet_cell_warnings <- function(expr) {
+  withCallingHandlers(expr, pte_cell_summary = function(w) {
+    invokeRestart("muffleWarning")
+  })
+}
 
 #' @title Heavy-Lifting for pte Function
 #'
@@ -60,6 +155,9 @@ compute.pte <- function(ptep,
   # list to hold extra results from gt-specific calculations
   extra_gt_returns <- list()
 
+  # warnings signaled with pte_cell_warning(), reported once after the loop
+  cell_warnings <- list()
+
   if (isTRUE(global_fun)) {
     data$y0 <- attgt_fun(data, ptep, ...)
     stop("global_fun not supported yet...")
@@ -109,6 +207,14 @@ compute.pte <- function(ptep,
                pte_calendar_time(data, g), ", period ",
                pte_calendar_time(data, tp), " failed: ",
                conditionMessage(e), call. = FALSE)
+        },
+        pte_cell_warning = function(w) {
+          cell_warnings[[length(cell_warnings) + 1]] <<- list(
+            summary = w$summary, detail = w$detail,
+            cell = paste0("group ", pte_calendar_time(data, g), ", period ",
+                          pte_calendar_time(data, tp))
+          )
+          invokeRestart("muffleWarning")
         }
       )
 
@@ -148,6 +254,8 @@ compute.pte <- function(ptep,
       #----------------------------------------------------
     }
   }
+
+  report_cell_warnings(cell_warnings)
 
   return(list(attgt.list = attgt.list, inffunc = inffunc, extra_gt_returns = extra_gt_returns))
 }

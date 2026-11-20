@@ -3,6 +3,9 @@
 # Description: check_overlap() reports, for the same group-time cells as
 #   pte_default(), the share of treated units outside the comparison
 #   group's covariate range and with propensity scores near 1 (#28).
+#   pte_attgt() warns, once per call and naming the cells, when it switches
+#   to regression adjustment or drops a covariate that varies among treated
+#   but not comparison units.
 # Author: Brant Callaway
 # Last update: 2026-11-20
 # Date created: 2026-11-20
@@ -136,4 +139,48 @@ test_that("the switch to regression adjustment says why", {
   w <- warnings_from(d, ~x)
   expect_true(length(w) > 0)
   expect_match(w, "limited overlap", all = FALSE)
+})
+
+pte_warnings <- function(data, xformula, ...) {
+  testthat::capture_warnings(pte_default(
+    "y", "G", "period", "id", data = data, xformula = xformula, ...
+  ))
+}
+
+test_that("each kind of warning is reported once per call, with its cells", {
+  d <- overlap_data()
+  treated_ids <- unique(d$id[d$G == 3])
+  d$x[d$id %in% treated_ids[1:40]] <- max(d$x) + 50
+  w <- pte_warnings(d, ~x, biters = 0)
+  overlap_w <- grep("limited overlap", w, value = TRUE)
+  expect_length(overlap_w, 1)
+  # every cell of group 3 is listed, in the original group and period codes
+  expect_match(overlap_w, "3 cells")
+  expect_match(overlap_w, "group 3, period 4: 20% of treated units",
+               fixed = TRUE)
+  # empirical bootstrap draws do not repeat it
+  w <- pte_warnings(d, ~x, boot_type = "empirical", biters = 5)
+  expect_length(grep("limited overlap", w), 1)
+})
+
+test_that("dropping a covariate that varies among treated units warns", {
+  d <- overlap_data()
+  # region 5 has treated units only
+  in5 <- d$G == 3 & d$id %% 4 == 1
+  d$region[in5] <- 5
+  w <- pte_warnings(d, ~ factor(region), est_method = "reg", biters = 0)
+  dropped_w <- grep("Covariates dropped", w, value = TRUE)
+  expect_length(dropped_w, 1)
+  share <- 100 * mean(d$region[d$G == 3 & d$period == 1] == 5)
+  expect_match(dropped_w, paste0("factor(region)5 (", share, "% of treated"),
+               fixed = TRUE)
+})
+
+test_that("dropping a redundant covariate does not warn", {
+  d <- overlap_data()
+  # a duplicate of x, and a factor level that no unit has after subsetting
+  d$x2 <- 2 * d$x
+  d$region <- factor(d$region, levels = 1:5)
+  w <- pte_warnings(d, ~ x + x2 + region, est_method = "reg", biters = 0)
+  expect_length(grep("Covariates dropped", w), 0)
 })

@@ -39,6 +39,7 @@ reference:
       - pte
       - pte_aggte
       - pte_attgt
+      - pte_cell_warning
       - setup_pte
       - setup_pte_basic
 

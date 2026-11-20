@@ -4,7 +4,7 @@
 #   SE routines), plus aggregation functions attgt_pte_aggregations,
 #   qtt_pte_aggregations, and qott_pte_aggregations.
 # Author: Brant Callaway
-# Last update: 2026-11-19
+# Last update: 2026-11-20
 # Date created: 2021-05-19
 # =============================================================================
 
@@ -310,12 +310,13 @@ panel_empirical_bootstrap <- function(attgt.list,
 
     # call our function for estimating attgt on the
     # bootstrapped data
-    bres_gt <- compute.pte(
+    # problems in cells are reported for the original sample, not per draw
+    bres_gt <- quiet_cell_warnings(compute.pte(
       ptep = bptep,
       subset_fun = subset_fun,
       attgt_fun = attgt_fun,
       ...
-    )[c("attgt.list", "extra_gt_returns")] # don't need to carry around ptep
+    ))[c("attgt.list", "extra_gt_returns")] # don't need to carry around ptep
     if (!has_estimates(bres_gt$attgt.list)) return(NULL)
 
     bres <- aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
@@ -737,12 +738,12 @@ qtt_empirical_bootstrap <- function(attgt.list,
       ...
     )
 
-    bres_gt <- compute.pte(
+    bres_gt <- quiet_cell_warnings(compute.pte(
       ptep       = bptep,
       subset_fun = subset_fun,
       attgt_fun  = attgt_fun,
       ...
-    )[c("attgt.list", "extra_gt_returns")]
+    ))[c("attgt.list", "extra_gt_returns")]
     if (!has_estimates(bres_gt$attgt.list)) return(NULL)
 
     bres <- aggte_fun(bres_gt$attgt.list, bptep, bres_gt$extra_gt_returns)
