@@ -1,5 +1,15 @@
 # ptetools 1.1.0
 
+* New `check_overlap()` reports overlap diagnostics for each group-time cell
+  (#28). It uses the same cells and covariates as `pte_default()`. For each
+  cell it gives the share of treated units outside the comparison group's
+  covariate range (including the lagged outcome with
+  `lagged_outcome_cov = TRUE`) and, where it can be estimated, the share
+  with a propensity score above 0.9 and 0.999. Shares are reported weighted
+  too when `weightsname` is given. When `pte_attgt()` switches from AIPW to
+  regression adjustment, the warning now says why: too few treated units
+  for the number of covariates, or propensity scores near 1 for a given
+  share of treated units (it used to say "small group size" either way).
 * Bug fix: uniform confidence bands for QTT curves (and QTT minus ATT)
   could be absurdly wide when the outcome has a mass point, such as zero
   earnings (#33). The critical value standardized the bootstrap draws by

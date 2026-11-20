@@ -3,7 +3,7 @@
 # Description: Estimators for a single (g,t) cell (did_attgt, did_rcs_attgt,
 #   pte_attgt) and internal helpers that put a 2x2 panel cell in wide form.
 # Author: Brant Callaway
-# Last update: 2026-11-19
+# Last update: 2026-11-20
 # Date created: 2021-05-18
 # =============================================================================
 
@@ -250,7 +250,7 @@ pte_attgt <- function(
   # pre and post rows, matched by unit
   pp <- gt_pre_post(gt_data)
 
-  this.g <- pp$post$G[pp$post$D == 1]
+  this.g <- unique(pp$post$G[pp$post$D == 1])
   this.tp <- unique(pp$post$period)
 
   #-----------------------------------------------------------------------------
@@ -295,10 +295,21 @@ pte_attgt <- function(
     pscore <- predict(pscore_est, type = "response")
     if (max(pscore) > 0.99) {
       est_method <- "reg"
-      warning(paste0(
-        "Switching to regression adjustment because of small group size for group ",
-        this.g, " in time period ", this.tp
-      ))
+      # say which problem it is: with no more treated units than covariates
+      # the logit separates whatever the overlap; otherwise some treated
+      # units have no comparable comparison units (#28)
+      n_treated <- sum(D)
+      reason <- if (n_treated <= ncol(covmat)) {
+        paste0("too few treated units (", n_treated, ") for ",
+               ncol(covmat), " covariates")
+      } else {
+        share <- mean(pscore[D == 1] > 0.99)
+        paste0("the propensity score is above 0.99 for ",
+               round(100 * share, 1), "% of treated units (limited ",
+               "overlap; see check_overlap())")
+      }
+      warning("Switching to regression adjustment for group ", this.g,
+              " in time period ", this.tp, ": ", reason, ".", call. = FALSE)
     }
   }
 
