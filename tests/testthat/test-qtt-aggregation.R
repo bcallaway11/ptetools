@@ -2,8 +2,10 @@
 # Title: Tests for exact QTT aggregation
 # Description: qtt_pte_aggregations() mixes the cells' CDFs exactly, from
 #   every support point (BMisc::combine_ecdfs()), rather than on a
-#   1,000-point grid of the pooled outcome (#25). Checked against a brute-force mixture, and integer weights
-#   must give the same QTTs as the equivalent row-replicated data.
+#   1,000-point grid of the pooled outcome (#25). Checked against a
+#   brute-force mixture, and integer weights must give the same QTTs as the
+#   equivalent row-replicated data. Uniform bands stay finite at quantiles
+#   inside a mass point (#33).
 # Author: Brant Callaway
 # Last update: 2026-11-19
 # Date created: 2026-11-19
@@ -265,4 +267,53 @@ test_that("aggregation weights follow the order of the cells", {
     if (unique(post$period) == 2) res$attgt <- NA
     res
   })
+})
+
+# --- Uniform bands at mass points (#33) --------------------------------------
+
+# The critical value used to standardize the draws by an IQR-based scale
+# while the band used the SD. At a quantile inside a mass point the IQR
+# scale is close to 0 without being 0, and the band exploded at every
+# quantile.
+test_that("uniform bands do not explode at quantiles inside a mass point", {
+  set.seed(1)
+  n_draws <- 1000
+  boot_mat <- cbind(
+    rnorm(n_draws),
+    # 7% of draws jump; the rest sit at 0 up to tiny noise
+    ifelse(runif(n_draws) < 0.07, 5, 0) + rnorm(n_draws, sd = 1e-6)
+  )
+  se <- apply(boot_mat, 2, sd)
+  st <- boot_sup_t(boot_mat, c(0, 0), se, alp = 0.05)
+  expect_lt(st$cval, 10)
+  # the band covers the draws simultaneously in about 95% of them
+  inside <- apply(abs(boot_mat) <= rep(st$cval * se, each = n_draws), 1, all)
+  expect_gte(mean(inside), 0.95)
+  # quantiles whose draws never vary are left out of the sup
+  with_flat <- boot_sup_t(cbind(boot_mat, 0), c(0, 0, 0), c(se, 0), 0.05)
+  expect_equal(with_flat$cval, st$cval)
+  expect_equal(boot_sup_t(matrix(0, 10, 2), c(0, 0), c(0, 0), 0.05)$pval,
+               NA_real_)
+})
+
+test_that("QTT bands are finite with a mass point in the outcome", {
+  skip_on_cran()
+  d <- did::mpdta
+  set.seed(3)
+  d$lemp[rep(runif(500) < 0.25, each = 5)] <- 0
+  set.seed(1)
+  res <- suppressWarnings(suppressMessages(pte(
+    yname = "lemp", gname = "first.treat", tname = "year",
+    idname = "countyreal", data = d, setup_pte_fun = setup_pte,
+    subset_fun = two_by_two_subset, attgt_fun = qtt_cell,
+    aggte_fun = qtt_pte_aggregations, gt_type = "qtt",
+    boot_type = "empirical", probs = seq(0.1, 0.9, 0.1), biters = 100
+  )))
+  for (curves in list(res$overall, res$dynamic)) {
+    half_width <- curves$upper_ub - curves$qtt
+    ok <- curves$se > 0
+    # critical values on the SD scale stay moderate
+    expect_true(all(half_width[ok] / curves$se[ok] < 10))
+    expect_true(all(half_width[!ok] == 0))
+  }
 })

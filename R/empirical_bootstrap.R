@@ -758,26 +758,6 @@ qtt_empirical_bootstrap <- function(attgt.list,
   alp <- ptep$alp
   z   <- qnorm(1 - alp / 2)
 
-  # Sup-t over quantiles, from a bootstrap matrix (draws x quantiles) and
-  # point estimates: the uniform critical value, and the p-value of the test
-  # that the curve is 0 at every quantile. Uses an IQR-based scale (more
-  # robust when some QTTs are near zero), following the same approach as
-  # computeSE() in the qte package. qtt +/- cval * se gives a simultaneous
-  # band across quantiles. Both pointwise and uniform CIs are always
-  # computed; cband is a plotting choice, not a computation choice.
-  sup_t <- function(boot_mat, est) {
-    sigmahalf <- (apply(boot_mat, 2, function(b) quantile(b, 0.75, type = 1)) -
-                  apply(boot_mat, 2, function(b) quantile(b, 0.25, type = 1))) /
-                 (qnorm(0.75) - qnorm(0.25))
-    if (any(sigmahalf == 0)) {
-      sigmahalf <- pmax(apply(boot_mat, 2, sd), 1e-9)
-    }
-    cb <- apply(boot_mat, 1, function(q) max(abs((q - est) / sigmahalf)))
-    stat <- max(abs(est) / sigmahalf)
-    list(cval = as.numeric(quantile(cb, 1 - alp, type = 1)),
-         pval = mean(cb >= stat))
-  }
-
   # Each curve's standard errors use the draws in which it is estimated; if
   # it is missing from more than 10% of the draws (small cohorts), its
   # standard errors, bounds and p-value are NA, but the estimates are kept
@@ -810,9 +790,9 @@ qtt_empirical_bootstrap <- function(attgt.list,
         res <- list(se = NA_real_, cval = NA_real_, pval = NA_real_)
       } else {
         boot_mat <- do.call(rbind, boot_rows[ok])
-        st <- sup_t(boot_mat, this_est)
-        res <- list(se = unname(apply(boot_mat, 2, sd)), cval = st$cval,
-                    pval = st$pval)
+        se <- unname(apply(boot_mat, 2, sd))
+        st <- boot_sup_t(boot_mat, this_est, se, alp)
+        res <- list(se = se, cval = st$cval, pval = st$pval)
       }
       res$n_complete <- sum(ok)
       res$rows <- which(rows_for(est, k))
@@ -973,4 +953,43 @@ qott_pte_aggregations <- function(attgt.list, ptep, extra_gt_returns) {
     group_results = do.call(rbind.data.frame, group_qott),
     overall_results = overall_qott
   )
+}
+
+# --- Sup-t over quantiles --------------------------------------------------
+#
+# Internal helper for qtt_empirical_bootstrap(). From a bootstrap matrix
+# (draws x quantiles), point estimates and the bootstrap standard errors:
+# the uniform critical value, and the p-value of the test that the curve is
+# 0 at every quantile. curve +/- cval * se is a simultaneous band across
+# quantiles. Both pointwise and uniform CIs are always computed; cband is a
+# plotting choice, not a computation choice.
+#
+# The draws are standardized by the same scale (the bootstrap SD) that the
+# band is built with. They used to be standardized by an IQR-based scale
+# (as in did::mboot()) while the band used the SD. At quantiles inside a
+# mass point of the outcome, nearly every draw is the same but a few jump,
+# so the IQR scale is close to 0 without being 0: the critical value, and
+# the band at every quantile, exploded (#33). Using the IQR scale for both
+# was also tried; it still lets jumpy quantiles dominate the sup and gave
+# bands several times too wide. Quantiles whose draws never vary (se = 0,
+# e.g. QTTs exactly 0 inside a mass point) are left out of the sup, as
+# did::mboot() drops degenerate columns; their band is the point estimate.
+#
+# Arguments:
+#   boot_mat - numeric matrix of bootstrap draws (rows = draws)
+#   est      - point estimates, one per column
+#   se       - bootstrap standard errors, one per column
+#   alp      - significance level
+#
+# Returns: list with cval (critical value) and pval (sup-t p-value; NA if
+#   no quantile varies)
+boot_sup_t <- function(boot_mat, est, se, alp) {
+  keep <- se > 0
+  if (!any(keep)) return(list(cval = qnorm(1 - alp / 2), pval = NA_real_))
+  scaled <- sweep(sweep(boot_mat[, keep, drop = FALSE], 2, est[keep]), 2,
+                  se[keep], "/")
+  cb <- apply(abs(scaled), 1, max)
+  stat <- max(abs(est[keep]) / se[keep])
+  list(cval = as.numeric(stats::quantile(cb, 1 - alp, type = 1)),
+       pval = mean(cb >= stat))
 }

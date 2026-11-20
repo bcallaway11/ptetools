@@ -1,5 +1,13 @@
 # ptetools 1.1.0
 
+* Bug fix: uniform confidence bands for QTT curves (and QTT minus ATT)
+  could be absurdly wide when the outcome has a mass point, such as zero
+  earnings (#33). The critical value standardized the bootstrap draws by
+  an IQR-based scale, but the band multiplied it by the bootstrap SD. At
+  quantiles inside the mass point the IQR scale is nearly, but not
+  exactly, 0, so the critical value exploded. Both now use the SD, and
+  quantiles whose draws never vary are left out of the critical value.
+  Standard errors are unchanged.
 * Bug fix: with time periods coded 2, ..., T (for example 2:3 or 2:5),
   results were not mapped back from the internal coding 1, ..., T.
   Group-time results were labeled with the wrong groups and periods, and
