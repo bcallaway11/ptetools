@@ -1,5 +1,12 @@
 # ptetools 1.1.0
 
+* Bug fix: with time periods coded 2, ..., T (for example 2:3 or 2:5),
+  results were not mapped back from the internal coding 1, ..., T.
+  Group-time results were labeled with the wrong groups and periods, and
+  the overall ATT and event study were `NaN`. Whether to map back was
+  guessed from whether the internal periods were all valid original
+  periods; it now checks whether the setup function recoded them. Periods
+  coded 1, ..., T, calendar years and other codings were unaffected.
 * Bug fix: the empirical bootstrap ignored sampling weights. Each draw was
   set up again without `weightsname`, so every draw was unweighted and
   weighted standard errors and bands were those of the unweighted
@@ -11,12 +18,12 @@
 
 * Sampling weights audit (#21): `did_attgt()` and `covid_attgt()` now use
   sampling weights (they did not pass them to DRDID), and
-  `setup_pte_basic()` gains `weightsname` (it set every weight to 1). Weighted estimates and standard errors from
-  `pte_default()` match `did::att_gt()` for panel data (ATT(g,t), event
-  study and overall, both estimation methods, with covariates, both base
-  periods and comparison groups, and with clustering) and for repeated
-  cross sections (ATT(g,t)), and are unchanged when the weights are
-  rescaled.
+  `setup_pte_basic()` gains `weightsname` (it set every weight to 1).
+  Weighted estimates and standard errors from `pte_default()` match
+  `did::att_gt()` for panel data (ATT(g,t), event study and overall, both
+  estimation methods, with covariates, both base periods and comparison
+  groups, and with clustering) and for repeated cross sections (ATT(g,t)),
+  and are unchanged when the weights are rescaled.
 
 * Bug fix: aggregated QTTs and QOTTs mixed the wrong cells' distributions.
   `attgt_pte_aggregations()` returned its weight vectors in the order of an

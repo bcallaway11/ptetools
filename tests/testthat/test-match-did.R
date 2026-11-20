@@ -7,7 +7,7 @@
 #   (#16); aggregated standard errors (#19) and the pre-test (#18) must
 #   match too;
 #   anticipation follows did's rules, in units of the time variable;
-#   control_group = "eventuallytreated" (#29).
+#   control_group = "eventuallytreated" (#29); periods coded 2..T.
 # Author: Brant Callaway
 # Last update: 2026-11-19
 # Date created: 2026-11-19
@@ -132,6 +132,41 @@ unequal_data <- function() {
     ifelse(d$grp > 0 & d$year >= d$grp, 1, 0)
   d
 }
+
+# Results were mapped back to the original periods only if the internal
+# periods (1..T) were not all valid original periods. With periods coded
+# 2..T they are, so nothing was mapped back: group-time results kept the
+# internal coding and the overall ATT was NaN.
+test_that("pte_default() matches did::att_gt() with periods coded 2..T", {
+  skip_if_not_installed("did")
+  d <- did::mpdta
+  d$period <- d$year - 2001
+  d$grp <- ifelse(d$first.treat == 0, 0, d$first.treat - 2001)
+  for (i in seq_len(nrow(settings))) {
+    diffs <- diff_from_did(d, "lemp", "grp", "period", "countyreal",
+                           settings$base_period[i], settings$control_group[i])
+    expect_lt(max(diffs), 1e-10, label = paste(settings[i, ], collapse = "/"))
+  }
+  # two periods, one treated group
+  d2 <- d[d$period %in% 2:3 & d$grp %in% c(0, 3), ]
+  diffs <- diff_from_did(d2, "lemp", "grp", "period", "countyreal",
+                         "varying", "nevertreated")
+  expect_lt(max(diffs, na.rm = TRUE), 1e-10)
+  # empirical bootstrap
+  set.seed(1)
+  emp <- suppressMessages(suppressWarnings(pte(
+    yname = "lemp", gname = "grp", tname = "period", idname = "countyreal",
+    data = d, setup_pte_fun = setup_pte, subset_fun = two_by_two_subset,
+    attgt_fun = pte_attgt, xformula = ~1, d_outcome = TRUE,
+    boot_type = "empirical", biters = 10
+  )))
+  ref <- suppressWarnings(pte_default(
+    yname = "lemp", gname = "grp", tname = "period", idname = "countyreal",
+    data = d, d_outcome = TRUE, biters = 0
+  ))
+  expect_equal(emp$overall_results$att, ref$overall_att$overall.att)
+  expect_setequal(emp$attgt_results$group, c(3, 5, 6))
+})
 
 test_that("anticipation follows did::att_gt()'s rules, in units of tname", {
   skip_if_not_installed("did")

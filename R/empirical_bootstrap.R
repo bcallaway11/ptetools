@@ -238,14 +238,16 @@ panel_empirical_bootstrap <- function(attgt.list,
   # kind of hack...calls and returns of emprical and multiplier bootstrap
   # not matching exactly
   original_time.periods <- sort(unique(data[, ptep$tname]))
-  extra_gt_returns <- lapply(
-    extra_gt_returns,
-    function(egr) {
-      egr$group <- BMisc::t2orig(egr$group, original_time.periods)
-      egr$time.period <- BMisc::t2orig(egr$time.period, original_time.periods)
-      egr
-    }
-  )
+  if (pte_periods_recoded(ptep, ptep$tlist)) {
+    extra_gt_returns <- lapply(
+      extra_gt_returns,
+      function(egr) {
+        egr$group <- BMisc::t2orig(egr$group, original_time.periods)
+        egr$time.period <- BMisc::t2orig(egr$time.period, original_time.periods)
+        egr
+      }
+    )
+  }
 
   # biters = 0 skips the bootstrap: point estimates only, NA standard
   # errors (#14)
@@ -404,7 +406,7 @@ attgt_pte_aggregations <- function(attgt.list, ptep) {
   attgt.results <- attgt.results[complete.cases(attgt.results), ]
 
   # handle unequally spaced periods
-  if (!(all(time.periods %in% original_time.periods))) {
+  if (pte_periods_recoded(ptep, time.periods)) {
     time.periods <- BMisc::t2orig(time.periods, original_time.periods)
     groups <- BMisc::t2orig(groups, original_time.periods)
     attgt.results$time.period <- BMisc::t2orig(attgt.results$time.period, original_time.periods)

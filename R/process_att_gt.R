@@ -117,7 +117,7 @@ process_att_gt <- function(att_gt_results, ptep) {
 
   # from "new" time to "original" time
   original_time.periods <- sort(unique(ptep$data[, ptep$tname]))
-  if (!all(ptep$tlist %in% original_time.periods)) {
+  if (pte_periods_recoded(ptep, ptep$tlist)) {
     ptep$tlist <- BMisc::t2orig(ptep$tlist, original_time.periods)
     ptep$glist <- BMisc::t2orig(ptep$glist, original_time.periods)
     group <- BMisc::t2orig(group, original_time.periods)
@@ -263,4 +263,31 @@ pte_cluster <- function(ptep) {
 cluster_sums <- function(inffunc, cluster) {
   if (is.null(cluster)) return(inffunc)
   rowsum(as.matrix(inffunc), cluster, reorder = FALSE)
+}
+
+# --- Were the time periods recoded? ------------------------------------------
+#
+# Internal helper. setup_pte() recodes time periods and groups to 1..T
+# (.period, .G), and results are mapped back to the original periods with
+# BMisc::t2orig(). setup_pte_basic() and some custom setup functions keep
+# the original periods, and mapping those again would be wrong. This used
+# to be guessed from whether the internal periods were all valid original
+# periods, which fails whenever they happen to be: with periods 2:3 the
+# internal post period 2 is also an original period, so nothing was mapped
+# back and the overall ATT was NaN. When the data have .period, compare it
+# with the user's time column instead; fall back to the old guess for
+# setups without .period.
+#
+# Arguments:
+#   ptep           - pte_params object
+#   internal_tlist - time periods as used in the group-time loop
+#
+# Returns: TRUE if results must be mapped back with BMisc::t2orig()
+pte_periods_recoded <- function(ptep, internal_tlist) {
+  data <- ptep$data
+  if (!is.null(data$.period)) {
+    return(any(data$.period != data[[ptep$tname]]))
+  }
+  original_time.periods <- sort(unique(data[[ptep$tname]]))
+  !all(internal_tlist %in% original_time.periods)
 }
