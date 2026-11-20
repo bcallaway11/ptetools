@@ -4,7 +4,7 @@
 #   treatment effects into overall, group, and dynamic (event-study)
 #   parameters, with multiplier-bootstrap or analytical inference.
 # Author: Brant Callaway
-# Last update: 2026-11-19
+# Last update: 2026-11-20
 # Date created: 2023-02-14
 # =============================================================================
 
@@ -154,17 +154,17 @@ pte_aggte <- function(attgt,
     # (here use pgg instead of pg because we can just look at each group)
     selective.att <- sum(selective.att.g * pgg) / sum(pgg)
 
-    # account for having to estimate pgg in the influence function
-    selective.wif <- NULL
-    if (isTRUE(panel)) {
-      selective.wif <- wif(
-        keepers = 1:length(glist),
-        pg = pgg,
-        weights.ind = weights.ind,
-        G = G,
-        group = group
-      )
-    }
+    # account for having to estimate pgg in the influence function. This
+    # applies to repeated cross sections too: there pgg is a share of all
+    # observations, estimated from the same rows the influence function is
+    # indexed by, as in did::aggte() (#32)
+    selective.wif <- wif(
+      keepers = seq_along(glist),
+      pg = pgg,
+      weights.ind = weights.ind,
+      G = G,
+      group = group
+    )
 
     # get overall influence function
     selective.inf.func <- get_agg_inf_func(
@@ -239,10 +239,8 @@ pte_aggte <- function(attgt,
     dynamic.se.inner <- lapply(eseq, function(e) {
       whiche <- which((originalt - originalgroup == e) & (include.balanced.gt))
       pge <- pg[whiche] / (sum(pg[whiche]))
-      wif.e <- NULL
-      if (isTRUE(panel)) {
-        wif.e <- wif(whiche, pg, weights.ind, G, group)
-      }
+      # estimated weights, for panel data and repeated cross sections (#32)
+      wif.e <- wif(whiche, pg, weights.ind, G, group)
       inf.func.e <- as.numeric(get_agg_inf_func(
         att = att,
         inffunc1 = inf_func,

@@ -34,6 +34,12 @@
   covered about 92%; they now cover 95%. Results with never-treated
   comparisons, and those for `ACRT(d)` and the overall parameters, are
   unaffected.
+* Bug fix: with repeated cross sections (`panel = FALSE`), standard errors
+  of the event study and the overall ATT left out the term for estimating
+  the group shares used to weight `ATT(g,t)` (#32). They now match
+  `did::aggte()` exactly, with and without sampling weights. The
+  difference was small in practice (about 0.01% on `mpdta`); group-time
+  standard errors were unaffected.
 * Bug fix: the empirical bootstrap ignored sampling weights. Each draw was
   set up again without `weightsname`, so every draw was unweighted and
   weighted standard errors and bands were those of the unweighted

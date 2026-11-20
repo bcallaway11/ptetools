@@ -7,9 +7,10 @@
 #   (#16); aggregated standard errors (#19) and the pre-test (#18) must
 #   match too;
 #   anticipation follows did's rules, in units of the time variable;
-#   control_group = "eventuallytreated" (#29); periods coded 2..T.
+#   control_group = "eventuallytreated" (#29); periods coded 2..T;
+#   aggregated standard errors with repeated cross sections (#32).
 # Author: Brant Callaway
-# Last update: 2026-11-19
+# Last update: 2026-11-20
 # Date created: 2026-11-19
 # =============================================================================
 
@@ -348,4 +349,34 @@ test_that("eventuallytreated with one treated cohort gives a clear error", {
                 control_group = "eventuallytreated", biters = 0),
     "no comparison units"
   )
+})
+
+# With repeated cross sections the aggregated SEs left out the influence
+# function of the estimated group shares (#32)
+test_that("aggregated SEs match did with repeated cross sections", {
+  skip_if_not_installed("did")
+  set.seed(3)
+  full <- did::mpdta
+  full$w <- runif(nrow(full), 0.2, 3)
+  # unequal numbers of observations per period
+  sub <- full[sort(sample(nrow(full), 1800)), ]
+  for (d in list(full, sub)) {
+    for (wn in list(NULL, "w")) {
+      a <- suppressWarnings(pte_default(
+        "lemp", "first.treat", "year", data = d, panel = FALSE,
+        xformula = ~lpop, weightsname = wn, bstrap = FALSE, cband = FALSE
+      ))
+      b <- suppressWarnings(did::att_gt(
+        "lemp", "year", "countyreal", "first.treat", xformla = ~lpop,
+        data = d, panel = FALSE, control_group = "notyettreated",
+        weightsname = wn, bstrap = FALSE, cband = FALSE
+      ))
+      dyn <- did::aggte(b, type = "dynamic", bstrap = FALSE)
+      grp <- did::aggte(b, type = "group", bstrap = FALSE)
+      em <- match(a$event_study$egt, dyn$egt)
+      expect_equal(a$event_study$se.egt, dyn$se.egt[em], tolerance = 1e-10)
+      expect_equal(a$overall_att$overall.se, grp$overall.se,
+                   tolerance = 1e-10)
+    }
+  }
 })
