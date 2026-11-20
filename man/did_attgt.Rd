@@ -33,4 +33,7 @@ treatment periods), \code{Y} (outcome).
 
 In our case, we call \code{two_by_two_subset} which sets up the
 data to have this format before the call to \code{did_attgt}.
+
+Sampling weights (\code{weightsname} in \code{pte()}, stored as
+\code{.w}) are passed to \code{DRDID::drdid_panel()}.
 }

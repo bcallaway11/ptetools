@@ -105,6 +105,9 @@ gt_covariates <- function(pp, xformula, d_covs_formula = ~-1,
 #'  In our case, we call \code{two_by_two_subset} which sets up the
 #'  data to have this format before the call to \code{did_attgt}.
 #'
+#'  Sampling weights (\code{weightsname} in \code{pte()}, stored as
+#'  \code{.w}) are passed to \code{DRDID::drdid_panel()}.
+#'
 #' @param gt_data data that is "local" to a particular group-time average
 #'  treatment effect
 #' @param xformula one-sided formula for covariates used in the propensity score
@@ -133,12 +136,17 @@ did_attgt <- function(gt_data, xformula = ~1, ...) {
   Y_pre <- gt_dataX$pre
 
   # call DRDID functions to make the computations;
-  # just like in `did` package
+  # just like in `did` package. Sampling weights (.w, all 1 without
+  # weightsname) were not passed, so they were ignored (#21); normalized to
+  # mean 1 within the cell, as DRDID does anyway.
+  w <- pp$pre$.w
+  if (is.null(w)) w <- rep(1, length(Y_post))
   attgt <- DRDID::drdid_panel(
     y1 = Y_post,
     y0 = Y_pre,
     D = D,
     covariates = covmat,
+    i.weights = w / mean(w),
     inffunc = TRUE
   )
 

@@ -11,6 +11,7 @@ setup_pte_basic(
   idname = NULL,
   data,
   panel = TRUE,
+  weightsname = NULL,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
@@ -37,6 +38,9 @@ setup_pte_basic(
 
 \item{panel}{Whether the data are panel data.  The default is TRUE.  Set to
 FALSE for repeated cross sections.}
+
+\item{weightsname}{The name of the column that contains sampling weights.
+The default is NULL, in which case no sampling weights are used.}
 
 \item{cband}{whether or not to report a uniform (instead of pointwise)
 confidence band (default is TRUE)}

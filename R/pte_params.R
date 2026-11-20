@@ -40,6 +40,7 @@ setup_pte_basic <- function(yname,
                             idname = NULL,
                             data,
                             panel = TRUE,
+                            weightsname = NULL,
                             cband = TRUE,
                             alp = 0.05,
                             boot_type = "multiplier",
@@ -71,7 +72,13 @@ setup_pte_basic <- function(yname,
   data$.id <- id
   data$.period <- period
   data$.Y <- data[, yname]
-  data$.w <- rep(1, nrow(data))
+  # sampling weights (#21); all 1 without weightsname. Checked in
+  # pte_params(), as for setup_pte()
+  data$.w <- if (is.null(weightsname)) {
+    rep(1, nrow(data))
+  } else {
+    data[, weightsname]
+  }
   data$.rowid <- seq_len(nrow(data))
 
   time.periods <- sort(unique(data$.period))
@@ -92,6 +99,7 @@ setup_pte_basic <- function(yname,
     idname = idname,
     data = data,
     panel = panel,
+    weightsname = weightsname,
     glist = groups,
     tlist = time.periods,
     cband = cband,

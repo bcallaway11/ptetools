@@ -34,6 +34,10 @@ differences) — e.g., during the early COVID-19 pandemic.
 Originally from Callaway and Li (2021). Moved into \code{ptetools} from
 the \code{ppe} package.
 }
+\details{
+Sampling weights (\code{weightsname} in \code{pte()}, stored as
+\code{.w}) are passed to \code{DRDID::drdid_panel()}.
+}
 \references{
 Callaway, B. and Li, T. (2021). Policy Evaluation during a
 Pandemic. \url{https://arxiv.org/abs/2105.06927}

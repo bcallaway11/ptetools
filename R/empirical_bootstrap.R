@@ -296,7 +296,11 @@ panel_empirical_bootstrap <- function(attgt.list,
       alp = ptep$alp,
       boot_type = boot_type,
       gt_type = gt_type,
-      # ret_quantile=ret_quantile,
+      # weightsname and ret_quantile are named arguments of pte(), not in
+      # `...`; they were not passed here, so every draw was unweighted and
+      # the QOTT draws used the default quantile (#21)
+      weightsname = ptep$weightsname,
+      ret_quantile = ptep$ret_quantile,
       biters = ptep$biters,
       cl = ptep$cl,
       ...
@@ -723,6 +727,9 @@ qtt_empirical_bootstrap <- function(attgt.list,
       boot_type = ptep$boot_type,
       gt_type   = ptep$gt_type,
       probs     = ptep$probs,
+      # not in `...` (a named argument of pte()); every draw was unweighted
+      # (#21)
+      weightsname = ptep$weightsname,
       biters    = ptep$biters,
       cl        = ptep$cl,
       ...

@@ -28,6 +28,9 @@
 #'   changes (differences). Default is \code{~-1} (no change covariates).
 #' @param ... extra arguments; not used
 #'
+#' @details Sampling weights (\code{weightsname} in \code{pte()}, stored as
+#'   \code{.w}) are passed to \code{DRDID::drdid_panel()}.
+#'
 #' @return \code{attgt_if} object
 #'
 #' @references Callaway, B. and Li, T. (2021). Policy Evaluation during a
@@ -67,11 +70,16 @@ covid_attgt <- function(gt_data, xformla, d_outcome = FALSE,
   keep_covs <- precheck_reg$pivot[seq_len(precheck_reg$rank)]
   covmat <- covmat[, keep_covs]
 
+  # sampling weights (.w, one per unit; all 1 without weightsname)
+  w <- pp$pre$.w
+  if (is.null(w)) w <- rep(1, length(Y))
+
   attgt <- DRDID::drdid_panel(
     y1 = Y,
     y0 = rep(0, length(Y)),
     D = D,
     covariates = covmat,
+    i.weights = w / mean(w),
     inffunc = TRUE
   )
 
