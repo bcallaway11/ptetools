@@ -187,8 +187,16 @@ process_dose_gt <- function(gt_results, ptep, ...) {
                 # add comparison group part of the influence function
                 # every d is the same with respect to comparison group
                 # don't rescale the influence function for untreated because these
-                # were already rescaled in the call to pte_default above
-                out_inffunc[keep_mat2[, i], ] <- -replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
+                # were already rescaled in the call to pte_default above.
+                # ATT(d) = x(d)'beta - m0 and ATT(g,t) = (treated mean) - m0
+                # enter m0 with the same sign, so the ATT(g,t) influence
+                # function's comparison entries, -(n / n0)(dy - m0), are
+                # already ATT(d)'s. They used to be negated: within a cell
+                # the sign does not matter, but a not-yet-treated unit is a
+                # comparison in early cells and treated in later ones, so
+                # the covariances across cells, and the standard errors of
+                # the aggregated ATT(d), were wrong.
+                out_inffunc[keep_mat2[, i], ] <- replicate(n = ncol(out_inffunc), comparison_inffunc[keep_mat2[, i], i])
                 out_inffunc
             }
         )

@@ -7,6 +7,15 @@
   guessed from whether the internal periods were all valid original
   periods; it now checks whether the setup function recoded them. Periods
   coded 1, ..., T, calendar years and other codings were unaffected.
+* Bug fix: standard errors and uniform bands for `ATT(d)` from
+  `process_dose_gt()` (used by contdid) were wrong with a not-yet-treated
+  comparison group, the default. The comparison-group part of the
+  influence function had the wrong sign. That cancels within a single
+  group-time cell, but not across cells where the same unit is first a
+  comparison unit and later treated. In simulations, 95% intervals
+  covered about 92%; they now cover 95%. Results with never-treated
+  comparisons, and those for `ACRT(d)` and the overall parameters, are
+  unaffected.
 * Bug fix: the empirical bootstrap ignored sampling weights. Each draw was
   set up again without `weightsname`, so every draw was unweighted and
   weighted standard errors and bands were those of the unweighted
