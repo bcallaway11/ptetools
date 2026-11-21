@@ -27,7 +27,7 @@ this release without changes.
     - macos-latest (R release)
     - ubuntu-latest (R release)
     - ubuntu-latest (R devel)
-    - TODO: fill in results after the GitHub Actions run (release step 10)
+    - All five: Status OK (0 errors, 0 warnings, 0 notes)
 
 ## R CMD check results
 
