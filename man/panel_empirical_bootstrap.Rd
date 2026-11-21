@@ -91,7 +91,10 @@ potentially useful for debugging.}
 
 \item{aggte_fun}{An optional function for aggregating group-time
 treatment effects.  When \code{NULL} (the default), the function is
-selected automatically based on \code{gt_type}.}
+selected automatically based on \code{gt_type}:
+\code{attgt_pte_aggregations()} for ATT-type results, silently, and
+\code{qtt_pte_aggregations()} or \code{qott_pte_aggregations()}, with a
+warning that this default will be removed, for distributional results.}
 
 \item{...}{extra arguments that can be passed to create the correct subsets
 of the data (depending on \code{subset_fun}), to estimate group time

@@ -28,6 +28,10 @@
 * New `pte_cell_warning()` lets any `attgt_fun` report problems this way:
   `pte()` collects the warnings across group-time cells and reports each
   kind once, listing the cells.
+* `pte()` (e.g. `pte_default()`) with `boot_type = "empirical"` no longer
+  warns "aggte_fun not specified" for ATT results, where the default
+  aggregation is the only built-in one. The warning remains for QTT and
+  QOTT results.
 * Bug fix: uniform confidence bands for QTT curves (and QTT minus ATT)
   could be absurdly wide when the outcome has a mass point, such as zero
   earnings (#33). The critical value standardized the bootstrap draws by

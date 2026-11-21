@@ -178,7 +178,10 @@ make_boot_sampler <- function(data, idname, panel, clustered = FALSE) {
 #' @param attgt.list list of attgt results from \code{compute.pte}
 #' @param aggte_fun An optional function for aggregating group-time
 #'  treatment effects.  When \code{NULL} (the default), the function is
-#'  selected automatically based on \code{gt_type}.
+#'  selected automatically based on \code{gt_type}:
+#'  \code{attgt_pte_aggregations()} for ATT-type results, silently, and
+#'  \code{qtt_pte_aggregations()} or \code{qott_pte_aggregations()}, with a
+#'  warning that this default will be removed, for distributional results.
 #'
 #' @return \code{pte_emp_boot} object
 #'
@@ -191,15 +194,21 @@ panel_empirical_bootstrap <- function(attgt.list,
                                       extra_gt_returns,
                                       aggte_fun = NULL,
                                       ...) {
-  # Resolve aggte_fun; warn if caller did not supply one (deprecated path).
-  # Resolution happens before the QTT dispatch so the resolved value flows through.
+  # Resolve aggte_fun before the QTT dispatch, so the resolved value flows
+  # through. For ATT-type results attgt_pte_aggregations() is the natural
+  # (and only built-in) choice, so the default is silent; pte_default() and
+  # other ATT estimators with boot_type = "empirical" used to warn about
+  # their own default. For distributional results (qtt, qott) callers are
+  # still asked to choose the aggregation explicitly.
   if (is.null(aggte_fun)) {
-    warning(
-      "aggte_fun not specified; defaulting based on gt_type. ",
-      "This default will be removed in a future version of ptetools.",
-      call. = FALSE
-    )
     gt_type_inner <- ptep$gt_type
+    if (gt_type_inner %in% c("qtt", "qott")) {
+      warning(
+        "aggte_fun not specified; defaulting based on gt_type. ",
+        "This default will be removed in a future version of ptetools.",
+        call. = FALSE
+      )
+    }
     aggte_fun <- switch(gt_type_inner,
       qtt  = qtt_pte_aggregations,
       qott = qott_pte_aggregations,
