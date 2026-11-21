@@ -5,7 +5,7 @@ Function to take an nx1 influence function and return a standard error
 ## Usage
 
 ``` r
-getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05)
+getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05, cluster = NULL)
 ```
 
 ## Arguments
@@ -13,6 +13,11 @@ getSE(thisinffunc, bstrap = TRUE, biters = 100, alp = 0.05)
 - thisinffunc:
 
   An influence function
+
+- cluster:
+
+  cluster identifiers, one per element of `thisinffunc`, or `NULL` for
+  unit-level clustering
 
 ## Value
 

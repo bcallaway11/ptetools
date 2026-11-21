@@ -9,7 +9,16 @@ intervals.
 ## Usage
 
 ``` r
-pte_qtt(overall, dynamic, group, F0_overall = NULL, F1_overall = NULL, ptep)
+pte_qtt(
+  overall,
+  dynamic,
+  group,
+  F0_overall = NULL,
+  F1_overall = NULL,
+  ptep,
+  att = NULL,
+  qtt_minus_att = NULL
+)
 ```
 
 ## Arguments
@@ -40,6 +49,20 @@ pte_qtt(overall, dynamic, group, F0_overall = NULL, F1_overall = NULL, ptep)
 - ptep:
 
   `pte_params` object
+
+- att:
+
+  `NULL`, or a list with the `overall`, `dynamic` and `group` ATTs from
+  the same run and bootstrap draws: data.frames with columns (`e` or
+  `group`,) `att`, `se`, `lower`, `upper` (pointwise)
+
+- qtt_minus_att:
+
+  `NULL`, or a list with the `overall`, `dynamic` and `group` curves
+  QTT(tau) - ATT, with the same columns as the QTT results (value column
+  `qtt_minus_att`) plus `pval`: the bootstrap sup-t p-value of the test
+  that QTT(tau) = ATT for every tau in `probs`, one per curve (repeated
+  on its rows)
 
 ## Value
 

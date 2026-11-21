@@ -66,6 +66,7 @@ reference:
       - qott_pte_aggregations
       - qtt_empirical_bootstrap
       - qtt_pte_aggregations
+      - summary.pte_qtt
 
   - title: Functions for group-time specific subsets of data
     contents:

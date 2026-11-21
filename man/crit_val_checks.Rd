@@ -2,7 +2,7 @@
 % Please edit documentation in R/pte_aggte.R
 \name{crit_val_checks}
 \alias{crit_val_checks}
-\title{Sanity Checks on Critical Values}
+\title{Sanity-Check a Simultaneous Critical Value}
 \usage{
 crit_val_checks(crit_val, alp = 0.05)
 }
@@ -12,15 +12,10 @@ crit_val_checks(crit_val, alp = 0.05)
 \item{alp}{significance level}
 }
 \value{
-a (possibly adjusted) critical value
-
 the (possibly corrected) critical value, with a \code{"cband"}
 logical attribute
 }
 \description{
-A function to perform sanity checks and possibly adjust a
-a critical value to form a uniform confidence band
-
 Validates a bootstrapped simultaneous critical value, falling
 back to the pointwise normal critical value if it is degenerate. Whether
 the fallback happened is signaled through the \code{"cband"} attribute of the

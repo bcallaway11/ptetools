@@ -10,7 +10,9 @@ D (treated group identifier), period (time period), name
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), Y (outcome).
 In our case, we call two_by_two_subset which sets up the
-data to have this format before the call to did_attgt.'><meta property="og:description" content='Takes a data.frame and computes for a particular group g
+data to have this format before the call to did_attgt.
+Sampling weights (weightsname in pte(), stored as
+.w) are passed to DRDID::drdid_panel().'><meta property="og:description" content='Takes a data.frame and computes for a particular group g
 and time period t and computes
 an estimate of a group time average treatment effect
 and a corresponding influence function using a difference in differences
@@ -21,7 +23,9 @@ D (treated group identifier), period (time period), name
 (equal to "pre" for pre-treatment periods and equal to "post" for post
 treatment periods), Y (outcome).
 In our case, we call two_by_two_subset which sets up the
-data to have this format before the call to did_attgt.'><meta property="og:image" content="https://github.com/bcallaway11/ptetools/logo.png"></head><body>
+data to have this format before the call to did_attgt.
+Sampling weights (weightsname in pte(), stored as
+.w) are passed to DRDID::drdid_panel().'><meta property="og:image" content="https://github.com/bcallaway11/ptetools/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -29,7 +33,7 @@ data to have this format before the call to did_attgt.'><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,6 +69,8 @@ In particular, there should be an <code>id</code> column (individual identifier)
 treatment periods), <code>Y</code> (outcome).</p>
 <p>In our case, we call <code>two_by_two_subset</code> which sets up the
 data to have this format before the call to <code>did_attgt</code>.</p>
+<p>Sampling weights (<code>weightsname</code> in <code><a href="pte.html">pte()</a></code>, stored as
+<code>.w</code>) are passed to <code><a href="https://psantanna.com/DRDID/reference/drdid_panel.html" class="external-link">DRDID::drdid_panel()</a></code>.</p>
     </div>
 
     <div class="section level2">

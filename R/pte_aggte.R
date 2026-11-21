@@ -4,7 +4,7 @@
 #   treatment effects into overall, group, and dynamic (event-study)
 #   parameters, with multiplier-bootstrap or analytical inference.
 # Author: Brant Callaway
-# Last update: 2026-11-20
+# Last update: 2026-11-21
 # Date created: 2023-02-14
 # =============================================================================
 
@@ -518,17 +518,6 @@ overall_weights <- function(attgt,
   )
 }
 
-#' @title Sanity Checks on Critical Values
-#'
-#' @description A function to perform sanity checks and possibly adjust a
-#'  a critical value to form a uniform confidence band
-#'
-#' @param crit_val the critical value
-#' @param alp the significance level
-#'
-#' @return a (possibly adjusted) critical value
-#'
-#' @export
 #' @title Sanity-Check a Simultaneous Critical Value
 #'
 #' @description Validates a bootstrapped simultaneous critical value, falling
@@ -545,6 +534,7 @@ overall_weights <- function(attgt,
 #'
 #' @return the (possibly corrected) critical value, with a `"cband"`
 #'  logical attribute
+#' @export
 #' @keywords internal
 crit_val_checks <- function(crit_val, alp = 0.05) {
   cband_ok <- TRUE

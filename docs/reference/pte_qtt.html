@@ -13,7 +13,7 @@ together with bootstrap standard errors and pointwise confidence intervals."><me
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,16 @@ together with bootstrap standard errors and pointwise confidence intervals.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pte_qtt</span><span class="op">(</span><span class="va">overall</span>, <span class="va">dynamic</span>, <span class="va">group</span>, F0_overall <span class="op">=</span> <span class="cn">NULL</span>, F1_overall <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">ptep</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pte_qtt</span><span class="op">(</span></span>
+<span>  <span class="va">overall</span>,</span>
+<span>  <span class="va">dynamic</span>,</span>
+<span>  <span class="va">group</span>,</span>
+<span>  F0_overall <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  F1_overall <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">ptep</span>,</span>
+<span>  att <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  qtt_minus_att <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,6 +86,21 @@ together with bootstrap standard errors and pointwise confidence intervals.</p>
 
 <dt id="arg-ptep">ptep<a class="anchor" aria-label="anchor" href="#arg-ptep"></a></dt>
 <dd><p><code>pte_params</code> object</p></dd>
+
+
+<dt id="arg-att">att<a class="anchor" aria-label="anchor" href="#arg-att"></a></dt>
+<dd><p><code>NULL</code>, or a list with the <code>overall</code>,
+<code>dynamic</code> and <code>group</code> ATTs from the same run and bootstrap
+draws: data.frames with columns (<code>e</code> or <code>group</code>,)
+<code>att</code>, <code>se</code>, <code>lower</code>, <code>upper</code> (pointwise)</p></dd>
+
+
+<dt id="arg-qtt-minus-att">qtt_minus_att<a class="anchor" aria-label="anchor" href="#arg-qtt-minus-att"></a></dt>
+<dd><p><code>NULL</code>, or a list with the <code>overall</code>,
+<code>dynamic</code> and <code>group</code> curves QTT(tau) - ATT, with the same
+columns as the QTT results (value column <code>qtt_minus_att</code>) plus
+<code>pval</code>: the bootstrap sup-t p-value of the test that QTT(tau) =
+ATT for every tau in <code>probs</code>, one per curve (repeated on its rows)</p></dd>
 
 </dl></div>
     <div class="section level2">

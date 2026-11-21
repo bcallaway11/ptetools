@@ -9,7 +9,7 @@ Main function for computing panel treatment effects"><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,7 @@ Main function for computing panel treatment effects"><meta property="og:image" c
 <span>  cband <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  alp <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  boot_type <span class="op">=</span> <span class="st">"multiplier"</span>,</span>
+<span>  bstrap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  weightsname <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  gt_type <span class="op">=</span> <span class="st">"att"</span>,</span>
 <span>  ret_quantile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -182,7 +183,21 @@ The multiplier bootstrap is generally much faster, but <code>attgt_fun</code> ne
 to provide an expression for the influence function (which could be challenging
 to figure out).  If no influence function is provided, then the <code>pte</code>
 package will use the empirical bootstrap no matter what the value of this
-parameter.</p></dd>
+parameter.  <code>bstrap = FALSE</code> (purely analytical standard errors) takes
+priority over <code>boot_type</code>: it is only available when <code>attgt_fun</code>
+returns an influence function, and it overrides <code>boot_type = "empirical"</code>.</p></dd>
+
+
+<dt id="arg-bstrap">bstrap<a class="anchor" aria-label="anchor" href="#arg-bstrap"></a></dt>
+<dd><p>whether to use the multiplier bootstrap (<code>TRUE</code>, the default)
+or purely analytical standard errors (<code>FALSE</code>) when the group-time
+estimator returns an influence function.  <code>bstrap = FALSE</code> overrides
+<code>boot_type</code> (i.e., <code>boot_type = "empirical"</code> is ignored) and only
+supports pointwise confidence intervals – if <code>cband = TRUE</code> is also
+requested, <code>ptetools</code> falls back to pointwise intervals with a warning.
+Analytical standard errors are not currently supported for continuous
+treatment (<code>gt_type = "dose"</code>): with <code>bstrap = FALSE</code>, the multiplier
+bootstrap is used instead, with a warning.</p></dd>
 
 
 <dt id="arg-weightsname">weightsname<a class="anchor" aria-label="anchor" href="#arg-weightsname"></a></dt>
@@ -242,11 +257,24 @@ which to evaluate the QTT curve.  Defaults to <code>seq(0.05, 0.95, 0.05)</code>
 
 
 <dt id="arg-biters">biters<a class="anchor" aria-label="anchor" href="#arg-biters"></a></dt>
-<dd><p>number of bootstrap iterations; default is 100</p></dd>
+<dd><p>number of bootstrap iterations; default is 100.
+<code>biters = 0</code> skips the bootstrap: where <code>attgt_fun</code> returns an
+influence function this is the same as <code>bstrap = FALSE</code> (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with <code>NA</code> standard errors.</p></dd>
 
 
 <dt id="arg-cl">cl<a class="anchor" aria-label="anchor" href="#arg-cl"></a></dt>
-<dd><p>number of clusters to be used when bootstrapping; default is 1</p></dd>
+<dd><p>parallel workers for the empirical bootstrap (the multiplier
+bootstrap does not need them); default is 1 (no parallelization). Either
+a number of workers or a cluster object from
+<code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">parallel::makeCluster()</a></code>. A number uses forked processes on
+Unix/macOS; on Windows, which cannot fork, a cluster with that many
+workers is created and stopped automatically. Cluster workers are
+separate R sessions: they load the installed packages, and functions
+defined in your workspace (e.g. a custom <code>attgt_fun</code>) must not rely
+on other objects in your workspace.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -294,47 +322,23 @@ aggregating treatment effects (particularly useful are <code>min_e</code>,
 <span class="r-in"><span>  attgt_fun <span class="op">=</span> <span class="va">did_attgt</span>,</span></span>
 <span class="r-in"><span>  xformla <span class="op">=</span> <span class="op">~</span><span class="va">lpop</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>critical value for uniform confidence band is somehow smaller than</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             critical value for pointwise confidence interval...using pointwise</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>             confidence interal</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">did_res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Overall ATT:  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      ATT    Std. Error     [ 95%  Conf. Int.]  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.0305        0.0118    -0.0535     -0.0074 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.0305        0.0125     -0.055     -0.0059 *</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Dynamic Effects:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          -3   0.0298     0.0167       -0.0086      0.0681  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          -2  -0.0024     0.0120       -0.0300      0.0251  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          -1  -0.0243     0.0105       -0.0484     -0.0001 *</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0  -0.0189     0.0148       -0.0529      0.0150  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1  -0.0536     0.0171       -0.0928     -0.0144 *</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           2  -0.1363     0.0378       -0.2228     -0.0497 *</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           3  -0.1008     0.0402       -0.1928     -0.0089 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -3   0.0298     0.0141       -0.0073      0.0668  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -2  -0.0024     0.0143       -0.0401      0.0352  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -1  -0.0243     0.0149       -0.0635      0.0149  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           0  -0.0189     0.0127       -0.0522      0.0143  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1  -0.0536     0.0182       -0.1013     -0.0059 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2  -0.1363     0.0333       -0.2236     -0.0490 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3  -0.1008     0.0355       -0.1941     -0.0075 *</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes: `*' confidence band does not cover 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

@@ -20,6 +20,8 @@
   : Aggregates (g,t)-Specific Results
 - [`pte_attgt()`](https://github.com/bcallaway11/ptetools/reference/pte_attgt.md)
   : General ATT(g,t)
+- [`pte_cell_warning()`](https://github.com/bcallaway11/ptetools/reference/pte_cell_warning.md)
+  : Warn about a problem in one group-time cell
 - [`setup_pte()`](https://github.com/bcallaway11/ptetools/reference/setup_pte.md)
   : Generic Setup Function
 - [`setup_pte_basic()`](https://github.com/bcallaway11/ptetools/reference/setup_pte_basic.md)
@@ -39,6 +41,13 @@
 - [`two_by_two_rcs_subset()`](https://github.com/bcallaway11/ptetools/reference/two_by_two_rcs_subset.md)
   : Two Period Two Group Repeated Cross Sections Subset
 
+## Diagnostics
+
+- [`check_overlap()`](https://github.com/bcallaway11/ptetools/reference/check_overlap.md)
+  : Overlap Diagnostics for Group-Time Cells
+- [`unsupported_covariates()`](https://github.com/bcallaway11/ptetools/reference/unsupported_covariates.md)
+  : Covariates dropped for collinearity that matter for prediction
+
 ## Functions for dealing with a continuous treatment
 
 - [`pte_dose_results()`](https://github.com/bcallaway11/ptetools/reference/pte_dose_results.md)
@@ -54,6 +63,8 @@
   : Empirical Bootstrap for QTT Curves
 - [`qtt_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/qtt_pte_aggregations.md)
   : Aggregate Group-Time Quantile Treatment Effects
+- [`summary(`*`<pte_qtt>`*`)`](https://github.com/bcallaway11/ptetools/reference/summary.pte_qtt.md)
+  : summary.pte_qtt
 
 ## Functions for group-time specific subsets of data
 
@@ -63,6 +74,10 @@
   : Keep All Untreated Subset
 - [`two_by_two_subset()`](https://github.com/bcallaway11/ptetools/reference/two_by_two_subset.md)
   : Two Period Two Group Subset
+- [`pte_base_period()`](https://github.com/bcallaway11/ptetools/reference/pte_base_period.md)
+  : Base Period of a Group-Time Cell
+- [`pte_calendar_time()`](https://github.com/bcallaway11/ptetools/reference/pte_calendar_time.md)
+  : Calendar Time of Internal Periods
 
 ## Plotting functions
 
@@ -90,7 +105,7 @@
 ## Helper functions
 
 - [`crit_val_checks()`](https://github.com/bcallaway11/ptetools/reference/crit_val_checks.md)
-  : Sanity Checks on Critical Values
+  : Sanity-Check a Simultaneous Critical Value
 - [`mboot2()`](https://github.com/bcallaway11/ptetools/reference/mboot2.md)
   : Multiplier Bootstrap
 

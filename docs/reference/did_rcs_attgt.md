@@ -7,7 +7,7 @@ function using a repeated cross sections DID approach.
 ## Usage
 
 ``` r
-did_rcs_attgt(gt_data, xformula = ~1, est_method = "dr", ...)
+did_rcs_attgt(gt_data, xformula = ~1, est_method = "aipw", ...)
 ```
 
 ## Arguments
@@ -24,8 +24,10 @@ did_rcs_attgt(gt_data, xformula = ~1, est_method = "dr", ...)
 
 - est_method:
 
-  Which type of estimation method to use. Default is "dr" for doubly
-  robust. The other option is "reg" for regression adjustment.
+  Which type of estimation method to use. The default is "aipw"
+  (augmented inverse probability weighting, i.e. doubly robust). The
+  other option is "reg" for regression adjustment. "dr" is a deprecated
+  alias for "aipw".
 
 - ...:
 

@@ -1,10 +1,13 @@
 # Aggregate Group-Time Quantile Treatment Effects
 
 Aggregate group-time F0/F1 distributions into QTT curves at the overall,
-group, and dynamic level. CDFs are mixed first using
-[`BMisc::combine_ecdfs`](https://bcallaway11.github.io/BMisc/reference/combine_ecdfs.html)
-and then inverted at all quantile levels in `probs`, avoiding the bias
-from averaging scalar QTTs.
+group, and dynamic level. CDFs are mixed first, with the aggregation
+weights, and the mixtures are then inverted at all quantile levels in
+`probs`, avoiding the bias from averaging scalar QTTs. The mixtures are
+computed exactly, from every support point of the cells' CDFs
+([`BMisc::combine_ecdfs()`](https://bcallaway11.github.io/BMisc/reference/combine_ecdfs.html)
+without `y.seq`), which must be step functions (such as those from
+[`BMisc::weighted_ecdf()`](https://bcallaway11.github.io/BMisc/reference/weighted_ecdf.html)).
 
 ## Usage
 
@@ -34,4 +37,8 @@ qtt_pte_aggregations(attgt.list, ptep, extra_gt_returns)
 ## Value
 
 named list with elements `overall_results`, `dyn_results`,
-`group_results`, `F0_overall`, `F1_overall`
+`group_results` (QTTs), `att_results` (a list with the `overall`,
+`dynamic` and `group` ATTs, aggregated with the same weights),
+`qtt_minus_att_results` (a list with `overall`, `dynamic` and `group`
+curves QTT(tau) - ATT, column `qtt_minus_att`), `F0_overall` and
+`F1_overall`

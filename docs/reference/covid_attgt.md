@@ -45,6 +45,13 @@ covid_attgt(gt_data, xformla, d_outcome = FALSE, d_covs_formula = ~-1, ...)
 
 `attgt_if` object
 
+## Details
+
+Sampling weights (`weightsname` in
+[`pte()`](https://github.com/bcallaway11/ptetools/reference/pte.md),
+stored as `.w`) are passed to
+[`DRDID::drdid_panel()`](https://psantanna.com/DRDID/reference/drdid_panel.html).
+
 ## References
 
 Callaway, B. and Li, T. (2021). Policy Evaluation during a Pandemic.

@@ -49,7 +49,12 @@ pte_emp_boot(
 - group_weights:
 
   list containing weights on underlying ATT(g,t) corresponding to
-  deliver averaged group-specific treatment effects
+  deliver averaged group-specific treatment effects. All weight vectors
+  from
+  [`attgt_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/attgt_pte_aggregations.md)
+  are in the order of the group-time cells as computed (`attgt.list`,
+  and so `extra_gt_returns`), with 0 for cells dropped as `NA`; this is
+  not necessarily the row order of `attgt_results`.
 
 - extra_gt_returns:
 

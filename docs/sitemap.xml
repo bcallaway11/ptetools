@@ -1,7 +1,5 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://github.com/bcallaway11/ptetools/404.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/AGENTS.html</loc></url>
-<url><loc>https://github.com/bcallaway11/ptetools/CLAUDE.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/authors.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/index.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/news/index.html</loc></url>
@@ -13,6 +11,7 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/autoplot.pte_emp_boot.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/autoplot.pte_qtt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/autoplot.pte_results.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/check_overlap.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/compute.pte.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/covid_attgt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/covid_data.html</loc></url>
@@ -37,15 +36,20 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/plot.pte_qtt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/plot.pte_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.group_time_att.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/print.pte_overlap.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.pte_qtt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.pte_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.summary.dose_obj.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/print.summary.pte_qtt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/print.summary.pte_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/process_att_gt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/process_dose_gt.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_aggte.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_attgt.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/pte_base_period.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/pte_calendar_time.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/pte_cell_warning.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_default.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_dose_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/pte_emp_boot.html</loc></url>
@@ -65,6 +69,7 @@
 <url><loc>https://github.com/bcallaway11/ptetools/reference/summary.pte_results.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/two_by_two_rcs_subset.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/two_by_two_subset.html</loc></url>
+<url><loc>https://github.com/bcallaway11/ptetools/reference/unsupported_covariates.html</loc></url>
 <url><loc>https://github.com/bcallaway11/ptetools/reference/wif.html</loc></url>
 </urlset>
 

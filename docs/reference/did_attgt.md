@@ -14,6 +14,11 @@ periods), `Y` (outcome).
 In our case, we call `two_by_two_subset` which sets up the data to have
 this format before the call to `did_attgt`.
 
+Sampling weights (`weightsname` in
+[`pte()`](https://github.com/bcallaway11/ptetools/reference/pte.md),
+stored as `.w`) are passed to
+[`DRDID::drdid_panel()`](https://psantanna.com/DRDID/reference/drdid_panel.html).
+
 ## Usage
 
 ``` r

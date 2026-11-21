@@ -1,7 +1,12 @@
 # Aggregate Group-Time Quantile of the Treatment Effect
 
 Aggregate group-time distribution of the treatment effect into overall,
-group, and dynamic effects.
+group, and dynamic effects, at the quantile `ptep$ret_quantile`. The
+distributions are mixed exactly, from every support point of the cells'
+CDFs (`Fte`), with
+[`BMisc::combine_ecdfs()`](https://bcallaway11.github.io/BMisc/reference/combine_ecdfs.html);
+they must be step functions (such as those from
+[`BMisc::weighted_ecdf()`](https://bcallaway11.github.io/BMisc/reference/weighted_ecdf.html)).
 
 ## Usage
 

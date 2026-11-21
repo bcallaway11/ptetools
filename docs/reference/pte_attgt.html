@@ -27,7 +27,7 @@ data to have this format before the call to pte_attgt'><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@ data to have this format before the call to <code>pte_attgt</code></p>
 <span>  d_outcome <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  d_covs_formula <span class="op">=</span> <span class="op">~</span><span class="op">-</span><span class="fl">1</span>,</span>
 <span>  lagged_outcome_cov <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  est_method <span class="op">=</span> <span class="st">"dr"</span>,</span>
+<span>  est_method <span class="op">=</span> <span class="st">"aipw"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -108,8 +108,10 @@ Default is FALSE.</p></dd>
 
 
 <dt id="arg-est-method">est_method<a class="anchor" aria-label="anchor" href="#arg-est-method"></a></dt>
-<dd><p>Which type of estimation method to use. Default is "dr" for
-doubly robust.  The other option is "reg" for regression adjustment.</p></dd>
+<dd><p>Which type of estimation method to use. The default is
+"aipw" (augmented inverse probability weighting, i.e. doubly robust).
+The other option is "reg" for regression adjustment. "dr" is a
+deprecated alias for "aipw".</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -18,6 +18,7 @@ aggte_obj(
   se.egt = NULL,
   crit.val.egt = NULL,
   inf.function = NULL,
+  cband = NULL,
   min_e = NULL,
   max_e = NULL,
   balance_e = NULL,
@@ -61,6 +62,14 @@ aggte_obj(
 - inf.function:
 
   The influence function of the chosen aggregated parameters
+
+- cband:
+
+  Logical indicating whether `crit.val.egt` is a genuine simultaneous
+  critical value (`TRUE`) or whether it fell back to the pointwise
+  normal critical value, e.g. because standard errors were NA (`FALSE`).
+  See
+  [`crit_val_checks()`](https://github.com/bcallaway11/ptetools/reference/crit_val_checks.md).
 
 - min_e:
 

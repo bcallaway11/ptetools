@@ -1,5 +1,20 @@
 # Panel Treatment Effects Tools (ptetools) Package
 
+## Installation
+
+You can install the released version of `ptetools` from CRAN with:
+
+``` r
+install.packages("ptetools")
+```
+
+or the development version from GitHub with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("bcallaway11/ptetools")
+```
+
 ## Structure of panel data causal inference problems
 
 The `ptetools` package compartmentalizes the steps needed to implement
@@ -37,7 +52,8 @@ replacing step 1.
 The idea of the `ptetools` package is to re-use as much
 code/infrastructure as possible when developing new approaches to panel
 data causal inference. For example, `ptetools` sits as the “backend” for
-several other packages including: `ife`, `contdid`, and parts of `qte`.
+several other packages including: `ife`, `contdid`, `badcontrols`, and
+parts of `qte`.
 
 ## How ptetools works
 
@@ -79,6 +95,22 @@ but these seem to be the leading cases; aggregations of group-time
 average treatment effects are discussed at length in [Callaway and
 Sant’Anna (2021)](https://doi.org/10.1016/j.jeconom.2020.12.001).
 
+Estimators built on `ptetools` also inherit several features without any
+extra code:
+
+- Sampling weights, through the `weightsname` argument.
+
+- Clustered standard errors, through the `clustervars` argument (e.g.,
+  clustering counties by state). Clustering applies to analytical
+  standard errors, the multiplier bootstrap, and the empirical
+  bootstrap.
+
+- Overlap diagnostics for each group-time cell, through
+  [`check_overlap()`](https://github.com/bcallaway11/ptetools/reference/check_overlap.md),
+  and warnings that are collected and reported once per call (rather
+  than once per group-time cell) when, for example, a covariate has to
+  be dropped in some cells.
+
 Below are several examples of how the `ptetools` package can be used to
 implement an identification strategy with a very small amount of new
 code.
@@ -118,24 +150,24 @@ summary(did_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0305        0.0119    -0.0539     -0.0071 *
+#>  -0.0305        0.0155    -0.0608      -1e-04 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  
-#>          -3   0.0298     0.0155       -0.0100      0.0695  
-#>          -2  -0.0024     0.0136       -0.0372      0.0323  
-#>          -1  -0.0243     0.0172       -0.0683      0.0198  
-#>           0  -0.0189     0.0127       -0.0514      0.0136  
-#>           1  -0.0536     0.0156       -0.0936     -0.0136 *
-#>           2  -0.1363     0.0347       -0.2252     -0.0473 *
-#>           3  -0.1008     0.0387       -0.1999     -0.0017 *
+#>          -3   0.0298     0.0153       -0.0142      0.0738  
+#>          -2  -0.0024     0.0119       -0.0367      0.0318  
+#>          -1  -0.0243     0.0148       -0.0668      0.0183  
+#>           0  -0.0189     0.0121       -0.0538      0.0159  
+#>           1  -0.0536     0.0181       -0.1056     -0.0015 *
+#>           2  -0.1363     0.0376       -0.2442     -0.0283 *
+#>           3  -0.1008     0.0369       -0.2068      0.0052  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggplot2::autoplot(did_res)
 ```
 
-![](reference/figures/README-unnamed-chunk-3-1.png)
+![](reference/figures/README-unnamed-chunk-5-1.png)
 
 What’s most interesting here, is that the only “new” code that needs to
 be written is in [the `did_attgt`
@@ -189,49 +221,49 @@ summary(covid_res)
 #> 
 #> Overall ATT:  
 #>       ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  -13.2547       88.0238  -185.7783    159.2689 
+#>  -13.2547       78.2922  -166.7046    140.1952 
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Simult.  Conf. Band] 
-#>         -10  -6.3170     6.2253      -21.9441      9.3101 
-#>          -9   2.1087     1.0403       -0.5026      4.7200 
-#>          -8  -2.7721     1.3161       -6.0759      0.5316 
-#>          -7   3.8965     2.2331       -1.7091      9.5021 
-#>          -6  -1.0588     2.6737       -7.7703      5.6527 
-#>          -5   2.4337     5.8718      -12.3058     17.1732 
-#>          -4   0.2436     1.6735       -3.9574      4.4446 
-#>          -3  -1.3052     4.2679      -12.0187      9.4083 
-#>          -2   0.4594     2.1419       -4.9173      5.8362 
-#>          -1   4.0376     2.6016       -2.4931     10.5682 
-#>           0  -3.2518     3.0698      -10.9577      4.4542 
-#>           1  -7.4231     9.9500      -32.3999     17.5537 
-#>           2  -0.3148     8.5038      -21.6614     21.0318 
-#>           3   2.7880     8.3010      -18.0496     23.6256 
-#>           4   1.3625    11.3570      -27.1462     29.8713 
-#>           5  -2.9563    19.9698      -53.0854     47.1727 
-#>           6 -17.2610    28.2230      -88.1075     53.5855 
-#>           7 -19.2258    36.3255     -110.4116     71.9599 
-#>           8 -21.5150    40.3927     -122.9103     79.8804 
-#>           9 -25.2793    37.7454     -120.0294     69.4707 
-#>          10 -23.0541    49.5949     -147.5491    101.4409 
-#>          11  -3.8346    47.0793     -122.0149    114.3456 
-#>          12  -5.6789    61.7977     -160.8060    149.4482 
-#>          13 -12.4977    93.6276     -247.5254    222.5299 
-#>          14 -19.6199    91.2854     -248.7680    209.5283 
-#>          15 -11.6638    87.2393     -230.6552    207.3275 
-#>          16 -15.0522   101.3735     -269.5237    239.4193 
-#>          17  -3.3234   122.7752     -311.5184    304.8716 
-#>          18 -14.3328   110.3989     -291.4603    262.7947 
-#>          19 -26.1852   145.9644     -392.5905    340.2201 
-#>          20 -40.7039   139.8987     -391.8830    310.4753 
-#>          21 -58.7364   154.9435     -447.6815    330.2087 
+#>         -10  -6.3170     5.9091      -22.0136      9.3796 
+#>          -9   2.1087     1.1906       -1.0538      5.2712 
+#>          -8  -2.7721     1.4866       -6.7210      1.1768 
+#>          -7   3.8965     1.9004       -1.1516      8.9446 
+#>          -6  -1.0588     2.6696       -8.1501      6.0325 
+#>          -5   2.4337     6.1332      -13.8582     18.7256 
+#>          -4   0.2436     1.3210       -3.2654      3.7526 
+#>          -3  -1.3052     4.8644      -14.2266     11.6163 
+#>          -2   0.4594     2.0423       -4.9655      5.8844 
+#>          -1   4.0376     2.1559       -1.6891      9.7643 
+#>           0  -3.2518     3.7357      -13.1749      6.6714 
+#>           1  -7.4231    11.4175      -37.7518     22.9056 
+#>           2  -0.3148     7.9784      -21.5080     20.8783 
+#>           3   2.7880     8.7694      -20.5064     26.0824 
+#>           4   1.3625    11.1558      -28.2710     30.9960 
+#>           5  -2.9563    20.5049      -57.4242     51.5115 
+#>           6 -17.2610    31.3154     -100.4450     65.9230 
+#>           7 -19.2258    35.4103     -113.2873     74.8356 
+#>           8 -21.5150    37.0396     -119.9042     76.8743 
+#>           9 -25.2793    48.3840     -153.8031    103.2444 
+#>          10 -23.0541    45.4677     -143.8314     97.7232 
+#>          11  -3.8346    58.9140     -160.3295    152.6602 
+#>          12  -5.6789    73.5857     -201.1467    189.7889 
+#>          13 -12.4977    70.4054     -199.5177    174.5223 
+#>          14 -19.6199    90.4435     -259.8677    220.6279 
+#>          15 -11.6638   122.1818     -336.2190    312.8913 
+#>          16 -15.0522    80.1959     -228.0789    197.9745 
+#>          17  -3.3234   101.4282     -272.7500    266.1032 
+#>          18 -14.3328    89.8926     -253.1172    224.4515 
+#>          19 -26.1852   149.5505     -423.4406    371.0702 
+#>          20 -40.7039   123.9819     -370.0406    288.6329 
+#>          21 -58.7364   161.4025     -487.4746    370.0018 
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggplot2::autoplot(covid_res) + ylim(c(-1000, 1000))
 ```
 
-![](reference/figures/README-unnamed-chunk-7-1.png)
+![](reference/figures/README-unnamed-chunk-9-1.png)
 
 What’s most interesting is just how little code needs to be written
 here. The `pte_default` function handles the unconfoundedness-type
@@ -288,24 +320,24 @@ summary(did_res_noif)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0323        0.0129    -0.0582     -0.0063 *
+#>  -0.0323        0.0113    -0.0542     -0.0103 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  
-#>          -3   0.0269     0.0139       -0.0003      0.0541  
-#>          -2  -0.0050     0.0123       -0.0290      0.0191  
-#>          -1  -0.0229     0.0144       -0.0511      0.0054  
-#>           0  -0.0201     0.0123       -0.0443      0.0040  
-#>           1  -0.0547     0.0176       -0.0892     -0.0203 *
-#>           2  -0.1382     0.0403       -0.2172     -0.0592 *
-#>           3  -0.1069     0.0357       -0.1769     -0.0369 *
+#>          -3   0.0269     0.0132        0.0011      0.0528 *
+#>          -2  -0.0050     0.0130       -0.0304      0.0204  
+#>          -1  -0.0229     0.0141       -0.0506      0.0049  
+#>           0  -0.0201     0.0111       -0.0418      0.0015  
+#>           1  -0.0547     0.0165       -0.0871     -0.0224 *
+#>           2  -0.1382     0.0360       -0.2088     -0.0676 *
+#>           3  -0.1069     0.0335       -0.1726     -0.0412 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ggplot2::autoplot(did_res_noif)
 ```
 
-![](reference/figures/README-unnamed-chunk-9-1.png)
+![](reference/figures/README-unnamed-chunk-11-1.png)
 
 What’s exciting about this is just how little new code needs to be
 written.
@@ -332,6 +364,8 @@ written.
   : Aggregates (g,t)-Specific Results
 - [`pte_attgt()`](https://github.com/bcallaway11/ptetools/reference/pte_attgt.md)
   : General ATT(g,t)
+- [`pte_cell_warning()`](https://github.com/bcallaway11/ptetools/reference/pte_cell_warning.md)
+  : Warn about a problem in one group-time cell
 - [`setup_pte()`](https://github.com/bcallaway11/ptetools/reference/setup_pte.md)
   : Generic Setup Function
 - [`setup_pte_basic()`](https://github.com/bcallaway11/ptetools/reference/setup_pte_basic.md)
@@ -351,6 +385,13 @@ written.
 - [`two_by_two_rcs_subset()`](https://github.com/bcallaway11/ptetools/reference/two_by_two_rcs_subset.md)
   : Two Period Two Group Repeated Cross Sections Subset
 
+## Diagnostics
+
+- [`check_overlap()`](https://github.com/bcallaway11/ptetools/reference/check_overlap.md)
+  : Overlap Diagnostics for Group-Time Cells
+- [`unsupported_covariates()`](https://github.com/bcallaway11/ptetools/reference/unsupported_covariates.md)
+  : Covariates dropped for collinearity that matter for prediction
+
 ## Functions for dealing with a continuous treatment
 
 - [`pte_dose_results()`](https://github.com/bcallaway11/ptetools/reference/pte_dose_results.md)
@@ -366,6 +407,8 @@ written.
   : Empirical Bootstrap for QTT Curves
 - [`qtt_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/qtt_pte_aggregations.md)
   : Aggregate Group-Time Quantile Treatment Effects
+- [`summary(`*`<pte_qtt>`*`)`](https://github.com/bcallaway11/ptetools/reference/summary.pte_qtt.md)
+  : summary.pte_qtt
 
 ## Functions for group-time specific subsets of data
 
@@ -375,6 +418,10 @@ written.
   : Keep All Untreated Subset
 - [`two_by_two_subset()`](https://github.com/bcallaway11/ptetools/reference/two_by_two_subset.md)
   : Two Period Two Group Subset
+- [`pte_base_period()`](https://github.com/bcallaway11/ptetools/reference/pte_base_period.md)
+  : Base Period of a Group-Time Cell
+- [`pte_calendar_time()`](https://github.com/bcallaway11/ptetools/reference/pte_calendar_time.md)
+  : Calendar Time of Internal Periods
 
 ## Plotting functions
 
@@ -402,7 +449,7 @@ written.
 ## Helper functions
 
 - [`crit_val_checks()`](https://github.com/bcallaway11/ptetools/reference/crit_val_checks.md)
-  : Sanity Checks on Critical Values
+  : Sanity-Check a Simultaneous Critical Value
 - [`mboot2()`](https://github.com/bcallaway11/ptetools/reference/mboot2.md)
   : Multiplier Bootstrap
 

@@ -17,8 +17,9 @@ print(x, ...)
 
 - ...:
 
-  extra arguments
+  extra arguments passed to
+  [`summary.pte_qtt()`](https://github.com/bcallaway11/ptetools/reference/summary.pte_qtt.md)
 
 ## Value
 
-None. Prints the overall QTT curve.
+`x`, invisibly

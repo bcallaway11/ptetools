@@ -9,7 +9,7 @@ inference"><meta property="og:image" content="https://github.com/bcallaway11/pte
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,7 +39,7 @@ inference</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mboot2</span><span class="op">(</span><span class="va">inffunc</span>, biters <span class="op">=</span> <span class="fl">1000</span>, alp <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mboot2</span><span class="op">(</span><span class="va">inffunc</span>, biters <span class="op">=</span> <span class="fl">1000</span>, alp <span class="op">=</span> <span class="fl">0.05</span>, cband <span class="op">=</span> <span class="cn">TRUE</span>, cluster <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -51,17 +51,36 @@ inference</p>
 
 
 <dt id="arg-biters">biters<a class="anchor" aria-label="anchor" href="#arg-biters"></a></dt>
-<dd><p>number of bootstrap iterations; default is 100</p></dd>
+<dd><p>number of bootstrap iterations; default is 100.
+<code>biters = 0</code> skips the bootstrap: where <code>attgt_fun</code> returns an
+influence function this is the same as <code>bstrap = FALSE</code> (analytical,
+pointwise standard errors); where standard errors are only available
+from the bootstrap (the empirical bootstrap, dose-specific effects), the
+point estimates are returned with <code>NA</code> standard errors.</p></dd>
 
 
 <dt id="arg-alp">alp<a class="anchor" aria-label="anchor" href="#arg-alp"></a></dt>
 <dd><p>significance level; default is 0.05</p></dd>
 
+
+<dt id="arg-cband">cband<a class="anchor" aria-label="anchor" href="#arg-cband"></a></dt>
+<dd><p>whether to compute the critical value for uniform confidence
+bands (default <code>TRUE</code>). With <code>FALSE</code>, only standard errors are
+computed and <code>crit_val</code> is <code>NA</code>.</p></dd>
+
+
+<dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
+<dd><p>cluster identifiers, one per row of <code>inffunc</code>, or
+<code>NULL</code> (the default) for clustering at the level of the rows (units)</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>list with the following elements:</p><ul><li><p><code>boot_se</code>: bootstrap standard errors</p></li>
-<li><p><code>crit_val</code>: critical value for uniform confidence bands</p></li>
+<li><p><code>crit_val</code>: critical value for uniform confidence bands, from the
+sup-t statistic over the parameters with a positive standard error
+(the normal critical value if there is only one; <code>NA</code> if there
+are none or <code>cband = FALSE</code>)</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

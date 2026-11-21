@@ -106,7 +106,14 @@ panel_empirical_bootstrap(
 
   An optional function for aggregating group-time treatment effects.
   When `NULL` (the default), the function is selected automatically
-  based on `gt_type`.
+  based on `gt_type`:
+  [`attgt_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/attgt_pte_aggregations.md)
+  for ATT-type results, silently, and
+  [`qtt_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/qtt_pte_aggregations.md)
+  or
+  [`qott_pte_aggregations()`](https://github.com/bcallaway11/ptetools/reference/qott_pte_aggregations.md),
+  with a warning that this default will be removed, for distributional
+  results.
 
 - ...:
 

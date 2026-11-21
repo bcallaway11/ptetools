@@ -29,9 +29,11 @@ setup_pte_basic(
   idname = NULL,
   data,
   panel = TRUE,
+  weightsname = NULL,
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
+  bstrap = TRUE,
   gt_type = "att",
   ret_quantile = 0.5,
   probs = NULL,
@@ -69,6 +71,11 @@ setup_pte_basic(
   Whether the data are panel data. The default is TRUE. Set to FALSE for
   repeated cross sections.
 
+- weightsname:
+
+  The name of the column that contains sampling weights. The default is
+  NULL, in which case no sampling weights are used.
+
 - cband:
 
   whether or not to report a uniform (instead of pointwise) confidence
@@ -81,6 +88,18 @@ setup_pte_basic(
 - boot_type:
 
   which type of bootstrap to use
+
+- bstrap:
+
+  whether to use the multiplier bootstrap (`TRUE`, the default) or
+  purely analytical standard errors (`FALSE`) when the group-time
+  estimator returns an influence function. `bstrap = FALSE` overrides
+  `boot_type` (i.e., `boot_type = "empirical"` is ignored) and only
+  supports pointwise confidence intervals – if `cband = TRUE` is also
+  requested, `ptetools` falls back to pointwise intervals with a
+  warning. Analytical standard errors are not currently supported for
+  continuous treatment (`gt_type = "dose"`): with `bstrap = FALSE`, the
+  multiplier bootstrap is used instead, with a warning.
 
 - gt_type:
 
@@ -102,11 +121,24 @@ setup_pte_basic(
 
 - biters:
 
-  number of bootstrap iterations; default is 100
+  number of bootstrap iterations; default is 100. `biters = 0` skips the
+  bootstrap: where `attgt_fun` returns an influence function this is the
+  same as `bstrap = FALSE` (analytical, pointwise standard errors);
+  where standard errors are only available from the bootstrap (the
+  empirical bootstrap, dose-specific effects), the point estimates are
+  returned with `NA` standard errors.
 
 - cl:
 
-  number of clusters to be used when bootstrapping; default is 1
+  parallel workers for the empirical bootstrap (the multiplier bootstrap
+  does not need them); default is 1 (no parallelization). Either a
+  number of workers or a cluster object from
+  [`parallel::makeCluster()`](https://rdrr.io/r/parallel/makeCluster.html).
+  A number uses forked processes on Unix/macOS; on Windows, which cannot
+  fork, a cluster with that many workers is created and stopped
+  automatically. Cluster workers are separate R sessions: they load the
+  installed packages, and functions defined in your workspace (e.g. a
+  custom `attgt_fun`) must not rely on other objects in your workspace.
 
 - call:
 

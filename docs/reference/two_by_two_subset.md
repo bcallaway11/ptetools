@@ -35,7 +35,9 @@ two_by_two_subset(
 
 - control_group:
 
-  whether to use "notyettreated" (default) or "nevertreated"
+  whether to use "notyettreated" (default), "nevertreated" or
+  "eventuallytreated" (see
+  [`pte_params`](https://github.com/bcallaway11/ptetools/reference/pte_params.md))
 
 - anticipation:
 

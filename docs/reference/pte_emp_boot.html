@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,7 +82,11 @@ effect parameters.</p></dd>
 
 <dt id="arg-group-weights">group_weights<a class="anchor" aria-label="anchor" href="#arg-group-weights"></a></dt>
 <dd><p>list containing weights on underlying ATT(g,t)
-corresponding to deliver averaged group-specific treatment effects</p></dd>
+corresponding to deliver averaged group-specific treatment effects.
+All weight vectors from <code><a href="attgt_pte_aggregations.html">attgt_pte_aggregations()</a></code> are in the order
+of the group-time cells as computed (<code>attgt.list</code>, and so
+<code>extra_gt_returns</code>), with 0 for cells dropped as <code>NA</code>; this is
+not necessarily the row order of <code>attgt_results</code>.</p></dd>
 
 
 <dt id="arg-extra-gt-returns">extra_gt_returns<a class="anchor" aria-label="anchor" href="#arg-extra-gt-returns"></a></dt>

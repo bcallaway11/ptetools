@@ -23,7 +23,7 @@ pte_attgt(
   d_outcome = FALSE,
   d_covs_formula = ~-1,
   lagged_outcome_cov = FALSE,
-  est_method = "dr",
+  est_method = "aipw",
   ...
 )
 ```
@@ -59,8 +59,10 @@ pte_attgt(
 
 - est_method:
 
-  Which type of estimation method to use. Default is "dr" for doubly
-  robust. The other option is "reg" for regression adjustment.
+  Which type of estimation method to use. The default is "aipw"
+  (augmented inverse probability weighting, i.e. doubly robust). The
+  other option is "reg" for regression adjustment. "dr" is a deprecated
+  alias for "aipw".
 
 - ...:
 

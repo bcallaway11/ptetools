@@ -26,6 +26,21 @@ data(covid_data)
 
 # Panel Treatment Effects Tools (ptetools) Package <img src="man/figures/logo.png" align="right" alt="ptetools" width="155" />
 
+## Installation
+
+You can install the released version of `ptetools` from CRAN with:
+
+```{r eval=FALSE}
+install.packages("ptetools")
+```
+
+or the development version from GitHub with:
+
+```{r eval=FALSE}
+# install.packages("remotes")
+remotes::install_github("bcallaway11/ptetools")
+```
+
 ## Structure of panel data causal inference problems
 
 The `ptetools` package compartmentalizes the steps needed to implement estimators of group-time average treatment effects (and their aggregations) in order to make it easier to apply the same sorts of arguments outside of their "birthplace" in the literature on difference-in-differences.
@@ -46,7 +61,7 @@ Essentially, the idea is that many panel data causal inference problems involve 
 
 Many of these steps are common across different panel data causal inference settings.  For example, you could implement a difference-in-differences identification strategy or a change-in-changes identification strategy with all of the same steps as above except for replacing step 1.
 
-The idea of the `ptetools` package is to re-use as much code/infrastructure as possible when developing new approaches to panel data causal inference.  For example, `ptetools` sits as the "backend" for several other packages including: `ife`, `contdid`, and parts of `qte`.
+The idea of the `ptetools` package is to re-use as much code/infrastructure as possible when developing new approaches to panel data causal inference.  For example, `ptetools` sits as the "backend" for several other packages including: `ife`, `contdid`, `badcontrols`, and parts of `qte`.
 
 ## How ptetools works
 
@@ -60,6 +75,14 @@ If `attgt_fun` returns an influence function, then the `ptetools` package will a
 
 The default output of `pte` is an overall treatment effect on the treated (i.e., across all groups that participate in the treatment in any time period) and and event study.  More aggregations are possible, but these seem to be the leading cases; aggregations of group-time average treatment effects are discussed at length in [Callaway and Sant'Anna (2021)](https://doi.org/10.1016/j.jeconom.2020.12.001).
 
+Estimators built on `ptetools` also inherit several features without any extra code:
+
+* Sampling weights, through the `weightsname` argument.
+
+* Clustered standard errors, through the `clustervars` argument (e.g., clustering counties by state). Clustering applies to analytical standard errors, the multiplier bootstrap, and the empirical bootstrap.
+
+* Overlap diagnostics for each group-time cell, through `check_overlap()`, and warnings that are collected and reported once per call (rather than once per group-time cell) when, for example, a covariate has to be dropped in some cells.
+
 Below are several examples of how the `ptetools` package can be used to implement an identification strategy with a very small amount of new code.
 
 ## Example 1: Difference in differences
@@ -69,7 +92,7 @@ The [`did` package](https://bcallaway11.github.io/did/), which is based on [Call
 This example reproduces DID estimates of the effect of the minimum wage on employment using data from the `did` package.
 
 ```{r}
-#| fig-alt: "Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the minimum wage example."
+#| fig-alt: "Event-study plot of ATT estimates by event time, with uniform confidence bands, for the minimum wage example."
 library(did)
 data(mpdta)
 did_res <- pte(
@@ -127,7 +150,7 @@ covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))
 ```
 
 ```{r}
-#| fig-alt: "Event-study plot of ATT estimates by event time, with pointwise confidence intervals, for the COVID-19 shelter-in-place example."
+#| fig-alt: "Event-study plot of ATT estimates by event time, with uniform confidence bands, for the COVID-19 shelter-in-place example."
 covid_res <- pte_default(
   yname = "positive",
   gname = "group",

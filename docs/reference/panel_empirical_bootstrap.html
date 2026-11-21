@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ptetools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,7 +136,10 @@ potentially useful for debugging.</p></dd>
 <dt id="arg-aggte-fun">aggte_fun<a class="anchor" aria-label="anchor" href="#arg-aggte-fun"></a></dt>
 <dd><p>An optional function for aggregating group-time
 treatment effects.  When <code>NULL</code> (the default), the function is
-selected automatically based on <code>gt_type</code>.</p></dd>
+selected automatically based on <code>gt_type</code>:
+<code><a href="attgt_pte_aggregations.html">attgt_pte_aggregations()</a></code> for ATT-type results, silently, and
+<code><a href="qtt_pte_aggregations.html">qtt_pte_aggregations()</a></code> or <code><a href="qott_pte_aggregations.html">qott_pte_aggregations()</a></code>, with a
+warning that this default will be removed, for distributional results.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

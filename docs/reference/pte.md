@@ -21,6 +21,7 @@ pte(
   cband = TRUE,
   alp = 0.05,
   boot_type = "multiplier",
+  bstrap = TRUE,
   weightsname = NULL,
   gt_type = "att",
   ret_quantile = NULL,
@@ -150,7 +151,22 @@ pte(
   to provide an expression for the influence function (which could be
   challenging to figure out). If no influence function is provided, then
   the `pte` package will use the empirical bootstrap no matter what the
-  value of this parameter.
+  value of this parameter. `bstrap = FALSE` (purely analytical standard
+  errors) takes priority over `boot_type`: it is only available when
+  `attgt_fun` returns an influence function, and it overrides
+  `boot_type = "empirical"`.
+
+- bstrap:
+
+  whether to use the multiplier bootstrap (`TRUE`, the default) or
+  purely analytical standard errors (`FALSE`) when the group-time
+  estimator returns an influence function. `bstrap = FALSE` overrides
+  `boot_type` (i.e., `boot_type = "empirical"` is ignored) and only
+  supports pointwise confidence intervals – if `cband = TRUE` is also
+  requested, `ptetools` falls back to pointwise intervals with a
+  warning. Analytical standard errors are not currently supported for
+  continuous treatment (`gt_type = "dose"`): with `bstrap = FALSE`, the
+  multiplier bootstrap is used instead, with a warning.
 
 - weightsname:
 
@@ -212,11 +228,24 @@ pte(
 
 - biters:
 
-  number of bootstrap iterations; default is 100
+  number of bootstrap iterations; default is 100. `biters = 0` skips the
+  bootstrap: where `attgt_fun` returns an influence function this is the
+  same as `bstrap = FALSE` (analytical, pointwise standard errors);
+  where standard errors are only available from the bootstrap (the
+  empirical bootstrap, dose-specific effects), the point estimates are
+  returned with `NA` standard errors.
 
 - cl:
 
-  number of clusters to be used when bootstrapping; default is 1
+  parallel workers for the empirical bootstrap (the multiplier bootstrap
+  does not need them); default is 1 (no parallelization). Either a
+  number of workers or a cluster object from
+  [`parallel::makeCluster()`](https://rdrr.io/r/parallel/makeCluster.html).
+  A number uses forked processes on Unix/macOS; on Windows, which cannot
+  fork, a cluster with that many workers is created and stopped
+  automatically. Cluster workers are separate R sessions: they load the
+  installed packages, and functions defined in your workspace (e.g. a
+  custom `attgt_fun`) must not rely on other objects in your workspace.
 
 - call:
 
@@ -268,47 +297,23 @@ did_res <- pte(
   attgt_fun = did_attgt,
   xformla = ~lpop
 )
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
-#> Warning: critical value for uniform confidence band is somehow smaller than
-#>             critical value for pointwise confidence interval...using pointwise
-#>             confidence interal
 
 summary(did_res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -0.0305        0.0118    -0.0535     -0.0074 *
+#>  -0.0305        0.0125     -0.055     -0.0059 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error [95% Simult.  Conf. Band]  
-#>          -3   0.0298     0.0167       -0.0086      0.0681  
-#>          -2  -0.0024     0.0120       -0.0300      0.0251  
-#>          -1  -0.0243     0.0105       -0.0484     -0.0001 *
-#>           0  -0.0189     0.0148       -0.0529      0.0150  
-#>           1  -0.0536     0.0171       -0.0928     -0.0144 *
-#>           2  -0.1363     0.0378       -0.2228     -0.0497 *
-#>           3  -0.1008     0.0402       -0.1928     -0.0089 *
+#>          -3   0.0298     0.0141       -0.0073      0.0668  
+#>          -2  -0.0024     0.0143       -0.0401      0.0352  
+#>          -1  -0.0243     0.0149       -0.0635      0.0149  
+#>           0  -0.0189     0.0127       -0.0522      0.0143  
+#>           1  -0.0536     0.0182       -0.1013     -0.0059 *
+#>           2  -0.1363     0.0333       -0.2236     -0.0490 *
+#>           3  -0.1008     0.0355       -0.1941     -0.0075 *
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 #> 
