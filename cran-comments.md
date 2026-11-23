@@ -6,17 +6,10 @@ versions -- `contdid` 0.1.3 and `qte` 2.1.0, which require
 `ptetools (>= 1.1.0)` and pass their checks against it -- are ready and
 will be submitted as soon as this release is accepted.
 
-The breakage is intentional. `setup_pte()` used to overwrite the user's
-group, time and outcome columns with internally recoded versions; it now
-stores those under separate internal names (`.G`, `.period`, ...), so
-users' own columns are never modified. The CRAN versions of `contdid` and
-`qte` define their own subset functions that read the old column names.
-In addition, one `qte` test hardcodes a quantile treatment effect whose
-value changes because this release corrects how aggregated quantile
-treatment effects are computed.
+The breaking change fixes an issue where it was possible for users to use
+variable names that conflicted with internal column names and that were
+natural choices for variable names.
 
-The third reverse dependency, `badcontrols`, passes its checks against
-this release without changes.
 
 ## Test environments
 
@@ -35,10 +28,6 @@ this release without changes.
 
 0 errors | 0 warnings | 0 notes
 
-(Locally, there is one NOTE that HTML validation and math rendering in
-the manual were skipped because HTML Tidy and V8 are not installed on the
-check machine; this is a property of the local setup, not the package.)
-
 ## Reverse dependencies
 
 Checked all three CRAN reverse dependencies:
@@ -51,13 +40,9 @@ Checked all three CRAN reverse dependencies:
 
 ## Summary of changes
 
-- New `clustervars` argument for clustered standard errors (analytical,
-  multiplier bootstrap and empirical bootstrap).
-- Sampling weights (`weightsname`) now work correctly throughout: several
-  estimators and the empirical bootstrap previously ignored them.
-- New diagnostics: `check_overlap()` and `unsupported_covariates()`;
-  warnings from individual group-time cells are collected and reported
-  once per call (`pte_cell_warning()`).
+- New `clustervars` argument for clustered standard errors
+- Sampling weights (`weightsname`) now work correctly throughout
+- New diagnostics: `check_overlap()` and `unsupported_covariates()`
 - Covariate formulas can transform variables, and users' data columns are
   no longer overwritten.
 - Several bug fixes to standard errors, uniform confidence bands, and
