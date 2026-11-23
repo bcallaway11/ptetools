@@ -6,7 +6,7 @@
 #   it can be estimated, the share with a propensity score near 1 (#28).
 #   Built on the same cells and covariates as pte_attgt().
 # Author: Brant Callaway
-# Last update: 2026-11-20
+# Last update: 2026-11-23
 # Date created: 2026-11-20
 # =============================================================================
 
@@ -63,9 +63,10 @@
 #'       range on at least one covariate}
 #'     \item{worst_covariate}{the covariate with the most treated units
 #'       outside the comparison range (\code{NA} if none)}
-#'     \item{pscore_above_<threshold>}{share of treated units with a
-#'       propensity score above each threshold (\code{NA} if
-#'       \code{pscore_ok} is \code{FALSE})}
+#'     \item{pscore_above_0.9, pscore_above_0.999}{share of treated units
+#'       with a propensity score above each threshold, one column per
+#'       element of \code{pscore_thresholds} (these names are for the
+#'       default); \code{NA} if \code{pscore_ok} is \code{FALSE}}
 #'   }
 #'   plus weighted versions of the shares (ending in \code{_w}) when
 #'   \code{weightsname} is given. With \code{xformula = ~1} and no other
