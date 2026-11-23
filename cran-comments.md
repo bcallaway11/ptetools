@@ -3,8 +3,8 @@
 This release breaks the current CRAN versions of two reverse dependencies,
 `contdid` (0.1.2) and `qte` (2.0.0). I maintain both, and updated
 versions -- `contdid` 0.1.3 and `qte` 2.1.0, which require
-`ptetools (>= 1.1.0)` and pass their checks against it -- are being
-submitted at the same time as this release.
+`ptetools (>= 1.1.0)` and pass their checks against it -- are ready and
+will be submitted as soon as this release is accepted.
 
 The breakage is intentional. `setup_pte()` used to overwrite the user's
 group, time and outcome columns with internally recoded versions; it now
@@ -44,10 +44,10 @@ check machine; this is a property of the local setup, not the package.)
 Checked all three CRAN reverse dependencies:
 
 - `badcontrols` 1.0.1: OK.
-- `contdid` 0.1.2: breaks (see above); fixed in 0.1.3, submitted together
-  with this release.
-- `qte` 2.0.0: breaks (see above); fixed in 2.1.0, submitted together
-  with this release.
+- `contdid` 0.1.2: breaks (see above); fixed in 0.1.3, to be submitted as
+  soon as this release is accepted.
+- `qte` 2.0.0: breaks (see above); fixed in 2.1.0, to be submitted as
+  soon as this release is accepted.
 
 ## Summary of changes
 
